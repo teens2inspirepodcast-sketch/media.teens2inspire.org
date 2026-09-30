@@ -36,7 +36,8 @@ export async function GET(request:NextRequest) {
 
   if((profile.membership_tier==="personal" || profile.membership_tier==="family") && profile.membership_status==="pending_payment") {
     if(!user.email) return NextResponse.redirect(new URL("/profile?membership=checkout-pending",origin));
-    const checkout=await createMemberCheckout(supabase,user.id,user.email,origin);
+    const promoCode = typeof user.user_metadata?.membership_promo_code === "string" ? user.user_metadata.membership_promo_code : undefined;
+    const checkout=await createMemberCheckout(supabase,user.id,user.email,origin,undefined,promoCode);
     if("url" in checkout && typeof checkout.url === "string") return NextResponse.redirect(checkout.url);
     return NextResponse.redirect(new URL("/profile?membership=checkout-pending",origin));
   }

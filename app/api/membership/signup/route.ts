@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isMembershipTier, membershipInterests, normalizeSchoolCode, passwordRequirements } from "@/lib/membership";
-import { isMembershipBillingConfigured } from "@/lib/stripe";
+import { findValidMembershipPromotion, isMembershipBillingConfigured } from "@/lib/stripe";
 import { getSiteOrigin } from "@/lib/site-url";
 import { isSameOriginRequest } from "@/lib/same-origin";
 
@@ -27,6 +27,7 @@ export async function POST(request: Request) {
   const firstName = typeof body.firstName === "string" ? body.firstName.trim() : "";
   const displayName = typeof body.displayName === "string" ? body.displayName.trim() : "";
   const tier = body.tier;
+  const promoCode = typeof body.promoCode === "string" ? body.promoCode.trim().toUpperCase() : "";
   const schoolCode = typeof body.schoolCode === "string" ? normalizeSchoolCode(body.schoolCode) : "";
   const validInterests = Array.isArray(body.interests)
     ? body.interests.filter((value): value is string => typeof value === "string" && membershipInterests.includes(value as (typeof membershipInterests)[number]))
@@ -43,8 +44,13 @@ export async function POST(request: Request) {
   if (!isMembershipTier(tier)) return invalid("Choose a membership option to continue.");
   if (body.acceptedTerms !== true) return invalid("Please agree to the Terms of Use and Privacy Policy to continue.");
   if (tier === "school" && (schoolCode.length < 8 || schoolCode.length > 64)) return invalid("Enter the school code provided by your school.");
+  if (promoCode && tier === "school") return invalid("Promo codes are for Personal and Family memberships.");
   if (tier !== "school" && !isMembershipBillingConfigured(tier)) {
     return invalid("Personal and Family checkout is not connected yet. Please try again soon or choose a school membership if you have a code.", 503);
+  }
+  if (promoCode) {
+    const promotion = await findValidMembershipPromotion(promoCode, tier as "personal" | "family");
+    if (promotion.status !== "valid") return invalid(promotion.error || "This promo code couldn’t be applied.");
   }
 
   const supabase = await createClient();
@@ -76,6 +82,7 @@ export async function POST(request: Request) {
         interests,
         membership_tier: tier,
         membership_plan: tier,
+        ...(promoCode ? { membership_promo_code: promoCode } : {}),
         ...(tier === "school" ? { school_code_hash: schoolCodeHash } : {}),
         accepted_terms_at: new Date().toISOString(),
         age_group: "13plus",

@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { hasPaidMediaAccess } from "@/lib/membership-access-policy";
 
 type MembershipProfile = {
   role: string | null;
@@ -32,13 +33,7 @@ export async function getViewerAccess(client?: SupabaseClient | null): Promise<V
 
   const membership = profile as MembershipProfile | null;
   const isAdministrator = membership?.role === "administrator";
-  const verifiedEmail = Boolean(user.email_confirmed_at);
-  const paidMembership =
-    (membership?.membership_tier === "personal" || membership?.membership_tier === "family") &&
-    membership.membership_status === "active" &&
-    Boolean(membership.stripe_subscription_id) &&
-    Boolean(membership.membership_period_end && Date.parse(membership.membership_period_end) > Date.now());
-  const mayViewPaidMedia = verifiedEmail && (isAdministrator || paidMembership);
+  const mayViewPaidMedia = hasPaidMediaAccess(user.email_confirmed_at, membership);
   return {
     isSignedIn: true,
     isAdministrator,

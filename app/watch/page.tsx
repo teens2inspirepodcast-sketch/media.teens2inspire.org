@@ -4,6 +4,7 @@ import { getPublishedContent } from "@/lib/content";
 import { ExpandableDescription } from "@/components/ExpandableDescription";
 import { MediaShelf } from "@/components/MediaShelf";
 import { getViewerAccess } from "@/lib/membership-access";
+import { Icon } from "@/components/Icon";
 
 export const metadata: Metadata = { title: "Watch", description: "Original stories, conversations and videos made for Jewish teen girls." };
 
@@ -37,7 +38,7 @@ export default async function WatchPage() {
               label={`${featured.title} description`}
             />}
             <Link className="button button-primary" href={featuredHref}>
-              Watch now <span aria-hidden="true">↗</span>
+              Watch now <span aria-hidden="true"><Icon name="arrow-up-right" /></span>
             </Link>
           </div>
           <Link className="watch-feature-art" href={featuredHref} aria-label={`Watch ${featured.title}`}>
@@ -46,7 +47,7 @@ export default async function WatchPage() {
             ) : (
               <span className="watch-feature-placeholder" aria-hidden="true">✳</span>
             )}
-            <span className="watch-feature-play" aria-hidden="true">▶</span>
+            <span className="watch-feature-play" aria-hidden="true"><Icon name="play" /></span>
             {!access.canWatchVideos && <span className="media-lock watch-feature-lock" role="img" aria-label="Membership required"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 6V4.5a3.5 3.5 0 0 1 7 0V6h.75A1.75 1.75 0 0 1 14 7.75v5.5A1.75 1.75 0 0 1 12.25 15h-8.5A1.75 1.75 0 0 1 2 13.25v-5.5A1.75 1.75 0 0 1 3.75 6zm1.5 0h4V4.5a2 2 0 0 0-4 0zM8 8.5a1.25 1.25 0 0 0-.75 2.25v1.5h1.5v-1.5A1.25 1.25 0 0 0 8 8.5" fill="currentColor"/></svg></span>}
           </Link>
         </section>

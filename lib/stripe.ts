@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import type { MembershipTier } from "@/lib/membership";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { membershipCheckoutIdempotencyKey } from "@/lib/stripe-idempotency";
 
 let stripeClient: Stripe | null = null;
 
@@ -141,7 +142,7 @@ export async function createMemberCheckout(supabase: SupabaseClient, userId: str
       subscription_data: { metadata: { supabase_user_id: userId, membership_tier: tier } },
       success_url: new URL("/membership/success", origin).toString(),
       cancel_url: new URL("/profile?membership=checkout-canceled", origin).toString(),
-    }, { idempotencyKey: `teens2inspire-checkout-${userId}-${tier}-${Math.floor(Date.now() / 300000)}` });
+    }, { idempotencyKey: membershipCheckoutIdempotencyKey(userId, tier, normalizedPromo, Math.floor(Date.now() / 300000)) });
     if (!session.url) return { error: "Stripe did not return a checkout link. Please try again.", status: 503 as const };
     return { url: session.url };
   } catch {

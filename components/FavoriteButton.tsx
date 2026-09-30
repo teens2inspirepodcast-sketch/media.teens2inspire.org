@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { Icon } from "@/components/Icon";
 
 export function FavoriteButton({ contentId, initialSaved = false }: { contentId: string; initialSaved?: boolean }) {
   const [saved, setSaved] = useState(initialSaved);
@@ -17,5 +18,5 @@ export function FavoriteButton({ contentId, initialSaved = false }: { contentId:
     } catch { setNotice("We couldn't update your saved items. Please try again."); }
     finally { setBusy(false); }
   }
-  return <div className="favorite-wrap"><button className={`button button-outline favorite-button${saved ? " is-saved" : ""}`} onClick={toggle} aria-pressed={saved} disabled={busy}>{busy ? "Saving…" : saved ? "♥ Saved" : "♡ Save for later"}</button>{notice && <p className="inline-notice">{notice} {notice.startsWith("Sign in") && <Link href="/login">Sign in</Link>}</p>}</div>;
+  return <div className="favorite-wrap"><button className={`button button-outline favorite-button${saved ? " is-saved" : ""}`} onClick={toggle} aria-pressed={saved} disabled={busy}>{busy ? "Saving…" : <><Icon name="heart" filled={saved} /> {saved ? "Saved" : "Save for later"}</>}</button>{notice && <p className="inline-notice">{notice} {notice.startsWith("Sign in") && <Link href="/login">Sign in</Link>}</p>}</div>;
 }

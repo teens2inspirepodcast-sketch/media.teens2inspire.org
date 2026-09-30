@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { MembershipTier } from "@/lib/membership";
+import { Icon } from "@/components/Icon";
 
 export function MembershipSuccessStatus({ tier, active }: { tier: MembershipTier; active: boolean }) {
   const [isActive, setIsActive] = useState(active);
@@ -33,10 +34,10 @@ export function MembershipSuccessStatus({ tier, active }: { tier: MembershipTier
     <p>Your {tier} membership is active. Listen. Watch. Explore. Connect. Grow.</p>
     <div className="membership-welcome-links" aria-label="Explore Teens2Inspire">
       <Link href="/listen"><span aria-hidden="true">✳</span><strong>Listen</strong><small>Podcasts &amp; conversations</small></Link>
-      <Link href="/watch"><span aria-hidden="true">▶</span><strong>Watch</strong><small>Stories &amp; videos</small></Link>
+      <Link href="/watch"><span aria-hidden="true"><Icon name="play" /></span><strong>Watch</strong><small>Stories &amp; videos</small></Link>
       <Link href="/resources"><span aria-hidden="true">✦</span><strong>Explore</strong><small>Resources &amp; ideas</small></Link>
       <Link href="/events"><span aria-hidden="true">◇</span><strong>Connect</strong><small>Events &amp; community</small></Link>
     </div>
-    <div className="membership-success-actions"><Link className="button button-primary" href="/listen">Start exploring <span aria-hidden="true">↗</span></Link><Link className="button button-outline" href="/profile">View my profile <span aria-hidden="true">→</span></Link></div>
+    <div className="membership-success-actions"><Link className="button button-primary" href="/listen">Start exploring <span aria-hidden="true"><Icon name="arrow-up-right" /></span></Link><Link className="button button-outline" href="/profile">View my profile <span aria-hidden="true"><Icon name="arrow-right" /></span></Link></div>
   </div>;
 }

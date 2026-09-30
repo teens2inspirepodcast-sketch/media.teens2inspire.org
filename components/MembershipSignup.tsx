@@ -12,6 +12,7 @@ type SignupValues = {
   firstName: string;
   displayName: string;
   tier: MembershipTier;
+  promoCode: string;
   schoolCode: string;
   interests: string[];
   acceptedTerms: boolean;
@@ -20,7 +21,7 @@ type SignupValues = {
 
 const initialValues: SignupValues = {
   email: "", password: "", confirmPassword: "", firstName: "", displayName: "",
-  tier: "personal", schoolCode: "", interests: [], acceptedTerms: false,
+  tier: "personal", promoCode: "", schoolCode: "", interests: [], acceptedTerms: false,
   ageGroup: "",
 };
 const stepNames = ["Account", "About you", "Interests", "Finish"];
@@ -34,6 +35,9 @@ export function MembershipSignup() {
   const [confirmationEmail, setConfirmationEmail] = useState("");
   const [resendMessage, setResendMessage] = useState("");
   const [resending, setResending] = useState(false);
+  const [appliedPromo, setAppliedPromo] = useState("");
+  const [promoMessage, setPromoMessage] = useState("");
+  const [checkingPromo, setCheckingPromo] = useState(false);
 
   function set<K extends keyof SignupValues>(key: K, value: SignupValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -82,10 +86,13 @@ export function MembershipSignup() {
     if (issue) { setError(issue); return; }
     setBusy(true); setError("");
     try {
+      if (values.promoCode.trim() && appliedPromo !== values.promoCode.trim().toUpperCase()) {
+        throw new Error("Apply and verify your promo code before continuing.");
+      }
       const response = await fetch("/api/membership/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, promoCode: appliedPromo }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Something went wrong. Please try again.");
@@ -116,6 +123,28 @@ export function MembershipSignup() {
       setResendMessage(reason instanceof Error ? reason.message : "We couldn’t resend the email just now.");
     } finally {
       setResending(false);
+    }
+  }
+
+  async function applyPromoCode() {
+    if (!values.promoCode.trim() || (values.tier !== "personal" && values.tier !== "family")) return;
+    setCheckingPromo(true); setPromoMessage(""); setAppliedPromo(""); setError("");
+    try {
+      const response = await fetch("/api/stripe/promo/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: values.promoCode, tier: values.tier, preSignup: true }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "This promo code couldn’t be applied.");
+      const normalized = values.promoCode.trim().toUpperCase();
+      set("promoCode", normalized);
+      setAppliedPromo(normalized);
+      setPromoMessage(result.message || "Valid code. Stripe will apply the discount at checkout.");
+    } catch (reason) {
+      setPromoMessage(reason instanceof Error ? reason.message : "This promo code couldn’t be applied.");
+    } finally {
+      setCheckingPromo(false);
     }
   }
 
@@ -171,13 +200,17 @@ export function MembershipSignup() {
           <fieldset className="membership-plan-fieldset">
             <legend>Choose a membership</legend>
             <div className="membership-plan-grid">
-              {membershipOptions.map((option) => <button type="button" key={option.id} className={`membership-plan-card${values.tier === option.id ? " is-selected" : ""}`} aria-pressed={values.tier === option.id} onClick={() => set("tier", option.id)}>
+              {membershipOptions.map((option) => <button type="button" key={option.id} className={`membership-plan-card${values.tier === option.id ? " is-selected" : ""}`} aria-pressed={values.tier === option.id} onClick={() => { set("tier", option.id); setAppliedPromo(""); setPromoMessage(""); }}>
                 <span className="membership-plan-topline"><strong>{option.name}</strong>{option.id === "family" && <span className="membership-plan-badge">3 profiles</span>}</span>
                 <span className="membership-plan-price">{option.price}<small>{option.cadence}</small></span>
                 <span className="membership-plan-description">{option.description}</span>
               </button>)}
             </div>
           </fieldset>
+          {(values.tier === "personal" || values.tier === "family") && <>
+            <div className="promo-checkout-field signup-promo-field"><label>Promo code<input value={values.promoCode} onChange={(event) => { set("promoCode", event.target.value.toUpperCase()); setAppliedPromo(""); setPromoMessage(""); }} maxLength={40} autoComplete="off" /></label><button type="button" onClick={applyPromoCode} disabled={checkingPromo || !values.promoCode.trim()}>{checkingPromo ? "Checking…" : "Apply"}</button></div>
+            {promoMessage && <p className={`promo-feedback${appliedPromo ? " is-valid" : ""}`} role="status">{promoMessage}</p>}
+          </>}
           {values.tier === "school" && <label className="membership-field">School code<input value={values.schoolCode} onChange={(event) => set("schoolCode", event.target.value)} autoComplete="off" placeholder="Enter the code from your school" aria-describedby="school-code-help" /><span id="school-code-help" className="field-help">Your school code keeps this membership free.</span></label>}
           <label className="membership-field">Email address<input type="email" inputMode="email" autoComplete="email" value={values.email} onChange={(event) => set("email", event.target.value)} placeholder="you@example.com" aria-describedby="email-help" /><span id="email-help" className="field-help">We’ll use this for sign-in and important account emails.</span></label>
           <div className="membership-password-grid">
