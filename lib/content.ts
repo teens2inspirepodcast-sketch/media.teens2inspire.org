@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getLegacyMediaApiPath } from "@/lib/media-reference";
 
 export type ContentType = "podcast" | "video" | "resource" | "printable" | "event" | "article" | "original";
 
@@ -38,6 +39,8 @@ function resolveStoragePath(value: string | null) {
     const path = value.slice("storage://media/".length).split("/").map(encodeURIComponent).join("/");
     return `/api/media/${path}`;
   }
+  const legacyMediaPath = getLegacyMediaApiPath(value);
+  if (legacyMediaPath) return legacyMediaPath;
   return value;
 }
 

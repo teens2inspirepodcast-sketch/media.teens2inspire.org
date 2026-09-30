@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createR2DownloadUrl, getR2Object, keyFromR2Ref } from "@/lib/r2";
 import { getViewerAccess } from "@/lib/membership-access";
+import { getLegacyMediaSourceUrl, isSafeMediaObjectPath } from "@/lib/media-reference";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -66,9 +67,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
   }
 
   const isR2 = parts[0] === "r2" && parts.length === 4 && parts[1] === "media";
-  const storagePath = isR2 ? parts.slice(1).join("/") : parts.join("/");
-  if (!isR2 && !/^[0-9a-f-]{36}\/\d+-[A-Za-z0-9._-]{1,100}$/i.test(storagePath)) return new NextResponse("Not found", { status: 404 });
-  const storageRef = isR2 ? `r2://${storagePath}` : `storage://media/${storagePath}`;
+  const isLegacyMedia = parts[0] === "storage" && parts[1] === "media" && parts.length >= 4;
+  const storagePath = isR2 ? parts.slice(1).join("/") : isLegacyMedia ? parts.slice(2).join("/") : parts.join("/");
+  if (isLegacyMedia && !isSafeMediaObjectPath(storagePath)) return new NextResponse("Not found", { status: 404 });
+  if (!isR2 && !isLegacyMedia && !/^[0-9a-f-]{36}\/\d+-[A-Za-z0-9._-]{1,100}$/i.test(storagePath)) return new NextResponse("Not found", { status: 404 });
+  const storageRef = isR2 ? `r2://${storagePath}` : isLegacyMedia ? getLegacyMediaSourceUrl(storagePath) : `storage://media/${storagePath}`;
+  if (!storageRef) return new NextResponse("Not found", { status: 404 });
   const r2Key = isR2 ? keyFromR2Ref(storageRef) : null;
   if (isR2 && !r2Key) return new NextResponse("Not found", { status: 404 });
 
@@ -95,7 +99,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
     if (r2Key) {
       signedUrl = await createR2DownloadUrl(r2Key, 120);
     } else {
-      const { data, error } = await supabase.storage.from("media").createSignedUrl(storagePath, 120);
+      const { data, error } = await admin.storage.from("media").createSignedUrl(storagePath, 120);
       if (!error) signedUrl = data?.signedUrl ?? null;
     }
     if (!signedUrl) return new NextResponse("Media unavailable", { status: 503, headers: privateHeaders });

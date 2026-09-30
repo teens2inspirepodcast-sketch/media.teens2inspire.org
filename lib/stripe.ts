@@ -4,7 +4,10 @@ import Stripe from "stripe";
 import type { MembershipTier } from "@/lib/membership";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { membershipCheckoutIdempotencyKey } from "@/lib/stripe-idempotency";
+import { isUsableCheckoutSession, membershipCheckoutIdempotencyKey, stripeIntegrationIdentifier } from "@/lib/stripe-idempotency";
+import { stripeStatusToMembershipStatus } from "@/lib/stripe-membership-status";
+
+export { stripeStatusToMembershipStatus } from "@/lib/stripe-membership-status";
 
 let stripeClient: Stripe | null = null;
 
@@ -54,13 +57,6 @@ export async function findValidMembershipPromotion(code: string, tier: "personal
   }
 }
 
-export function stripeStatusToMembershipStatus(status: Stripe.Subscription.Status) {
-  if (status === "active" || status === "trialing") return "active" as const;
-  if (status === "past_due") return "past_due" as const;
-  if (status === "canceled" || status === "unpaid" || status === "paused" || status === "incomplete_expired") return "canceled" as const;
-  return "pending_payment" as const;
-}
-
 export async function createMemberCheckout(supabase: SupabaseClient, userId: string, email: string, origin: string, requestedTier?: "personal" | "family", promoCode?: string) {
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
@@ -108,9 +104,11 @@ export async function createMemberCheckout(supabase: SupabaseClient, userId: str
 
     const openSessions = await stripe.checkout.sessions.list({ customer: customerId, status: "open", limit: 100 });
     const normalizedPromo = String(promoCode || "").trim().toUpperCase();
+    const nowSeconds = Math.floor(Date.now() / 1000);
     const matchingSession = openSessions.data.find((session) =>
       session.mode === "subscription" && session.metadata?.supabase_user_id === userId &&
-      session.metadata?.membership_tier === tier && session.metadata?.promo_code === normalizedPromo && session.url,
+      session.metadata?.membership_tier === tier && session.metadata?.promo_code === normalizedPromo &&
+      session.url && session.expires_at > nowSeconds,
     );
     if (matchingSession?.url) return { url: matchingSession.url };
     for (const session of openSessions.data) {
@@ -132,7 +130,7 @@ export async function createMemberCheckout(supabase: SupabaseClient, userId: str
     }
     const validPromo = normalizedPromo ? await findValidMembershipPromotion(normalizedPromo, tier, customerId) : null;
     if (validPromo && validPromo.status !== "valid") return { error: validPromo.error, status: 400 as const };
-    const session = await stripe.checkout.sessions.create({
+    const sessionParams: Stripe.Checkout.SessionCreateParams = {
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
       client_reference_id: userId,
@@ -142,9 +140,23 @@ export async function createMemberCheckout(supabase: SupabaseClient, userId: str
       subscription_data: { metadata: { supabase_user_id: userId, membership_tier: tier } },
       success_url: new URL("/membership/success", origin).toString(),
       cancel_url: new URL("/profile?membership=checkout-canceled", origin).toString(),
-    }, { idempotencyKey: membershipCheckoutIdempotencyKey(userId, tier, normalizedPromo, Math.floor(Date.now() / 300000)) });
-    if (!session.url) return { error: "Stripe did not return a checkout link. Please try again.", status: 503 as const };
-    return { url: session.url };
+    };
+    const timeBucket = Math.floor(Date.now() / 300000);
+    let previousSessionId: string | undefined;
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const idempotencyKey = membershipCheckoutIdempotencyKey(userId, tier, normalizedPromo, timeBucket, previousSessionId);
+      sessionParams.integration_identifier = stripeIntegrationIdentifier(idempotencyKey);
+      const created = await stripe.checkout.sessions.create(sessionParams, {
+        idempotencyKey,
+      });
+      // Stripe can replay an idempotent response after that session has expired.
+      // Check the current state, then chain a replacement key from the stale
+      // session ID so concurrent retries converge on the same new session.
+      const current = await stripe.checkout.sessions.retrieve(created.id);
+      if (isUsableCheckoutSession(current)) return { url: current.url! };
+      previousSessionId = current.id;
+    }
+    return { error: "Secure checkout could not be prepared. Please try again.", status: 503 as const };
   } catch {
     return { error: "We couldn’t open secure checkout. Please try again shortly.", status: 503 as const };
   }
