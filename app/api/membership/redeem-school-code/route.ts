@@ -2,10 +2,10 @@ import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { normalizeSchoolCode } from "@/lib/membership";
+import { isSameOriginRequest } from "@/lib/same-origin";
 
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
-  if (origin && origin !== new URL(request.url).origin) return NextResponse.json({ error: "Please reload the page and try again." }, { status: 403 });
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: "Please reload the page and try again." }, { status: 403 });
   let body: { code?: unknown };
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Enter the school code to continue." }, { status: 400 }); }
   const code = typeof body.code === "string" ? normalizeSchoolCode(body.code) : "";

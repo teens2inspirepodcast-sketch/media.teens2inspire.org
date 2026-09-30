@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isSameOriginRequest } from "@/lib/same-origin";
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: "Please reload the page and try again." }, { status: 403 });
   const supabase=await createClient(); if(!supabase) return NextResponse.json({error:"Supabase is not configured."},{status:503});
   const {data:{user}}=await supabase.auth.getUser(); if(!user) return NextResponse.json({error:"Sign in first."},{status:401});
   let contentId=""; try { contentId=String((await request.json()).contentId||""); } catch { return NextResponse.json({error:"Invalid request."},{status:400}); }

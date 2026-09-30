@@ -39,6 +39,9 @@ export default async function ContentPage({ params }: Props) {
   const isVideo = item.type === "video" || item.type === "original";
   const [related, supabase] = await Promise.all([getRelatedContent(item), createClient()]);
   const access = await getViewerAccess(supabase);
+  const needsMemberAccess = Boolean(item.member_only) || isVideo;
+  const mayAccessItem = !needsMemberAccess || access.canAccessMembersContent;
+  const memberMediaIsProtected = !item.member_only || (typeof item.media_url === "string" && item.media_url.startsWith("/api/media/") && !item.external_url);
   let initiallySaved = false;
   if (supabase) {
     const { data: { user } } = await supabase.auth.getUser();
@@ -58,7 +61,7 @@ export default async function ContentPage({ params }: Props) {
   }
 
   const date = item.published_at ? new Date(item.published_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
-  const siteOrigin = getSiteOrigin() || "https://teens2inspire-website-ra8kiujs6.vercel.app";
+  const siteOrigin = getSiteOrigin() || "https://teens2inspire.org";
   const backHref = item.type === "podcast" ? "/listen" : isVideo ? "/watch" : item.type === "event" ? "/events" : "/resources";
   const backLabel = item.type === "podcast" ? "Listen" : isVideo ? "Watch" : item.type === "event" ? "Events" : "Explore";
 
@@ -73,13 +76,13 @@ export default async function ContentPage({ params }: Props) {
         {item.description && (isVideo
           ? <ExpandableDescription className="detail-description" text={item.description} label={`${item.title} description`} />
           : <p className="detail-description">{item.description}</p>)}
-        {item.type === "podcast" && item.media_url && <audio className="audio-player" controls preload="metadata" src={item.media_url}>Your browser does not support audio playback.</audio>}
-        {(item.type === "resource" || item.type === "printable") && (item.media_url || item.external_url) && <a className="button button-primary" href={item.media_url || item.external_url || "#"} target="_blank" rel="noreferrer">Open this {item.type} <span>↗</span></a>}
+        {item.type === "podcast" && item.media_url && mayAccessItem && memberMediaIsProtected && <audio className="audio-player" controls preload="metadata" src={item.media_url}>Your browser does not support audio playback.</audio>}
+        {(item.type === "resource" || item.type === "printable") && (item.media_url || item.external_url) && mayAccessItem && memberMediaIsProtected && <a className="button button-primary" href={item.media_url || item.external_url || "#"} target="_blank" rel="noreferrer">Open this {item.type} <span>↗</span></a>}
         {item.type === "event" && <div className="event-meta">
           {item.starts_at && <span>{new Date(item.starts_at).toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" })}{item.ends_at ? ` – ${new Date(item.ends_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}` : ""}</span>}
           {item.location && <span>{item.location}</span>}{item.address && <span>{item.address}</span>}{item.organizer && <span>Hosted by {item.organizer}</span>}{item.capacity && <span>{item.capacity} spots</span>}{item.ticket_info && <p>{item.ticket_info}</p>}
         </div>}
-        {item.type === "event" && item.external_url && <a className="button button-primary" href={item.external_url} target="_blank" rel="noreferrer">Registration details <span>↗</span></a>}
+        {item.type === "event" && item.external_url && mayAccessItem && <a className="button button-primary" href={item.external_url} target="_blank" rel="noreferrer">Registration details <span>↗</span></a>}
         <div className="detail-meta">{date && <span>Published {date}</span>}{item.tags?.length ? <div className="detail-tags">{item.tags.map((tag) => <span key={tag}>{tag}</span>)}</div> : null}</div>
         <FavoriteButton contentId={item.id} initialSaved={initiallySaved} />
       </div>
@@ -96,6 +99,8 @@ export default async function ContentPage({ params }: Props) {
           </div>
         </div>}
     </section>}
+    {!isVideo && needsMemberAccess && !mayAccessItem && <section className="detail-member-gate"><span className="media-lock" role="img" aria-label="Membership required"><LockIcon /></span><div><span className="eyebrow">Members only</span><h2>There’s more waiting for you.</h2><p>Join Teens2Inspire to open this {item.type}.</p><div className="video-gate-actions"><Link className="button button-primary" href={access.isSignedIn ? "/profile" : "/signup"}>{access.isSignedIn ? "View your membership" : "Join Teens2Inspire"} <span aria-hidden="true">↗</span></Link>{!access.isSignedIn && <Link className="text-link" href="/login">Already a member? Sign in</Link>}</div></div></section>}
+    {!isVideo && needsMemberAccess && mayAccessItem && !memberMediaIsProtected && <section className="detail-member-gate"><div><span className="eyebrow">Private file needed</span><h2>This item is being prepared.</h2><p>Its file must be stored in Teens2Inspire private media storage before it can be shared safely.</p></div></section>}
 
     <div className="detail-share"><span>Pass it along to someone who’d love it.</span><a href={`mailto:?subject=${encodeURIComponent(item.title)}&body=${encodeURIComponent(`Thought you might like this: ${siteOrigin}/content/${item.slug}`)}`}>Share this <span>↗</span></a></div>
     {related.length > 0 && <MediaShelf title="You might also like" items={related} canWatchVideos={access.canWatchVideos} />}

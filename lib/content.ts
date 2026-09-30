@@ -8,6 +8,7 @@ export type ContentRecord = {
   slug: string;
   type: ContentType;
   description: string | null;
+  short_description?: string | null;
   category: string | null;
   tags: string[] | null;
   status: "draft" | "published" | "archived";
@@ -16,6 +17,9 @@ export type ContentRecord = {
   external_url: string | null;
   published_at: string | null;
   created_at: string;
+  member_only?: boolean;
+  featured?: boolean;
+  updated_at?: string;
   location?: string | null;
   address?: string | null;
   organizer?: string | null;
@@ -48,6 +52,13 @@ export async function getPublishedContent(type?: ContentType, limit = 12): Promi
   if (type) query = query.eq("type", type);
   const { data } = await query.order("published_at", { ascending: false }).limit(limit);
   return ((data ?? []) as ContentRecord[]).map(withMediaUrls);
+}
+
+export async function getFeaturedContent(): Promise<ContentRecord | null> {
+  const supabase = await createClient();
+  if (!supabase) return null;
+  const { data } = await supabase.from("content").select("*").eq("status", "published").eq("featured", true).order("published_at", { ascending: false }).limit(1).maybeSingle();
+  return data ? withMediaUrls(data as ContentRecord) : null;
 }
 
 export async function getPublishedBySlug(slug: string): Promise<ContentRecord | null> {

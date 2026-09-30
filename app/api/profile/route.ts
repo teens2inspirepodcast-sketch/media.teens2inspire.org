@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { membershipInterests } from "@/lib/membership";
+import { isSameOriginRequest } from "@/lib/same-origin";
 
 export async function PUT(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: "Please reload the page and try again." }, { status: 403 });
   let body: Record<string, unknown>;
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Check your profile details and try again." }, { status: 400 }); }
   const firstName = typeof body.firstName === "string" ? body.firstName.trim() : "";

@@ -1,8 +1,10 @@
 import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isSameOriginRequest } from "@/lib/same-origin";
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: "This request was not allowed." }, { status: 403 });
   let body: { schoolName?: unknown; maxUses?: unknown; expiresInDays?: unknown };
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Check the school code settings and try again." }, { status: 400 }); }
   const schoolName = typeof body.schoolName === "string" ? body.schoolName.trim() : "";

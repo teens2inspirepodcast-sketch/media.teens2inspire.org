@@ -29,6 +29,30 @@ export function isMembershipBillingConfigured(tier: MembershipTier) {
   );
 }
 
+export async function findValidMembershipPromotion(code: string, tier: "personal" | "family", customerId?: string | null) {
+  const stripe = getStripe();
+  const normalized = code.trim().toUpperCase();
+  if (!stripe || !normalized || !/^[A-Z0-9-]{3,40}$/.test(normalized)) return { error: "Enter a valid promo code.", status: "invalid" as const };
+  try {
+    const { data } = await stripe.promotionCodes.list({ code: normalized, active: true, limit: 100, expand: ["data.promotion.coupon"] });
+    const promotionCode = data.find((candidate) => candidate.code.toUpperCase() === normalized);
+    if (!promotionCode) return { error: "This promo code isn’t valid.", status: "invalid" as const };
+    if (!promotionCode.active || (promotionCode.expires_at && promotionCode.expires_at * 1000 <= Date.now()) || (promotionCode.max_redemptions !== null && promotionCode.times_redeemed >= promotionCode.max_redemptions)) return { error: "This promo code has expired or reached its limit.", status: "expired" as const };
+    if (promotionCode.customer && (typeof promotionCode.customer === "string" ? promotionCode.customer : promotionCode.customer.id) !== customerId) return { error: "This promo code isn’t available for this account.", status: "not_applicable" as const };
+    const promotion = promotionCode.promotion;
+    const coupon = promotion.type === "coupon" ? (typeof promotion.coupon === "string" ? await stripe.coupons.retrieve(promotion.coupon) : promotion.coupon) : null;
+    if (!coupon?.valid || (coupon.redeem_by && coupon.redeem_by * 1000 <= Date.now())) return { error: "This promo code has expired or reached its limit.", status: "expired" as const };
+    if (coupon.applies_to?.products?.length) {
+      const price = await stripe.prices.retrieve(stripePriceIdFor(tier));
+      const productId = typeof price.product === "string" ? price.product : price.product.id;
+      if (!coupon.applies_to.products.includes(productId)) return { error: "This promo code doesn’t apply to the selected plan.", status: "not_applicable" as const };
+    }
+    return { promotionCode, coupon, status: "valid" as const, message: coupon.percent_off ? `${coupon.percent_off}% discount applied at checkout.` : "Discount applied at checkout." };
+  } catch {
+    return { error: "We couldn’t check that code right now. Please try again.", status: "unavailable" as const };
+  }
+}
+
 export function stripeStatusToMembershipStatus(status: Stripe.Subscription.Status) {
   if (status === "active" || status === "trialing") return "active" as const;
   if (status === "past_due") return "past_due" as const;
@@ -36,7 +60,7 @@ export function stripeStatusToMembershipStatus(status: Stripe.Subscription.Statu
   return "pending_payment" as const;
 }
 
-export async function createMemberCheckout(supabase: SupabaseClient, userId: string, email: string, origin: string, requestedTier?: "personal" | "family") {
+export async function createMemberCheckout(supabase: SupabaseClient, userId: string, email: string, origin: string, requestedTier?: "personal" | "family", promoCode?: string) {
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("membership_tier,membership_status,stripe_customer_id")
@@ -82,9 +106,10 @@ export async function createMemberCheckout(supabase: SupabaseClient, userId: str
     }
 
     const openSessions = await stripe.checkout.sessions.list({ customer: customerId, status: "open", limit: 100 });
+    const normalizedPromo = String(promoCode || "").trim().toUpperCase();
     const matchingSession = openSessions.data.find((session) =>
       session.mode === "subscription" && session.metadata?.supabase_user_id === userId &&
-      session.metadata?.membership_tier === tier && session.url,
+      session.metadata?.membership_tier === tier && session.metadata?.promo_code === normalizedPromo && session.url,
     );
     if (matchingSession?.url) return { url: matchingSession.url };
     for (const session of openSessions.data) {
@@ -104,12 +129,15 @@ export async function createMemberCheckout(supabase: SupabaseClient, userId: str
     if (!price.active || price.currency !== "usd" || price.unit_amount !== expectedAmount || price.recurring?.interval !== "month") {
       return { error: "The monthly membership prices need to be checked in Stripe before checkout can start.", status: 503 as const };
     }
+    const validPromo = normalizedPromo ? await findValidMembershipPromotion(normalizedPromo, tier, customerId) : null;
+    if (validPromo && validPromo.status !== "valid") return { error: validPromo.error, status: 400 as const };
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
       client_reference_id: userId,
       customer: customerId,
-      metadata: { supabase_user_id: userId, membership_tier: tier },
+      ...(validPromo?.status === "valid" ? { discounts: [{ promotion_code: validPromo.promotionCode.id }] } : {}),
+      metadata: { supabase_user_id: userId, membership_tier: tier, promo_code: normalizedPromo },
       subscription_data: { metadata: { supabase_user_id: userId, membership_tier: tier } },
       success_url: new URL("/membership/success", origin).toString(),
       cancel_url: new URL("/profile?membership=checkout-canceled", origin).toString(),

@@ -1,15 +1,18 @@
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isMembershipTier, membershipInterests, normalizeSchoolCode, passwordRequirements } from "@/lib/membership";
 import { isMembershipBillingConfigured } from "@/lib/stripe";
 import { getSiteOrigin } from "@/lib/site-url";
+import { isSameOriginRequest } from "@/lib/same-origin";
 
 function invalid(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return invalid("Please reload the page and try again.", 403);
   let body: Record<string, unknown>;
   try {
     body = await request.json();
@@ -50,9 +53,12 @@ export async function POST(request: Request) {
   let schoolCodeHash = "";
   if (tier === "school") {
     schoolCodeHash = createHash("sha256").update(schoolCode.toLowerCase()).digest("hex");
-    const { data: codeIsValid, error: codeError } = await supabase.rpc("validate_school_code", { p_code_hash: schoolCodeHash });
+    const admin = createAdminClient();
+    if (!admin) return invalid("School-code sign-up is not available right now. Please contact Teens2Inspire.", 503);
+    const { data: code, error: codeError } = await admin.from("school_codes").select("active,expires_at,uses,max_uses").eq("code_hash", schoolCodeHash).maybeSingle();
     if (codeError) return invalid("School-code membership is not set up yet. Please contact Teens2Inspire for help.", 503);
-    if (codeIsValid !== true) return invalid("That school code isn’t valid or has already been used the allowed number of times.");
+    const expiresAt = code?.expires_at ? Date.parse(code.expires_at) : null;
+    if (!code?.active || code.uses >= code.max_uses || (expiresAt !== null && (!Number.isFinite(expiresAt) || expiresAt <= Date.now()))) return invalid("That school code isn’t valid or has already been used the allowed number of times.");
   }
 
   const origin = getSiteOrigin(request.url);

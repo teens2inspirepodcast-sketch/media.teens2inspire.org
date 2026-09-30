@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteOrigin } from "@/lib/site-url";
+import { isSameOriginRequest } from "@/lib/same-origin";
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: "Please reload the page and try again." }, { status: 403 });
   let email = "";
   try {
     const body = await request.json();

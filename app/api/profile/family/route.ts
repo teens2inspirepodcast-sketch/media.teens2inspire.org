@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isSameOriginRequest } from "@/lib/same-origin";
 
 async function signedInClient() {
   const supabase = await createClient();
@@ -10,6 +11,7 @@ async function signedInClient() {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: "Please reload the page and try again." }, { status: 403 });
   let body: { firstName?: unknown; displayName?: unknown };
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Enter a first name and display name." }, { status: 400 }); }
   const firstName = typeof body.firstName === "string" ? body.firstName.trim() : "";
@@ -23,6 +25,7 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: "Please reload the page and try again." }, { status: 403 });
   let body: { id?: unknown };
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Choose a profile to remove." }, { status: 400 }); }
   const id = typeof body.id === "string" ? body.id : "";

@@ -2,9 +2,12 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { deleteR2Object } from "@/lib/r2";
+import { writeAdminAudit } from "@/lib/admin-audit";
+import { isSameOriginRequest } from "@/lib/same-origin";
 
 const types=["podcast","video","resource","printable","event","article","original"];
 async function saveContent(request: Request, updating: boolean) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({error:"This request was not allowed."},{status:403});
   const supabase=await createClient(); if(!supabase) return NextResponse.json({error:"Supabase is not configured."},{status:503});
   const {data:{user}}=await supabase.auth.getUser(); if(!user) return NextResponse.json({error:"Sign in to continue."},{status:401});
   const {data:profile}=await supabase.from("profiles").select("role").eq("id",user.id).maybeSingle();
@@ -27,7 +30,11 @@ async function saveContent(request: Request, updating: boolean) {
   const mediaUrl = isVideo ? null : optionalUrl(rawMediaUrl,true);
   if(coverUrl===false || mediaUrl===false || externalUrl===false || (isVideo && (rawMediaUrl && !uploadedVideo || externalUrl))) return NextResponse.json({error:"Videos must be uploaded to Teens2Inspire protected storage. Direct video links aren’t accepted."},{status:400});
   const tags=Array.isArray(body.tags)?body.tags.map((tag:unknown)=>String(tag).trim()).filter(Boolean).slice(0,20):[];
-  const payload={title,slug,type,status,description:String(body.description||"").trim().slice(0,10000)||null,category:String(body.category||"").trim().slice(0,100)||null,tags,cover_url:coverUrl,media_url:mediaUrl,external_url:externalUrl,published_at:publishedAt,location:String(body.location||"").trim().slice(0,250)||null,address:String(body.address||"").trim().slice(0,500)||null,organizer:String(body.organizer||"").trim().slice(0,180)||null,capacity,ticket_info:String(body.ticket_info||"").trim().slice(0,1000)||null,starts_at:startsAt,ends_at:endsAt,created_by:user.id};
+  const memberOnly=body.member_only===true;
+  if(memberOnly && (externalUrl || (rawMediaUrl && !(rawMediaUrl.startsWith("r2://media/") || rawMediaUrl.startsWith("storage://media/"))))) return NextResponse.json({error:"Members-only content must use private Teens2Inspire storage; public external file links cannot be protected."},{status:400});
+  const sectionIds: string[] = Array.isArray(body.section_ids) ? [...new Set((body.section_ids as unknown[]).map((value) => String(value)))] : [];
+  if(sectionIds.length>20 || sectionIds.some((id)=>!/^[0-9a-f-]{36}$/i.test(id))) return NextResponse.json({error:"Choose valid content sections."},{status:400});
+  const payload={title,slug,type,status,member_only:memberOnly,featured:body.featured===true,short_description:String(body.short_description||"").trim().slice(0,300)||null,description:String(body.description||"").trim().slice(0,10000)||null,category:String(body.category||"").trim().slice(0,100)||null,tags,cover_url:coverUrl,media_url:mediaUrl,external_url:externalUrl,published_at:publishedAt,location:String(body.location||"").trim().slice(0,250)||null,address:String(body.address||"").trim().slice(0,500)||null,organizer:String(body.organizer||"").trim().slice(0,180)||null,capacity,ticket_info:String(body.ticket_info||"").trim().slice(0,1000)||null,starts_at:startsAt,ends_at:endsAt,created_by:user.id};
   let error;
   const admin = isVideo || updating ? createAdminClient() : null;
   if (isVideo && !admin) return NextResponse.json({error:"Protected video storage isn’t configured yet."},{status:503});
@@ -79,6 +86,12 @@ async function saveContent(request: Request, updating: boolean) {
       return NextResponse.json({error:"The protected video could not be linked. The item was kept unpublished; please upload it again."},{status:503});
     }
   }
+  const targetId=updating?contentId:newContentId;
+  if(targetId){
+    const {error:sectionError}=await supabase.rpc("replace_content_sections",{p_content_id:targetId,p_section_ids:sectionIds});
+    if(sectionError) return NextResponse.json({error:"Content was saved, but section assignments could not be saved. Please retry the update."},{status:503});
+    await writeAdminAudit(user.id,updating?(status==="published"?"content_updated":"content_unpublished"):"content_created","content",targetId,{type,status,title});
+  }
   return NextResponse.json({ok:true},{status:updating?200:201});
 }
 
@@ -86,6 +99,7 @@ export async function POST(request:Request) { return saveContent(request,false);
 export async function PATCH(request:Request) { return saveContent(request,true); }
 
 export async function DELETE(request:Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({error:"This request was not allowed."},{status:403});
   const supabase=await createClient(); if(!supabase) return NextResponse.json({error:"Supabase is not configured."},{status:503});
   const {data:{user}}=await supabase.auth.getUser(); if(!user) return NextResponse.json({error:"Sign in to continue."},{status:401});
   const {data:profile}=await supabase.from("profiles").select("role").eq("id",user.id).maybeSingle();
@@ -102,6 +116,7 @@ export async function DELETE(request:Request) {
     }
   }
   const {error}=await supabase.from("content").delete().eq("id",contentId); if(error) return NextResponse.json({error:"We couldn't remove this item."},{status:400});
+  await writeAdminAudit(user.id,"content_deleted","content",contentId,{type:item.type});
   await Promise.all([deleteR2Object(videoRef), deleteR2Object(item.media_url), deleteR2Object(item.cover_url)]);
   return NextResponse.json({ok:true});
 }

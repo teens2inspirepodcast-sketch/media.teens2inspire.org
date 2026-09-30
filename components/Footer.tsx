@@ -11,6 +11,6 @@ export function Footer() {
         <div><strong>Connect</strong><Link href="/search">Search</Link><Link href="/signup">Join the community</Link><Link href="/contact">Contact</Link></div>
       </nav>
     </div>
-    <div className="footer-bottom"><span>© {new Date().getFullYear()} Teens2Inspire</span><span>Made for the girls becoming who they are.</span><div><Link href="/privacy">Privacy</Link><Link href="/cookies">Cookies</Link><Link href="/terms">Terms</Link></div></div>
+    <div className="footer-bottom"><span>© {new Date().getFullYear()} Teens2Inspire</span><span>Made for the girls becoming who they are.</span><div><Link href="/privacy">Privacy</Link><Link href="/cookies">Cookies</Link><Link href="/terms">Terms</Link><Link href="/refunds">Refunds</Link></div></div>
   </footer>;
 }

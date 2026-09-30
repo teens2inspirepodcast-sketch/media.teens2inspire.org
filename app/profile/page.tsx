@@ -7,6 +7,8 @@ import { SignOutButton } from "@/components/SignOutButton";
 import { ProfileSettingsForm } from "@/components/ProfileSettingsForm";
 import { FamilyProfilesManager } from "@/components/FamilyProfilesManager";
 import { MembershipActionButton } from "@/components/MembershipActionButton";
+import { DeleteAccountButton } from "@/components/DeleteAccountButton";
+import { CancelMembershipButton } from "@/components/CancelMembershipButton";
 import { SchoolCodeForm } from "@/components/SchoolCodeForm";
 import { membershipOptions, isMembershipTier, type MembershipTier } from "@/lib/membership";
 import { withMediaUrls, type ContentRecord } from "@/lib/content";
@@ -76,7 +78,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       {isSchoolPending && <><p>Your school membership is free with a code from your school.</p><SchoolCodeForm /></>}
       {tier === "school" && status === "active" && <><p>Your school membership is active. School codes do not unlock paid videos. Choose a paid plan to watch them.</p><div className="membership-plan-actions"><MembershipActionButton action="checkout" tier="personal" /><MembershipActionButton action="checkout" tier="family" /></div></>}
       {tier !== "school" && !isPaidActive && <><p>{status === "past_due" ? "There’s a payment update needed for your membership." : status === "canceled" ? "Your paid membership is no longer active." : "Finish setting up your membership to unlock your account."}</p><MembershipActionButton action={hasBillingAccount && status === "past_due" ? "portal" : "checkout"} /></>}
-      {isPaidActive && <><p>{tier === "family" ? "Your family space includes three profiles in total." : "Your Teens2Inspire membership is active."}{profile?.membership_period_end ? ` Renews or ends ${new Date(profile.membership_period_end).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}${profile.cancel_at_period_end ? " (canceled at period end)" : ""}.` : ""}</p><MembershipActionButton action="portal" /></>}
+      {isPaidActive && <><p>{tier === "family" ? "Your family space includes three profiles in total." : "Your Teens2Inspire membership is active."}{profile?.membership_period_end ? ` Renews or ends ${new Date(profile.membership_period_end).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}${profile.cancel_at_period_end ? " (canceled at period end)" : ""}.` : ""}</p><MembershipActionButton action="portal" />{!profile?.cancel_at_period_end && <CancelMembershipButton />}</>}
     </section>}
 
     {tier === "family" && status === "active" && <FamilyProfilesManager profiles={(familyProfiles ?? []) as { id: string; first_name: string; display_name: string; interests: string[] }[]} />}
@@ -85,6 +87,6 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
 
     <section className="profile-section"><div className="section-heading"><div><span className="eyebrow">Pick up where you left off</span><h2>Recently viewed</h2></div></div>{viewed.length ? <div className="media-shelf">{viewed.map((item) => <MediaCard key={item.id} item={item} canWatchVideos={access.canWatchVideos} />)}</div> : <div className="empty-note"><span className="empty-sparkle">↺</span><div><strong>Your recent finds will live here.</strong><p>Open a podcast, video or resource and it’ll be easy to find again.</p></div></div>}</section>
 
-    {profile && <section className="profile-section profile-settings-section"><div className="section-heading"><div><span className="eyebrow">Private to your account</span><h2>Account settings</h2></div></div><ProfileSettingsForm userId={user.id} email={user.email ?? ""} firstName={profile.first_name || name} displayName={displayName} interests={profile.interests ?? []} avatarUrl={photoData?.signedUrl ?? ""} /></section>}
+    {profile && <section className="profile-section profile-settings-section"><div className="section-heading"><div><span className="eyebrow">Private to your account</span><h2>Account settings</h2></div></div><ProfileSettingsForm userId={user.id} email={user.email ?? ""} firstName={profile.first_name || name} displayName={displayName} interests={profile.interests ?? []} avatarUrl={photoData?.signedUrl ?? ""} /><div className="account-danger-zone"><span className="eyebrow">Account control</span><p>Log out on this device or permanently remove your account.</p><DeleteAccountButton /></div></section>}
   </div>;
 }

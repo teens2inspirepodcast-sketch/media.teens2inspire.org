@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe";
 import { getSiteOrigin } from "@/lib/site-url";
+import { isSameOriginRequest } from "@/lib/same-origin";
 
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: "Please reload the page and try again." }, { status: 403 });
   const siteOrigin = getSiteOrigin(request.url);
   if (!siteOrigin) return NextResponse.json({ error: "Billing is not available right now." }, { status: 503 });
-  if (origin && origin !== siteOrigin) return NextResponse.json({ error: "Please reload the page and try again." }, { status: 403 });
   const supabase = await createClient();
   if (!supabase) return NextResponse.json({ error: "Billing is not available right now." }, { status: 503 });
   const { data: { user } } = await supabase.auth.getUser();

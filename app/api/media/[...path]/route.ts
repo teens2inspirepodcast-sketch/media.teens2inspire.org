@@ -79,17 +79,47 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
   if (privateVideoError) return new NextResponse("Media unavailable", { status: 503 });
   if (privateVideo) return new NextResponse("Not found", { status: 404 });
   const [{ data: publishedMedia }, { data: publishedCover }] = await Promise.all([
-    supabase.from("content").select("id").eq("status", "published").eq("media_url", storageRef).limit(1).maybeSingle(),
+    supabase.from("content").select("id,member_only").eq("status", "published").eq("media_url", storageRef).limit(1).maybeSingle(),
     supabase.from("content").select("id").eq("status", "published").eq("cover_url", storageRef).limit(1).maybeSingle(),
   ]);
   if (!publishedMedia && !publishedCover) return new NextResponse("Not found", { status: 404 });
+  if (publishedMedia?.member_only) {
+    const access = await getViewerAccess(supabase);
+    if (!access.canAccessMembersContent) return new NextResponse("Membership required", { status: access.isSignedIn ? 403 : 401, headers: privateHeaders });
+  }
+
+  // For private member content, keep the storage URL on the server and proxy the
+  // response. A short-lived redirect can still be copied and shared before expiry.
+  if (publishedMedia?.member_only) {
+    let signedUrl: string | null = null;
+    if (r2Key) {
+      signedUrl = await createR2DownloadUrl(r2Key, 120);
+    } else {
+      const { data, error } = await supabase.storage.from("media").createSignedUrl(storagePath, 120);
+      if (!error) signedUrl = data?.signedUrl ?? null;
+    }
+    if (!signedUrl) return new NextResponse("Media unavailable", { status: 503, headers: privateHeaders });
+    const requestedRange = request.headers.get("range");
+    const upstream = await fetch(signedUrl, {
+      ...(requestedRange ? { headers: { Range: requestedRange } } : {}),
+      cache: "no-store",
+      redirect: "error",
+    }).catch(() => null);
+    if (!upstream?.ok && upstream?.status !== 206) return new NextResponse("Media unavailable", { status: 502, headers: privateHeaders });
+    const headers = new Headers({ ...privateHeaders, "Content-Type": upstream.headers.get("content-type") || "application/octet-stream" });
+    for (const name of ["content-length", "content-range", "accept-ranges"]) {
+      const value = upstream.headers.get(name);
+      if (value) headers.set(name, value);
+    }
+    return new NextResponse(upstream.body, { status: upstream.status, headers });
+  }
 
   if (r2Key) {
     const signedUrl = await createR2DownloadUrl(r2Key, 300);
     if (!signedUrl) return new NextResponse("Media unavailable", { status: 503 });
     return new NextResponse(null, { status: 307, headers: { Location: signedUrl, ...privateHeaders } });
   }
-  const { data, error } = await supabase.storage.from("media").createSignedUrl(storagePath, 300);
+  const { data, error } = await admin.storage.from("media").createSignedUrl(storagePath, 300);
   if (error || !data?.signedUrl) return new NextResponse("Not found", { status: 404 });
   return new NextResponse(null, { status: 307, headers: { Location: data.signedUrl, ...privateHeaders } });
 }

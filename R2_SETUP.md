@@ -19,7 +19,7 @@
    [
      {
        "AllowedOrigins": [
-         "https://teens2inspire-website-ra8kiujs6.vercel.app",
+         "https://teens2inspire.org",
          "http://localhost:3000"
        ],
        "AllowedMethods": ["PUT"],
@@ -30,7 +30,7 @@
    ]
    ```
 
-   If Vercel gives the project a different site URL, use that exact origin instead. When you connect your custom domain, add its origin here too. An origin is just `https://your-domain.com`—no page path or trailing slash.
+   If you use a separate Vercel preview URL, add that exact origin too. An origin is just `https://your-domain.com`—no page path or trailing slash.
 
 5. Sign in to Teens2Inspire Studio and try uploading a small image. The app asks the server for a five-minute, single-file upload URL and sends the file directly to the private R2 bucket.
 
