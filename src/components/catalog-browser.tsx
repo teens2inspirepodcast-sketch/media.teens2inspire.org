@@ -14,7 +14,16 @@ export async function CatalogBrowser({ heading, intro, type, search, basePath = 
 }) {
   const typeList = Array.isArray(type) ? type : type ? [type] : undefined;
   const primaryType = typeList?.[0];
-  const items = await getPublishedContent({ type: typeList?.length === 1 ? typeList[0] : undefined, types: typeList?.length && typeList.length > 1 ? typeList : undefined, search, category, sort, limit: 48 });
+  const fetchedItems = await getPublishedContent({
+    type: typeList?.length === 1 ? typeList[0] : undefined,
+    types: typeList?.length && typeList.length > 1 ? typeList : undefined,
+    search,
+    category,
+    limit: 48,
+  });
+  const items = sort === "featured"
+    ? [...fetchedItems].sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)))
+    : fetchedItems;
   const categories = Array.from(new Set(items.map((item) => item.category).filter((value): value is string => Boolean(value)))).sort();
   const routeFor = (kind: string) => {
     const root = basePath;
