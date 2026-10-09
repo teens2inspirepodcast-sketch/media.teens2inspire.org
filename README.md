@@ -1,40 +1,15 @@
-# Teens2Inspire Media
+# Teens2Inspire media PWA
 
-The separate media/PWA app for `media.teens2inspire.com`.
+App-like media frontend for `media.teens2inspire.org`, with a dark premium mobile-first design, PWA manifest/service worker, install guide, explore/search/library/profile pages, and Supabase client foundation.
 
-## Architecture
-- Next.js 16 + TypeScript
-- Supabase Auth/database
-- Cloudflare R2 for media bytes
-- Supabase `content` metadata
-- Admin-only publishing studio
-- Same Supabase accounts as `teens2inspire.org`
+## Setup
+1. `npm install`, then `npm run dev`.
+2. Copy `.env.example` to `.env.local` and set the public Supabase URL and anon key.
+3. Deploy to Vercel and attach `media.teens2inspire.org`; ensure HTTPS is active.
+4. Configure the shared Supabase schema, RLS, Edge Functions, and authentication redirect URLs.
 
-## Vercel production variables
-Set the values from the production Supabase and Cloudflare R2 accounts. Never commit secrets.
+## Important security boundary
+This frontend intentionally does not contain R2 credentials, Stripe secrets, or public private-media URLs. Before serving production media, implement and deploy a server-side/Supabase Edge Function that authenticates the user, verifies active Stripe-backed membership or a valid school entitlement, and returns a short-lived signed R2 URL. Every content record and media object must be protected by RLS/server-side authorization. Do not expose R2 buckets publicly. The current category pages are safe placeholders; they do not claim to stream content before authorization is implemented.
 
-Required:
-`NEXT_PUBLIC_SUPABASE_URL`
-`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-`NEXT_PUBLIC_SITE_URL=https://media.teens2inspire.com`
-`SUPABASE_SECRET_KEY`
-`R2_ACCOUNT_ID`
-`R2_ACCESS_KEY_ID`
-`R2_SECRET_ACCESS_KEY`
-`R2_PRIVATE_BUCKET_NAME`
-`R2_PUBLIC_BUCKET_NAME`
-`R2_PUBLIC_BASE_URL=https://media.teens2inspire.com`
-
-## Supabase
-The media app uses the existing Teens2Inspire project and existing `profiles`, `family_profiles`, `content`, `favorites`, `subscriptions`, and membership logic.
-
-Add this redirect URL to Supabase Auth if using any email-auth flow on the media app:
-`https://media.teens2inspire.com/auth/callback`
-
-The primary account creation and email verification flow remains on `https://teens2inspire.org`.
-
-## R2
-Use a private bucket for video/audio and a public bucket for thumbnails/artwork. Configure `R2_PUBLIC_BASE_URL` to the custom domain attached to the public R2 bucket.
-
-## Deploy
-Import this repository into a new Vercel project and assign the custom domain `media.teens2inspire.com`.
+## Build status
+Reconstructed from saved Teens2Inspire requirements. Network access to npm registry timed out in this environment, so dependencies and production build could not be installed or verified. The frontend is not end-to-end production-ready until Supabase Edge Functions/schema, membership gates, content catalog, protected playback, and checkout have been configured and tested.

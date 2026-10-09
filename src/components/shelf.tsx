@@ -1,2 +1,0 @@
-import Link from "next/link"; import ContentCard from "./content-card"; import type { Content } from "@/lib/content";
-export default function Shelf({title,items,href}:{title:string;items:Content[];href?:string}){if(!items.length)return null;return <section className="section"><div className="section-head"><h2>{title}</h2>{href&&<Link href={href}>See all</Link>}</div><div className="shelf">{items.map(i=><ContentCard key={i.id} item={i}/>)}</div></section>}

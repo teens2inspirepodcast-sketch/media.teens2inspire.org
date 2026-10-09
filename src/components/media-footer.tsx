@@ -1,1 +1,0 @@
-export default function MediaFooter(){return <footer className="footer"><div className="shell">Teens2Inspire · Inspiring Jewish teen girls · <a href="https://teens2inspire.org">teens2inspire.org</a></div></footer>}
