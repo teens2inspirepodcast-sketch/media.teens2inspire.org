@@ -8,7 +8,7 @@ export type ContentType = Content["type"];
 
 export const contentTypeLabels: Record<string, string> = { podcast: "Podcast", video: "Video", article: "Article", resource: "Resource", printable: "Printable", event: "Event", recipe: "Recipe", pick: "Pick", original: "Original" };
 
-export async function getPublishedContent(options: { type?: ContentType; types?: ContentType[]; category?: string; search?: string; featured?: boolean; sort?: "newest" | "featured"; limit?: number } = {}) {
+export async function getPublishedContent(options: { type?: ContentType; types?: ContentType[]; category?: string; search?: string; featured?: boolean; limit?: number } = {}) {
   const supabase = await createServerSupabase();
   let query = supabase.from("content").select("*").eq("status", "published");
   if (options.type) query = query.eq("type", options.type);
@@ -20,7 +20,6 @@ export async function getPublishedContent(options: { type?: ContentType; types?:
     if (term) query = query.or(`title.ilike.%${term}%,short_description.ilike.%${term}%,description.ilike.%${term}%,category.ilike.%${term}%`);
   }
   try {
-    if (options.sort === "featured") query = query.order("featured", { ascending: false });
     const { data } = await query.order("published_at", { ascending: false }).limit(options.limit ?? 36);
     return data ?? [];
   } catch {
