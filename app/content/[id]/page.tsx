@@ -1,7 +1,0 @@
-import Link from "next/link";
-import {notFound} from "next/navigation";
-import {createAdminClient} from "@/lib/supabase/admin";
-import AppFrame from "@/components/app-frame";
-import ProtectedPlayer from "./player";
-export const dynamic="force-dynamic";
-export default async function ContentPage({params}:{params:Promise<{id:string}>}){const {id}=await params;const db=createAdminClient();if(!db)return <AppFrame title="Library"><section className="catalog-message"><h1>Library unavailable</h1><p>Server catalog access is not configured.</p><Link href="/">Back home</Link></section></AppFrame>;const {data,error}=await db.from("content").select("id,title,slug,type,description,short_description,cover_url,r2_thumbnail_key,member_only,status").eq("id",id).eq("status","published").maybeSingle();if(error||!data)notFound();return <AppFrame title="Now playing"><section className="quick-section"><div className="mini-label">TEENS2INSPIRE / LIBRARY</div><h1 style={{fontFamily:"'Playfair Display',serif",fontWeight:500,fontSize:34}}>{data.title}</h1><p style={{maxWidth:700,color:"#857b76",fontSize:13,lineHeight:1.8}}>{data.short_description||data.description||"A Teens2Inspire selection."}</p>{data.cover_url&&<img src={data.cover_url} alt="" style={{display:"block",width:"min(100%,720px)",maxHeight:360,objectFit:"cover",marginTop:20}}/>}<ProtectedPlayer id={data.id} type={data.type} memberOnly={data.member_only}/><p style={{marginTop:24}}><Link href="/library">← Back to library</Link></p></section></AppFrame>}

@@ -1,37 +1,53 @@
-# Teens2Inspire Media App — fresh source project
+# Teens2Inspire Media
 
-This repository is the member-facing app for `media.teens2inspire.org`. It is intentionally app-like (persistent navigation, responsive mobile menu, live content catalog) and separate from the public marketing site.
+The separate media/PWA app for `media.teens2inspire.org`.
 
-## Local development
-- Node.js 22.12+.
-- Copy `.env.example` to `.env.local` and fill in the Supabase public URL/key, server-only Supabase service-role key, and Cloudflare R2 server credentials.
-- Run `npm install`, `npm run typecheck`, `npm run test:routes`, then `npm run build`.
-- Vercel is configured to use `npm install` because this source bundle cannot contain a trustworthy generated lockfile without reaching the npm registry. Once running in a networked environment, generate and commit `package-lock.json`, then change the Vercel install command back to `npm ci`.
+## Architecture
+- Next.js 16 + TypeScript
+- Supabase Auth/database
+- Cloudflare R2 for media bytes
+- Supabase `content` metadata
+- Admin-only publishing studio for content, events, categories, home shelves, school codes, Stripe promotion codes, mailing list, and member profiles
+- Same Supabase accounts as `teens2inspire.org`
 
-## Stripe / Supabase
-Stripe is deliberately called from Supabase Edge Functions; no Stripe secret belongs in the Vercel environment or browser bundle.
-1. Deploy `supabase/functions/create-checkout-session`, `supabase/functions/create-billing-portal`, and `supabase/functions/stripe-webhook`.
-2. Configure Supabase Edge Function secrets using `supabase/.env.example` as a name/value checklist.
-3. The public project includes a compatibility route at `https://teens2inspire.org/api/stripe/webhook` that forwards the raw signed event to the Supabase function. Keep the existing Stripe endpoint and use its current signing secret as `STRIPE_WEBHOOK_SECRET` in Supabase. Subscribe to `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, and `invoice.payment_failed`. Alternatively, after testing, you may point Stripe directly at `https://mphswidvmesdkefkgwjz.supabase.co/functions/v1/stripe-webhook` and use the new endpoint signing secret.
-4. Do not remove or change the existing endpoint until the forwarding route and Supabase function have passed a real Stripe test event.
-5. Verify checkout and cancellation with Stripe test mode/test cards before changing to live mode.
+## Vercel production variables
 
-## Cloudflare R2
-- Private media bucket: `R2_PRIVATE_BUCKET_NAME`. Never enable public access for this bucket.
-- Public artwork bucket: `R2_PUBLIC_BUCKET_NAME`, exposed only through `R2_PUBLIC_BASE_URL`.
-- Uploads use short-lived presigned PUT URLs so large files do not pass through Vercel's request body limit.
-- In the Cloudflare R2 bucket Settings → CORS Policy → JSON tab, paste the array in `R2-CORS-SETUP.json` (the dashboard expects an array of rule objects). It allows `PUT`, `GET`, and `HEAD` from `https://media.teens2inspire.org` and `http://localhost:3000`. Verify with a small test file before large uploads.
+Set only the public values from `.env.example` in Vercel. `NEXT_PUBLIC_R2_PUBLIC_BASE_URL` is the public custom domain for the artwork bucket. Stripe secrets, the Supabase service-role key, and R2 access keys must not be stored in Vercel; they belong in the Supabase Edge Function secrets for the shared Supabase project.
 
-## Important launch checks
-- Supabase Auth Site URL and redirect allowlist must include `https://media.teens2inspire.org/auth/callback`.
-- Enable leaked-password protection in Supabase Auth.
-- Apply `supabase/migrations/20261011_school_code_redemption.sql` before relying on the school-code flow. Apply `supabase/migrations/20261011_signup_privacy.sql` so new accounts enter the mailing list only when they explicitly opt in.
-- Test account creation and confirmation, login, password recovery, Personal/Family checkout, webhook subscription synchronization, school-code redemption, private playback denial for a non-member, playback for an entitled member, R2 upload, publish/unpublish, and admin denial for non-admin users.
-- Do not call the project production-ready until these tests pass against the real account and services.
+## Supabase
+The media app uses the existing Teens2Inspire project and existing `profiles`, `family_profiles`, `content`, `favorites`, `subscriptions`, and membership logic.
 
+Add this redirect URL to Supabase Auth if using any email-auth flow on the media app:
+`https://media.teens2inspire.org/auth/callback`
 
-Build configuration note: Supabase Edge Functions under `supabase/functions/**` run in the Deno Edge Runtime and use Deno URL/Jsr imports. They are intentionally excluded from the Next.js TypeScript build; deploy and type-check them with the Supabase CLI/Edge Runtime, not `next build`.
+The primary account creation and email verification flow remains on `https://teens2inspire.org`.
 
+## R2
+Use a private bucket for video/audio/documents and a public bucket for thumbnails/artwork. Configure `NEXT_PUBLIC_R2_PUBLIC_BASE_URL` in Vercel to the actual custom domain attached to the public R2 bucket (for example, an assets subdomain). The signing credentials are stored only in Supabase Edge Function secrets.
 
-## Responsive app UI update
-The interface has been restyled to follow the supplied mobile-app inspiration: bright white canvas, vivid pink accent, rounded pale search surfaces, mobile bottom navigation, and responsive phone/tablet/desktop layouts. Test with `npm run build` and verify each route at phone, tablet, and desktop widths before production deployment.
+## Deploy
+Import this repository into a new Vercel project and assign the custom domain `media.teens2inspire.org`.
+
+## Shared sign-in across both subdomains
+
+Set `NEXT_PUBLIC_AUTH_COOKIE_DOMAIN=.teens2inspire.org` in **both production Vercel projects** so the Supabase SSR session cookie can be shared between `teens2inspire.org` and `media.teens2inspire.org`. Leave it blank for localhost development. Add both production origins and their auth callback paths to the Supabase Auth URL allow list.
+
+## Shared Edge Functions
+
+Deploy the `create-checkout`, `create-billing-portal`, `manage-promotions`, `stripe-webhook`, and `r2-media` functions from the `supabase/functions` folder in the `teens2inspire.org` project package. Both sites call the same Supabase functions. Set private Stripe/R2 values as Supabase Edge Function secrets, not Vercel variables.
+
+The admin studio relies on the `20261009000000_admin_studio_access.sql` migration for editorial shelf, mailing-list, and profile policies. Review and apply it only after checking the current Supabase schema.
+
+For Cloudflare R2, allow `PUT` from `https://media.teens2inspire.org` with the `Content-Type` header in bucket CORS. During local development, also allow `http://localhost:3000`. Keep the private media bucket private; only thumbnails/artwork belong in the public bucket.
+
+## Fixes in this candidate package
+
+- Paid signup preserves the selected Personal or Family plan through email confirmation and resumes Stripe checkout after confirmation.
+- The media app now has a protected `/saved` Library page and the mobile Library link points to it.
+- Family profile create/remove controls use the existing owner-scoped RPC contract. The added migration creates the table and restricts the RPCs to an active Family entitlement; it allows the account owner plus up to two additional profiles.
+- Playwright tests now target actual routes in this two-site architecture rather than removed `/membership`, `/discover`, and `/v2/*` pages.
+- Media content shelves fall back gracefully when Supabase is temporarily unreachable.
+
+## Build verification status
+
+**Not fully tested.** Static TypeScript/TSX parsing and local-import checks passed. The environment could not resolve `registry.npmjs.org`, so `npm ci` did not complete. The subsequent `npm run build` failed with `next: not found`, and Playwright E2E could not run because the dependency installation was incomplete. Do not deploy this candidate until dependencies can be installed and `npm run typecheck`, `npm test`, `npm run build`, and `npm run test:e2e` pass in a network-enabled environment. Review and test the new family-profile migration against the existing Supabase schema before applying it.

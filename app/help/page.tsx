@@ -1,3 +1,0 @@
-import AppFrame from "@/components/app-frame";
-import Link from "next/link";
-export default function Help(){return <AppFrame title="Help"><section className="quick-section"><div className="mini-label">YOUR SPACE / SUPPORT</div><h1 style={{fontFamily:"'Playfair Display',serif",fontWeight:500,fontSize:34}}>How can we help?</h1><p style={{maxWidth:640,color:"#857b76",fontSize:13,lineHeight:1.8}}>For account, billing, or access questions, email <a href="mailto:hello@teens2inspire.org">hello@teens2inspire.org</a>. Never send your password or payment details by email.</p><p><Link href="/membership">Membership help</Link> · <Link href="/school">School access</Link></p></section></AppFrame>}
