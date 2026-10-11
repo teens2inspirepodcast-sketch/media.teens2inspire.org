@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorPage({reset}:{error:Error&{digest?:string};reset:()=>void}){return <main className="simple-screen"><section className="simple-panel"><div className="mini-label">TEENS2INSPIRE / RECOVERY</div><h1>Something didn't load.</h1><p>Your account and content have not been changed by this screen. Try loading this page again.</p><button className="app-btn app-btn-dark" onClick={()=>reset()}>Try again</button></section></main>}

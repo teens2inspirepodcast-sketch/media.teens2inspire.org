@@ -1,0 +1,4 @@
+import AppFrame from "@/components/app-frame";
+import Link from "next/link";
+import CheckoutButtons from "./checkout-buttons";
+export default function Membership(){return <AppFrame title="Membership"><section className="quick-section"><div className="mini-label">YOUR SPACE / MEMBERSHIP</div><h1 style={{fontFamily:"'Playfair Display',serif",fontWeight:500,fontSize:34}}>Choose your membership.</h1><p style={{maxWidth:680,color:"#857b76",fontSize:13,lineHeight:1.8}}>A single account does not automatically unlock paid media. Checkout is handled by the Supabase Edge Function, and protected playback is granted only after a verified entitlement is recorded.</p><CheckoutButtons/><p style={{fontSize:12,color:"#857b76",marginTop:18}}>Have a school access code? <Link href="/school">Redeem it here</Link>.</p></section></AppFrame>}

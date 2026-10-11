@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function NotFound(){return <main className="simple-screen"><section className="simple-panel"><div className="mini-label">TEENS2INSPIRE / 404</div><h1>This page isn't in your space.</h1><p>The page may have moved. Return to the app home or browse the library.</p><p><Link href="/">App home</Link> · <Link href="/library">Library</Link></p></section></main>}

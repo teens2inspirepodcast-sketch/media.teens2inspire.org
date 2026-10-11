@@ -1,15 +1,22 @@
-FRESH PROJECT QA STATUS
+MEDIA APP SOURCE AUDIT — 2026-10-11
 
-Completed:
-- Rebuilt as a clean, independent Next.js source tree; no previous source files were patched in place.
-- New responsive marketing design, CSS motion, mobile navigation, reduced-motion support, membership marketing, school and contact pages.
-- Preserved the existing official Teens2Inspire logo and favicon assets.
-- TypeScript/TSX syntax transpilation check passed (no syntax diagnostics).
-- package.json parses as valid JSON.
+Verified from source:
+- This bundle has an app-like media home, persistent navigation for secondary catalog pages, responsive styling, and reduced-motion handling.
+- Static route audit passes; /admin/events, /admin/members, and /admin/school-codes are handled by the /admin/[section] route.
+- TypeScript/TSX syntax transpilation passes (syntax only; not a full typecheck or build).
+- Account creation/sign-in use Supabase Auth; signup metadata now supplies the live database trigger's required age-group and terms-acceptance fields, and includes optional newsletter opt-in. Added PKCE callback and password recovery/update screens.
+- Admin content routes check the authenticated profile role; upload/publish/unpublish/archive/delete and school-code issuance are implemented in source.
+- Media uploads use short-lived presigned R2 PUT URLs to avoid Vercel request-size limits.
+- Supabase Edge Function source is included for checkout, billing portal, and Stripe webhook sync.
 
-Not verified / launch blockers:
-- Full npm install and `npm run build` could not be completed in this environment because npm install timed out while trying to reach the package registry.
-- Signup links to the separate media app; production signup, checkout, Stripe webhook, email verification and account recovery must be exercised against the real configured services.
-- This site does not contain the member media library; that belongs on media.teens2inspire.org.
+Not verified / blockers:
+- Current deployed GitHub source for media.teens2inspire.org was found to contain the public marketing home page, not this media-app source. The latest deployment is READY, but that does not prove it is the intended app.
+- Supabase currently lists only the contact Edge Function; the new payment functions in this bundle are not deployed.
+- The current Stripe webhook endpoint points to a public-domain route missing from the deployed source. This bundle adds a compatibility proxy, but it will not work until the updated public site is deployed and the Supabase webhook function plus signing secret are configured.
+- Vercel environment-variable inspection and runtime-error access returned 403 authorization errors.
+- npm registry DNS resolution failed, so production builds and dependency installation could not be completed here.
+- Account creation, Stripe checkout/webhook, R2 upload, school redemption, and protected playback have not been end-to-end tested.
+- Apply both included migrations (school redemption and opt-in-only mailing list) before relying on those flows.
+- Studio includes upload and catalog publishing, event draft creation, school-code issuance, and record inspection. Member management, discounts, mailing list, and complete event editing are not yet implemented.
 
-Do not call this production-ready until dependency install, build, and end-to-end integration tests pass.
+Do not call production-ready until a networked build and authenticated end-to-end tests pass.
