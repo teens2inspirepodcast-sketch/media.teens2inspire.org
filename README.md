@@ -28,3 +28,6 @@ Stripe is deliberately called from Supabase Edge Functions; no Stripe secret bel
 - Apply `supabase/migrations/20261011_school_code_redemption.sql` before relying on the school-code flow. Apply `supabase/migrations/20261011_signup_privacy.sql` so new accounts enter the mailing list only when they explicitly opt in.
 - Test account creation and confirmation, login, password recovery, Personal/Family checkout, webhook subscription synchronization, school-code redemption, private playback denial for a non-member, playback for an entitled member, R2 upload, publish/unpublish, and admin denial for non-admin users.
 - Do not call the project production-ready until these tests pass against the real account and services.
+
+
+Build configuration note: Supabase Edge Functions under `supabase/functions/**` run in the Deno Edge Runtime and use Deno URL/Jsr imports. They are intentionally excluded from the Next.js TypeScript build; deploy and type-check them with the Supabase CLI/Edge Runtime, not `next build`.
