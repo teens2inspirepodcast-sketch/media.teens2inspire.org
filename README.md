@@ -31,3 +31,7 @@ Stripe is deliberately called from Supabase Edge Functions; no Stripe secret bel
 
 
 Build configuration note: Supabase Edge Functions under `supabase/functions/**` run in the Deno Edge Runtime and use Deno URL/Jsr imports. They are intentionally excluded from the Next.js TypeScript build; deploy and type-check them with the Supabase CLI/Edge Runtime, not `next build`.
+
+
+## Responsive app UI update
+The interface has been restyled to follow the supplied mobile-app inspiration: bright white canvas, vivid pink accent, rounded pale search surfaces, mobile bottom navigation, and responsive phone/tablet/desktop layouts. Test with `npm run build` and verify each route at phone, tablet, and desktop widths before production deployment.

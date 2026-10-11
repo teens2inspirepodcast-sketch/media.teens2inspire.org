@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
-import { AudioLines, BookOpen, CalendarDays, ChevronRight, Compass, Heart, Menu, Search, ShieldCheck, Sparkles, Video, X } from "lucide-react";
+import { AudioLines, BookOpen, CalendarDays, ChevronRight, CircleUserRound, Compass, Heart, Menu, Search, ShieldCheck, Sparkles, Video, X } from "lucide-react";
 
 const nav = [
   {label:"Home", href:"/", icon:Sparkles},
@@ -39,5 +39,11 @@ export default function AppFrame({children,title="Your space",active=""}:{childr
       <div className="app-content">{children}</div>
       <footer className="app-footer"><span>© 2025 Teens2Inspire</span><span>Made with intention for Jewish teen girls.</span><div><a href="/help">Help</a><a href="/privacy">Privacy</a></div></footer>
     </div>
+    <nav className="mobile-bottom-nav" aria-label="Primary navigation">
+      <a className={title === "Home" ? "nav-current" : ""} href="/"><Sparkles/><span>Explore</span></a>
+      <a className={title === "Search" ? "nav-current" : ""} href="/library"><Search/><span>Search</span></a>
+      <a className={title === "Library" || title === "Favorites" ? "nav-current" : ""} href="/library"><Video/><span>Library</span></a>
+      <a className={title === "Settings" || title === "Profile" ? "nav-current" : ""} href="/profile"><CircleUserRound/><span>Settings</span></a>
+    </nav>
   </main>;
 }
