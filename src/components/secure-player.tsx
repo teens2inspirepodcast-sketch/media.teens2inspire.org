@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { LockKeyhole, Play } from "lucide-react";
 
 export function SecurePlayer({ contentId, poster }: { contentId: string; poster?: string | null }) {
   const [url, setUrl] = useState<string | null>(null);
@@ -16,7 +17,12 @@ export function SecurePlayer({ contentId, poster }: { contentId: string; poster?
     } catch (error) { setMessage(error instanceof Error ? error.message : "Playback is unavailable."); }
     finally { setBusy(false); }
   }
-  return <div className="panel" style={{ padding: 0, overflow: "hidden" }}>
-    {url ? <video controls playsInline poster={poster || undefined} src={url} style={{ width: "100%", maxHeight: "70vh", background: "#241019" }} /> : <div style={{ padding: 30 }}><h3>Watch securely</h3><p>Playback uses an authenticated server endpoint so private media URLs are not embedded in the page.</p><button className="btn primary" onClick={load} disabled={busy}>{busy ? "Checking access…" : "Play episode"}</button>{message && <p className="notice" role="status">{message}</p>}</div>}
-  </div>;
+  return <section className="secure-player-shell" aria-label="Secure media player">
+    {url ? <video controls playsInline poster={poster || undefined} src={url} className="secure-video" autoPlay /> : <div className="secure-player-placeholder" style={poster ? { backgroundImage: `linear-gradient(0deg,rgba(30,8,20,.9),rgba(30,8,20,.18)),url("${poster}")` } : undefined}>
+      <div className="secure-player-lock"><LockKeyhole size={17}/><span>SECURE PLAYBACK</span></div>
+      <button className="secure-play-button" onClick={load} disabled={busy} aria-label={busy ? "Checking access" : "Play content"}><Play size={25} fill="currentColor"/></button>
+      <div className="secure-player-copy"><span>TEENS2INSPIRE ORIGINALS</span><h2>{busy ? "Checking your access…" : "Ready when you are."}</h2><p>Playback is authorized securely before the media is delivered.</p></div>
+      {message && <p className="secure-player-error" role="status">{message}</p>}
+    </div>}
+  </section>;
 }

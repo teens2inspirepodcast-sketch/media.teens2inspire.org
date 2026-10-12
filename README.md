@@ -1,25 +1,31 @@
-# Teens2Inspire Media — Media App
+# Teens2Inspire Media — Member App
 
-This ZIP is the **media and member app** intended for `media.teens2inspire.org`, separate from the public marketing website.
+This is the **light, app-like media experience** for `media.teens2inspire.org`, separate from the dark marketing site.
+
+## Design direction
+- White and warm-blush interface with the actual Teens2Inspire wordmark and vivid pink accents.
+- Mobile app chrome inspired by the supplied references: pink branded top bar, image-led featured content, horizontally swipeable shelves, compact cards, and a persistent four-tab bottom navigation (Explore, Search, Library, Settings).
+- Desktop navigation expands into a clean top navigation while the content shelves remain responsive.
+- Subtle entrance/hover transitions, visible focus states, touch-friendly controls, and reduced-motion support.
+- Uses real published cover URLs from Supabase when present. If no cover exists, it uses a restrained typographic gradient tile rather than fabricated photography.
 
 ## Included
-- Member app shell and Explore, Search, Library, Profile, and content pages
-- Admin dashboard and content/sections/events/members/schools/inquiries areas
-- Media playback API route foundation
-- School-code administration API and form
-- PWA manifest, service-worker registration, and shared Supabase helpers
-- Shared database migrations and environment example
+- App home, Explore with functional type filters, Search, My List/favorites, Settings, content detail, and secure-player interface
+- Admin dashboard and content/sections/events/members/schools/inquiries pages
+- Login and signup on the media domain, plus email-verification callback
+- PWA manifest, service-worker registration, actual logo asset, and app icon
+- School-code administration API, shared Supabase migrations, environment example
 
 ## Setup
 1. Create a separate Vercel project for this folder and connect `media.teens2inspire.org`.
-2. Install dependencies with `npm install`, then run `npm run dev`.
+2. Run `npm install`, then `npm run dev` locally.
 3. Configure `.env.local` and Vercel environment variables from `.env.example`.
 4. Apply the SQL migrations to the same Supabase project used by the main website.
-5. Configure the approved media provider's server-side API and signed playback flow before serving private content.
-6. Test member access, admin role enforcement, playback authorization, and mobile installation.
+5. Verify membership/school entitlements and admin role enforcement in Supabase before launch.
+6. Configure the confirmed V2 media provider API and signed playback adapter before serving private video/audio.
+7. Test the app on iPhone Safari, Android Chrome, tablet, and desktop, including install behavior.
 
-## Important
-This package is split from the main website for separate deployment. It is not a claim that production deployment or end-to-end tests have passed. The exact V2 media provider API still needs to be configured and verified before secure playback can be considered complete. The main website is supplied separately as `teens2inspire-website.zip`.
+## Readiness status
+The redesign's TypeScript/TSX files passed a syntax parse. A production build has **not** been verified because dependency installation timed out in this environment. Run `npm install` and `npm run build` in Vercel or a network-enabled environment before deploying.
 
-## Build-log fix included
-The manifest icon `purpose` is set to the valid Next.js value `any` instead of the invalid value `any maskable` that caused TypeScript error TS2820.
+**Playback blocker:** The V2 playback endpoint deliberately fails closed until the actual provider API contract and credentials are configured. Do not treat private playback as production-ready until that integration is implemented and tested. The main website is supplied separately as `teens2inspire-website-redesigned.zip`.

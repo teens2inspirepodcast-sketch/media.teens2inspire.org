@@ -1,11 +1,11 @@
 # Security and launch checks — Media App
 
-Before launch:
-- Restrict admin routes and server actions to the intended administrator role; test direct URL access.
-- Ensure Supabase RLS prevents users from changing their own role, membership, or school entitlement.
-- Do not expose public object URLs for private content. Use provider-authorized playback or short-lived signed URLs.
-- Verify the media playback API checks authentication, membership/school access, and content publication state on every request.
+- Admin routes and mutations must require the intended administrator role; test direct URL and server-action access.
+- Confirm Supabase RLS prevents users from changing their role, membership, or school entitlement.
+- Keep private media URLs out of database reads and rendered page HTML; only return provider-authorized short-lived playback URLs.
+- Verify the playback API checks authentication, active paid membership or school access, content publication state, and provider response on every request.
+- The current V2 adapter is intentionally not implemented without the provider's verified API contract. It must remain fail-closed.
 - Keep provider credentials and service-role keys server-only.
-- Test uploads, file type/size validation, content moderation, signed URL expiry, and error handling.
+- Test favorites, family profile limits, school-code redemption, Stripe status sync, and admin workflows.
 - Run `npm install`, `npm run build`, and end-to-end tests in the actual deployment environment.
-- Verify PWA behavior on iOS Safari and Android Chrome.
+- Verify PWA behavior on iOS Safari and Android Chrome. The service worker must not cache private pages, account data, API responses, or media.

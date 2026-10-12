@@ -1,1 +1,18 @@
-import Link from "next/link"; import {Home,Compass,Search,Bookmark,UserRound} from "lucide-react"; import {requireUser} from "@/lib/auth"; export default async function Layout({children}:{children:React.ReactNode}){const {user,profile}=await requireUser("/app");return <div className="app-shell"><header className="app-top"><Link className="brand" href="/app">Teens<span>2</span>Inspire</Link><span style={{fontSize:13,color:"#786a70"}}>{profile?.display_name||user.email}</span></header>{children}<nav className="bottom-nav">{[[Home,"Home","/app"],[Compass,"Explore","/app/explore"],[Search,"Search","/app/search"],[Bookmark,"Library","/app/library"],[UserRound,"Profile","/app/profile"]].map(([Icon,label,href]:any)=><Link href={href} key={href}><Icon size={20}/><br/>{label}</Link>)}</nav></div>}
+import Link from "next/link";
+import Image from "next/image";
+import { ChevronDown } from "lucide-react";
+import { requireUser } from "@/lib/auth";
+import { AppNavigation } from "@/components/app-navigation";
+export default async function Layout({ children }: { children: React.ReactNode }) {
+  const { user, profile } = await requireUser("/app");
+  const displayName = profile?.display_name?.trim() || user?.email?.split("@")[0] || "Your account";
+  return <div className="app-shell">
+    <header className="app-topbar">
+      <Link className="app-wordmark" href="/app" aria-label="Teens2Inspire home"><Image src="/teens2inspire-logo.png" alt="Teens2Inspire — a media platform for Jewish teen girls" width={520} height={130} priority /></Link>
+      <AppNavigation placement="desktop" />
+      <Link href="/app/profile" className="app-account"><span className="account-avatar">{displayName.slice(0,1).toUpperCase()}</span><span className="account-name">{displayName}</span><ChevronDown size={14}/></Link>
+    </header>
+    <div className="app-main-wrap">{children}</div>
+    <AppNavigation placement="bottom" />
+  </div>;
+}
