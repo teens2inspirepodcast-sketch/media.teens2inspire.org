@@ -1,28 +1,23 @@
 import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-import type { Database } from "@/types/database";
-import { publicEnvironment } from "@/lib/env";
-
-export async function createServerSupabase() {
-  const { url, publishableKey } = publicEnvironment();
-  const cookieStore = await cookies();
-
-  return createServerClient<Database>(url, publishableKey, {
+import { cookies, headers } from "next/headers";
+export async function createClient() {
+  const cookieStore = await cookies(); const headerStore = await headers();
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) throw new Error("Supabase environment variables are missing.");
+  const host = (headerStore.get("host") || "").split(":")[0].toLowerCase();
+  const trustedDomain = host === "teens2inspire.org" || host.endsWith(".teens2inspire.org");
+  const secure = headerStore.get("x-forwarded-proto") === "https" || process.env.NODE_ENV === "production";
+  const cookieOptions = trustedDomain
+    ? { domain: ".teens2inspire.org", sameSite: "lax" as const, secure: true }
+    : { sameSite: "lax" as const, secure };
+  return createServerClient(url, key, {
+    cookieOptions,
     cookies: {
-      getAll() {
-        return cookieStore.getAll();
-      },
-      setAll(cookiesToSet) {
-        try {
-          const sharedDomain = process.env.NEXT_PUBLIC_AUTH_COOKIE_DOMAIN === ".teens2inspire.org"
-            ? { domain: ".teens2inspire.org" }
-            : {};
-          for (const { name, value, options } of cookiesToSet) {
-            cookieStore.set(name, value, { ...options, ...sharedDomain });
-          }
-        } catch {
-          // Server Components cannot write cookies; route handlers and auth actions can.
-        }
+      getAll() { return cookieStore.getAll(); },
+      setAll(values) {
+        try { values.forEach(({ name, value, options }) => cookieStore.set(name, value, options)); }
+        catch { /* Server Components cannot always mutate cookies; proxy refresh handles writable contexts. */ }
       },
     },
   });

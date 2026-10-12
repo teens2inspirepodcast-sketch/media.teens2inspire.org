@@ -1,4 +1,1 @@
-import type { MetadataRoute } from "next";
-export default function manifest(): MetadataRoute.Manifest {
-  return { name: "Teens2Inspire", short_name: "Teens2Inspire", description: "The Teens2Inspire media app.", start_url: "/", display: "standalone", background_color: "#090809", theme_color: "#090809", icons: [{ src: "/teens2inspire-favicon.jpg", sizes: "any", type: "image/jpeg" }] };
-}
+import type {MetadataRoute} from "next"; export default function manifest():MetadataRoute.Manifest{return {name:"Teens2Inspire",short_name:"Teens2Inspire",description:"Inspiring Jewish teen girls",start_url:"/app",display:"standalone",background_color:"#f8f4f3",theme_color:"#541c30",icons:[{src:"/icon.svg",sizes:"any",type:"image/svg+xml",purpose:"any maskable"}]}}
