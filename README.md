@@ -29,3 +29,10 @@ This is the **light, app-like media experience** for `media.teens2inspire.org`, 
 The redesign's TypeScript/TSX files passed a syntax parse. A production build has **not** been verified because dependency installation timed out in this environment. Run `npm install` and `npm run build` in Vercel or a network-enabled environment before deploying.
 
 **Playback blocker:** The V2 playback endpoint deliberately fails closed until the actual provider API contract and credentials are configured. Do not treat private playback as production-ready until that integration is implemented and tested. The main website is supplied separately as `teens2inspire-website-redesigned.zip`.
+
+
+## Repair notes
+- Corrected profile lookup to avoid selecting the nonexistent `profiles.email` column.
+- Corrected section and section-content query column names to match the known Supabase schema.
+- Required public Vercel variables are shown in `.env.example`. Do not add Stripe secret keys to Vercel.
+- The project ZIP has not been proven production-ready by a live deployment/build; test authentication, entitlements, content shelves, and admin access after upload.
