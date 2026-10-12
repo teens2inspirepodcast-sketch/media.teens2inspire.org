@@ -20,3 +20,6 @@ This ZIP is the **media and member app** intended for `media.teens2inspire.org`,
 
 ## Important
 This package is split from the main website for separate deployment. It is not a claim that production deployment or end-to-end tests have passed. The exact V2 media provider API still needs to be configured and verified before secure playback can be considered complete. The main website is supplied separately as `teens2inspire-website.zip`.
+
+## Build-log fix included
+The manifest icon `purpose` is set to the valid Next.js value `any` instead of the invalid value `any maskable` that caused TypeScript error TS2820.
