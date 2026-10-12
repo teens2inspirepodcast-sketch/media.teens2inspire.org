@@ -36,3 +36,9 @@ The redesign's TypeScript/TSX files passed a syntax parse. A production build ha
 - Corrected section and section-content query column names to match the known Supabase schema.
 - Required public Vercel variables are shown in `.env.example`. Do not add Stripe secret keys to Vercel.
 - The project ZIP has not been proven production-ready by a live deployment/build; test authentication, entitlements, content shelves, and admin access after upload.
+
+## Root-route 404 repair
+
+The app now includes `src/app/page.tsx`, an explicit `/` route that redirects to `/app`.
+This prevents the domain root from returning a 404 if the host-based rewrite in `src/proxy.ts`
+is not applied. After deploying, verify `/`, `/app`, and `/login` on `https://media.teens2inspire.org`.
