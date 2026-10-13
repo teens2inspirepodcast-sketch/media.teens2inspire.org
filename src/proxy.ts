@@ -1,11 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
-/** Refresh Supabase auth cookies and route the media subdomain through the media-app pages. */
+/** Refresh Supabase auth cookies and normalize entry routes for the media app. */
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
   if (supabaseUrl && supabaseKey) {
     const host = (request.headers.get("host") || "").split(":")[0].toLowerCase();
     const trustedDomain = host === "teens2inspire.org" || host.endsWith(".teens2inspire.org");
@@ -29,15 +30,20 @@ export async function proxy(request: NextRequest) {
 
   const host = (request.headers.get("host") || "").split(":")[0].toLowerCase();
   const { pathname } = request.nextUrl;
+  const isMediaHost = host === "media.teens2inspire.org" || host.endsWith(".vercel.app");
+
+  // Keep the marketing site separate; only normalize routes on the media deployment.
   if (host === "teens2inspire.org" && (pathname === "/app" || pathname.startsWith("/app/") || pathname === "/admin" || pathname.startsWith("/admin/") || ["/explore", "/search", "/library", "/profile"].includes(pathname))) {
     const destination = new URL(`${pathname}${request.nextUrl.search}`, "https://media.teens2inspire.org");
     const redirected = NextResponse.redirect(destination);
     response.cookies.getAll().forEach(cookie => redirected.cookies.set(cookie));
     return redirected;
   }
-  if (host !== "media.teens2inspire.org") return response;
+  if (!isMediaHost) return response;
+
   const routeMap: Record<string, string> = {
-    "/": "/app",
+    "/": "/dashboard",
+    "/app": "/dashboard",
     "/explore": "/app/explore",
     "/search": "/app/search",
     "/library": "/app/library",
@@ -45,7 +51,8 @@ export async function proxy(request: NextRequest) {
   };
   const destination = routeMap[pathname];
   if (!destination) return response;
-  const url = request.nextUrl.clone(); url.pathname = destination;
+  const url = request.nextUrl.clone();
+  url.pathname = destination;
   const rewritten = NextResponse.rewrite(url);
   response.cookies.getAll().forEach(cookie => rewritten.cookies.set(cookie));
   return rewritten;
