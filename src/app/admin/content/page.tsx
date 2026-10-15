@@ -8,7 +8,7 @@ export default async function ContentAdmin({ searchParams }: { searchParams: Pro
   const errorText: Record<string, string> = { invalid: "Check the required fields and use HTTPS for cover images.", "duplicate-slug": "That slug is already in use. Choose a unique slug.", "save-failed": "The change could not be saved." };
   return <>
     <h1 style={{ fontSize: 42 }}>Content Studio</h1>
-    <p>Create content records and publish/unpublish items. Uploads and secure playback still require the verified V2 provider adapter.</p>
+    <p>Create content records and publish/unpublish items. For audio/video, set the media asset key to the exact private object key in your configured Cloudflare R2 bucket. Uploads are managed in Cloudflare R2.</p>
     {query.error && <p className="notice" role="alert">{errorText[query.error] || "Something went wrong."}</p>}
     {query.created && <p className="notice">Content saved.</p>}{query.updated && <p className="notice">Content status updated.</p>}
     <section className="panel" style={{ margin: "22px 0" }}><h2 style={{ fontSize: 30 }}>Add content</h2>
@@ -20,7 +20,7 @@ export default async function ContentAdmin({ searchParams }: { searchParams: Pro
         <label>Category<input name="category" maxLength={80}/></label>
         <label>Tags (comma-separated)<input name="tags" placeholder="friendship, emunah, confidence"/></label>
         <label>Cover image URL (HTTPS)<input name="cover_url" type="url" placeholder="https://…"/></label>
-        <label>Provider asset ID<input name="media_provider_id" maxLength={240} placeholder="ID from your verified media provider"/></label>
+        <label>Private R2 object key<input name="media_provider_id" maxLength={1024} placeholder="e.g. episodes/grief-interview.mp4"/><small>Use the exact object key in the private R2 bucket. Do not paste a public URL.</small></label>
         <label>Duration<input name="duration" placeholder="e.g. 24 min" maxLength={40}/></label>
         <label className="wide">Description<textarea name="description" rows={3} maxLength={5000}/></label>
         <label className="check-label"><input type="checkbox" name="member_only"/> Members only</label>

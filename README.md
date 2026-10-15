@@ -22,13 +22,13 @@ This is the **light, app-like media experience** for `media.teens2inspire.org`, 
 3. Configure `.env.local` and Vercel environment variables from `.env.example`.
 4. Apply the SQL migrations to the same Supabase project used by the main website.
 5. Verify membership/school entitlements and admin role enforcement in Supabase before launch.
-6. Configure the confirmed V2 media provider API and signed playback adapter before serving private video/audio.
+6. Configure the Cloudflare R2 credentials in `.env.local` and Vercel server environment variables. Store the exact private R2 object key in each content item’s `media_provider_id`. Playback URLs are signed for five minutes and are only issued after sign-in and membership checks.
 7. Test the app on iPhone Safari, Android Chrome, tablet, and desktop, including install behavior.
 
 ## Readiness status
 The redesign's TypeScript/TSX files passed a syntax parse. A production build has **not** been verified because dependency installation timed out in this environment. Run `npm install` and `npm run build` in Vercel or a network-enabled environment before deploying.
 
-**Playback blocker:** The V2 playback endpoint deliberately fails closed until the actual provider API contract and credentials are configured. Do not treat private playback as production-ready until that integration is implemented and tested. The main website is supplied separately as `teens2inspire-website-redesigned.zip`.
+**Playback configuration requirement:** The signed-playback route now supports private Cloudflare R2 objects. Playback remains unavailable until the four R2 server environment variables are configured, the objects exist in the private bucket, and a real member/non-member playback test passes. The main website is supplied separately as `teens2inspire-website-redesigned.zip`.
 
 
 ## Repair notes
@@ -36,9 +36,3 @@ The redesign's TypeScript/TSX files passed a syntax parse. A production build ha
 - Corrected section and section-content query column names to match the known Supabase schema.
 - Required public Vercel variables are shown in `.env.example`. Do not add Stripe secret keys to Vercel.
 - The project ZIP has not been proven production-ready by a live deployment/build; test authentication, entitlements, content shelves, and admin access after upload.
-
-## Root-route 404 repair
-
-The app now includes `src/app/page.tsx`, an explicit `/` route that redirects to `/app`.
-This prevents the domain root from returning a 404 if the host-based rewrite in `src/proxy.ts`
-is not applied. After deploying, verify `/`, `/app`, and `/login` on `https://media.teens2inspire.org`.

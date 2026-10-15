@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { LockKeyhole, Play } from "lucide-react";
 
-export function SecurePlayer({ contentId, poster }: { contentId: string; poster?: string | null }) {
+export function SecurePlayer({ contentId, poster, type }: { contentId: string; poster?: string | null; type?: string }) {
   const [url, setUrl] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -18,7 +18,7 @@ export function SecurePlayer({ contentId, poster }: { contentId: string; poster?
     finally { setBusy(false); }
   }
   return <section className="secure-player-shell" aria-label="Secure media player">
-    {url ? <video controls playsInline poster={poster || undefined} src={url} className="secure-video" autoPlay /> : <div className="secure-player-placeholder" style={poster ? { backgroundImage: `linear-gradient(0deg,rgba(30,8,20,.9),rgba(30,8,20,.18)),url("${poster}")` } : undefined}>
+    {url ? (type === "podcast" ? <audio controls src={url} className="secure-audio" autoPlay /> : <video controls playsInline poster={poster || undefined} src={url} className="secure-video" autoPlay />) : <div className="secure-player-placeholder" style={poster ? { backgroundImage: `linear-gradient(0deg,rgba(30,8,20,.9),rgba(30,8,20,.18)),url("${poster}")` } : undefined}>
       <div className="secure-player-lock"><LockKeyhole size={17}/><span>SECURE PLAYBACK</span></div>
       <button className="secure-play-button" onClick={load} disabled={busy} aria-label={busy ? "Checking access" : "Play content"}><Play size={25} fill="currentColor"/></button>
       <div className="secure-player-copy"><span>TEENS2INSPIRE ORIGINALS</span><h2>{busy ? "Checking your access…" : "Ready when you are."}</h2><p>Playback is authorized securely before the media is delivered.</p></div>
