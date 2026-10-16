@@ -2,17 +2,34 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
+
 export async function createFamilyProfile(formData: FormData) {
-  const { supabase, user, profile } = await requireUser("/app/profile");
-  const display_name = String(formData.get("display_name") || "").trim().slice(0, 40);
-  if (!display_name || profile?.membership_tier !== "family" || profile?.membership_status !== "active") redirect("/app/profile?family=unavailable");
-  const { error } = await supabase.from("family_profiles").insert({ owner_user_id: user!.id, display_name });
-  if (error) redirect(`/app/profile?family=${error.code === "42501" || error.code === "23514" ? "limit" : "save-failed"}`);
-  revalidatePath("/app/profile"); redirect("/app/profile?family=created");
+  const { supabase, profile } = await requireUser("/app/profile");
+  const firstName = String(formData.get("first_name") || "").trim().slice(0, 60);
+  const displayName = String(formData.get("display_name") || "").trim().slice(0, 40);
+  if (!firstName || !displayName || profile?.membership_tier !== "family" || profile?.membership_status !== "active") {
+    redirect("/app/profile?family=unavailable");
+  }
+  const { error } = await supabase.rpc("add_family_profile", {
+    p_first_name: firstName,
+    p_display_name: displayName,
+    p_interests: [],
+  });
+  if (error) {
+    const message = /active Family membership/i.test(error.message) ? "unavailable"
+      : /three profiles|two additional|limit/i.test(error.message) ? "limit" : "save-failed";
+    redirect(`/app/profile?family=${message}`);
+  }
+  revalidatePath("/app/profile");
+  redirect("/app/profile?family=created");
 }
+
 export async function deleteFamilyProfile(formData: FormData) {
-  const { supabase, user, profile } = await requireUser("/app/profile"); const id = String(formData.get("id") || "");
+  const { supabase, profile } = await requireUser("/app/profile");
+  const id = String(formData.get("id") || "");
   if (!id || profile?.membership_tier !== "family" || profile?.membership_status !== "active") redirect("/app/profile");
-  await supabase.from("family_profiles").delete().eq("id", id).eq("owner_user_id", user!.id);
-  revalidatePath("/app/profile"); redirect("/app/profile?family=updated");
+  const { error } = await supabase.rpc("remove_family_profile", { p_profile_id: id });
+  if (error) redirect("/app/profile?family=save-failed");
+  revalidatePath("/app/profile");
+  redirect("/app/profile?family=updated");
 }

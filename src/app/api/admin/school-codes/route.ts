@@ -13,14 +13,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Enter a school name, a use limit between 1 and 10,000, and a valid expiry." }, { status: 400 });
   }
   const { data: school, error: schoolError } = await supabase.from("schools").insert({ name: schoolName, is_active: true }).select("id,name").single();
-  if (schoolError || !school) return NextResponse.json({ error: "Could not create the school record. Apply the latest database migration and try again." }, { status: 500 });
+  if (schoolError || !school) { console.error("School record insert failed", schoolError?.code, schoolError?.message); return NextResponse.json({ error: "Could not create the school record. Check the database migration and administrator permissions." }, { status: 500 }); }
   const code = `TEENS-${randomBytes(3).toString("hex").toUpperCase()}-${randomBytes(3).toString("hex").toUpperCase()}`;
   const codeHash = createHash("sha256").update(code).digest("hex");
   const expiresAt = expiresInDays ? new Date(Date.now() + expiresInDays * 86400000).toISOString() : null;
   const { error: codeError } = await supabase.from("school_codes").insert({ school_id: school.id, code_hash: codeHash, max_uses: maxUses, expires_at: expiresAt, is_active: true });
   if (codeError) {
     await supabase.from("schools").delete().eq("id", school.id);
-    return NextResponse.json({ error: "Could not create the code. Apply the latest database migration and try again." }, { status: 500 });
+    console.error("School code insert failed", codeError.code, codeError.message); return NextResponse.json({ error: "Could not create the school code. Check the database migration and administrator permissions." }, { status: 500 });
   }
   // Return the raw code once only; the database stores its SHA-256 hash.
   return NextResponse.json({ code, schoolName: school.name, maxUses, expiresAt });

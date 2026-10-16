@@ -20,11 +20,12 @@ create table if not exists public.school_codes (
 
 create table if not exists public.family_profiles (
   id uuid primary key default gen_random_uuid(),
-  owner_user_id uuid not null references public.profiles(id) on delete cascade,
-  display_name text not null,
+  owner_id uuid not null references public.profiles(id) on delete cascade,
+  first_name text not null check (char_length(trim(first_name)) between 1 and 60),
+  display_name text not null check (char_length(trim(display_name)) between 1 and 40),
+  interests text[] not null default '{}'::text[],
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  constraint family_profile_name_length check (char_length(display_name) between 1 and 40)
+  updated_at timestamptz not null default now()
 );
 
 create table if not exists public.newsletter_subscribers (
@@ -61,14 +62,9 @@ create policy "admin schools all" on public.schools for all to authenticated
 create policy "admin school codes all" on public.school_codes for all to authenticated
   using (public.is_admin())
   with check (public.is_admin());
-create policy "family profiles owner read" on public.family_profiles for select to authenticated using (owner_user_id = auth.uid());
-create policy "family profiles owner insert" on public.family_profiles for insert to authenticated with check (
-  owner_user_id = auth.uid() and exists (select 1 from public.profiles p where p.id = auth.uid() and p.membership_tier = 'family' and p.membership_status = 'active')
-  and (select count(*) from public.family_profiles fp where fp.owner_user_id = auth.uid()) < 2
-);
-create policy "family profiles owner update" on public.family_profiles for update to authenticated
-  using (owner_user_id = auth.uid()) with check (owner_user_id = auth.uid());
-create policy "family profiles owner delete" on public.family_profiles for delete to authenticated using (owner_user_id = auth.uid());
+create policy "family profiles owner read" on public.family_profiles for select to authenticated using (owner_id = auth.uid());
+-- Mutations are intentionally routed through add_family_profile/remove_family_profile,
+-- which enforce ownership, paid entitlement, and the three-profile limit. No direct write policies.
 create policy "admin newsletter all" on public.newsletter_subscribers for all to authenticated
   using (public.is_admin())
   with check (public.is_admin());

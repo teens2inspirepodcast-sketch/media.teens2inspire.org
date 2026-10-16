@@ -13,6 +13,7 @@ function createR2Client() {
   return new S3Client({
     region: "auto",
     endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    forcePathStyle: true,
     credentials: { accessKeyId, secretAccessKey },
   });
 }
@@ -31,7 +32,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
   }
 
   const { data: content, error } = await supabase
-    .from("content").select("id,member_only,status,media_provider_id,type").eq("id", id).eq("status", "published").maybeSingle();
+    .from("content").select("id,member_only,status,r2_media_key,type").eq("id", id).eq("status", "published").maybeSingle();
   if (error || !content) return NextResponse.json({ error: "Content is unavailable." }, { status: 404 });
   if (content.member_only && profile?.membership_status !== "active") {
     return NextResponse.json({ error: "An active membership or participating-school access is required." }, { status: 403 });
@@ -39,7 +40,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
 
   const bucket = process.env.R2_BUCKET_NAME;
   const r2 = createR2Client();
-  const key = content.media_provider_id;
+  const key = content.r2_media_key;
   if (!bucket || !r2 || !key || key.length > 1024 || /[\u0000-\u001f\u007f]/.test(key)) {
     return NextResponse.json({ error: "Secure media playback is not configured for this item yet." }, { status: 503 });
   }

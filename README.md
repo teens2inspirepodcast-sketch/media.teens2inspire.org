@@ -22,7 +22,7 @@ This is the **light, app-like media experience** for `media.teens2inspire.org`, 
 3. Configure `.env.local` and Vercel environment variables from `.env.example`.
 4. Apply the SQL migrations to the same Supabase project used by the main website.
 5. Verify membership/school entitlements and admin role enforcement in Supabase before launch.
-6. Configure the Cloudflare R2 credentials in `.env.local` and Vercel server environment variables. Store the exact private R2 object key in each content item’s `media_provider_id`. Playback URLs are signed for five minutes and are only issued after sign-in and membership checks.
+6. Configure the Cloudflare R2 credentials in `.env.local` and Vercel server environment variables. Store the exact private R2 object key in each content item’s `r2_media_key`. Playback URLs are signed for five minutes and are only issued after sign-in, RLS-protected content lookup, and membership checks.
 7. Test the app on iPhone Safari, Android Chrome, tablet, and desktop, including install behavior.
 
 ## Readiness status
@@ -36,3 +36,58 @@ The redesign's TypeScript/TSX files passed a syntax parse. A production build ha
 - Corrected section and section-content query column names to match the known Supabase schema.
 - Required public Vercel variables are shown in `.env.example`. Do not add Stripe secret keys to Vercel.
 - The project ZIP has not been proven production-ready by a live deployment/build; test authentication, entitlements, content shelves, and admin access after upload.
+
+
+## Supabase schema repair and school-code creation
+
+Migration `supabase/migrations/003_school_admin_schema_compatibility.sql` aligns
+the school-code admin API with the live schema: it provides the `schools` table,
+the `school_codes.school_id` and `is_active` fields, a trigger to keep the school
+name compatible, and administrator-only RLS policies. Apply migrations in order
+to a fresh project. In the connected Teens2Inspire Supabase project, this
+compatibility migration was applied and a database insert smoke test passed.
+The Next.js app itself still needs a deployment-level test of school-code
+creation using the actual administrator login.
+
+## Admin media uploads to Cloudflare R2
+
+The Content Studio supports direct browser-to-R2 uploads for audio/video files up to 500 MB. The server checks the signed-in administrator, validates the file type/size, and issues a short-lived presigned PUT URL. The app saves the private object key in `content.r2_media_key`; playback uses the authenticated `/api/media/playback/[id]` route to issue short-lived signed GET URLs. The upload route returns JSON 401/403 responses for missing/non-admin sessions rather than redirecting the browser upload request to an HTML login page.
+
+Required server-only Vercel environment variables on `media.teens2inspire.org`:
+
+- `R2_ACCOUNT_ID`
+- `R2_ACCESS_KEY_ID`
+- `R2_SECRET_ACCESS_KEY`
+- `R2_BUCKET_NAME`
+
+Never prefix these variables with `NEXT_PUBLIC_` and never commit actual credentials.
+
+### Required R2 bucket CORS
+
+In Cloudflare Dashboard → R2 → your bucket → Settings → CORS, add a rule that allows the exact production origin and any preview origin used for testing. Example for production:
+
+```json
+[
+  {
+    "AllowedOrigins": ["https://media.teens2inspire.org"],
+    "AllowedMethods": ["PUT", "GET", "HEAD"],
+    "AllowedHeaders": ["content-type", "x-amz-*"],
+    "ExposeHeaders": ["etag"],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+If the bucket is configured to require additional signed headers, ensure the browser PUT sends those same headers. Test with a small non-sensitive sample media file after deploying and verify playback through the app, not through a public bucket URL.
+
+
+### Security compatibility migration
+Apply `supabase/migrations/005_security_hardening.sql` after the earlier migrations. It restricts trigger-only SECURITY DEFINER functions from direct RPC use, adds administrator-only policies to legacy school-code/video-asset tables, and disables obsolete school-code RPC overloads not used by the current apps. The connected Supabase project has this migration applied.
+
+
+### Family profile repair
+Migration `006_restore_guarded_family_profile_rpcs.sql` aligns the `family_profiles` table with the app's current `owner_id`, `first_name`, `display_name`, and `interests` fields. The UI calls guarded database functions for creating/removing profiles; direct member INSERT/DELETE policies are intentionally absent. Apply this migration after `005_security_hardening.sql`.
+
+
+### Fresh-install schema compatibility
+Migration `007_complete_app_schema.sql` brings older base migrations up to the current app schema, including section metadata, R2 content keys, categories, membership/subscription tables, Stripe webhook idempotency records, and current access-control policies. Apply migrations in numeric order through `007` before configuring production credentials.

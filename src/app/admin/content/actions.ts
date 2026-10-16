@@ -19,11 +19,12 @@ export async function createContent(formData: FormData) {
   const tags = String(formData.get("tags") || "").split(",").map(tag => tag.trim()).filter(Boolean).slice(0, 20);
   const coverUrlRaw = String(formData.get("cover_url") || "").trim();
   const cover_url = coverUrlRaw ? safeHttps(coverUrlRaw) : null;
-  const media_provider_id = String(formData.get("media_provider_id") || "").trim() || null;
-  const duration = String(formData.get("duration") || "").trim() || null;
-  if (!title || !slug || !types.has(type) || !statuses.has(status) || (coverUrlRaw && !cover_url)) redirect("/admin/content?error=invalid");
+  const r2_media_key = String(formData.get("r2_media_key") || "").trim() || null;
+  const durationRaw = String(formData.get("duration_seconds") || "").trim();
+  const duration_seconds = durationRaw ? Number(durationRaw) : null;
+  if (!title || !slug || !types.has(type) || !statuses.has(status) || (coverUrlRaw && !cover_url) || (duration_seconds !== null && (!Number.isInteger(duration_seconds) || duration_seconds < 0 || duration_seconds > 86400)) || (r2_media_key && !/^(podcasts|videos|downloads)\/[A-Za-z0-9._/-]+$/.test(r2_media_key)) || (r2_media_key && /(^|\/)\.\.?($|\/)/.test(r2_media_key))) redirect("/admin/content?error=invalid");
   const { error } = await supabase.from("content").insert({
-    title, slug, type, status, description, category, tags, cover_url, media_provider_id, duration,
+    title, slug, type, status, description, category, tags, cover_url, r2_media_key, duration_seconds,
     member_only: formData.get("member_only") === "on", featured: formData.get("featured") === "on",
     created_by: user?.id, published_at: status === "published" ? new Date().toISOString() : null,
   });
