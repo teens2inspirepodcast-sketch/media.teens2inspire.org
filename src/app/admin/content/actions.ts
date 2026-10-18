@@ -19,17 +19,31 @@ export async function createContent(formData: FormData) {
   const tags = String(formData.get("tags") || "").split(",").map(tag => tag.trim()).filter(Boolean).slice(0, 20);
   const coverUrlRaw = String(formData.get("cover_url") || "").trim();
   const cover_url = coverUrlRaw ? safeHttps(coverUrlRaw) : null;
+  const externalUrlRaw = String(formData.get("external_url") || "").trim();
+  const external_url = externalUrlRaw ? safeHttps(externalUrlRaw) : null;
   const r2_media_key = String(formData.get("r2_media_key") || "").trim() || null;
   const durationRaw = String(formData.get("duration_seconds") || "").trim();
   const duration_seconds = durationRaw ? Number(durationRaw) : null;
-  if (!title || !slug || !types.has(type) || !statuses.has(status) || (coverUrlRaw && !cover_url) || (duration_seconds !== null && (!Number.isInteger(duration_seconds) || duration_seconds < 0 || duration_seconds > 86400)) || (r2_media_key && !/^(podcasts|videos|downloads)\/[A-Za-z0-9._/-]+$/.test(r2_media_key)) || (r2_media_key && /(^|\/)\.\.?($|\/)/.test(r2_media_key))) redirect("/admin/content?error=invalid");
-  const { error } = await supabase.from("content").insert({
-    title, slug, type, status, description, category, tags, cover_url, r2_media_key, duration_seconds,
+  if (!title || !slug || !types.has(type) || !statuses.has(status) || (coverUrlRaw && !cover_url) || (externalUrlRaw && !external_url) || (duration_seconds !== null && (!Number.isInteger(duration_seconds) || duration_seconds < 0 || duration_seconds > 86400)) || (r2_media_key && !/^(podcasts|videos|downloads)\/[A-Za-z0-9._/-]+$/.test(r2_media_key)) || (r2_media_key && /(^|\/)\.\.?($|\/)/.test(r2_media_key))) redirect("/admin/content?error=invalid");
+  const sectionId = String(formData.get("section_id") || "").trim();
+  if (sectionId) {
+    const { data: section, error: sectionError } = await supabase.from("sections").select("id").eq("id", sectionId).maybeSingle();
+    if (sectionError || !section) redirect("/admin/content?error=invalid");
+  }
+  const { data: created, error } = await supabase.from("content").insert({
+    title, slug, type, status, description, category, tags, cover_url, external_url, r2_media_key, duration_seconds,
     member_only: formData.get("member_only") === "on", featured: formData.get("featured") === "on",
     created_by: user?.id, published_at: status === "published" ? new Date().toISOString() : null,
-  });
-  if (error) redirect(`/admin/content?error=${encodeURIComponent(error.code === "23505" ? "duplicate-slug" : "save-failed")}`);
-  revalidatePath("/admin/content"); revalidatePath("/app"); redirect("/admin/content?created=1");
+  }).select("id").single();
+  if (error || !created) redirect(`/admin/content?error=${encodeURIComponent(error?.code === "23505" ? "duplicate-slug" : "save-failed")}`);
+  if (sectionId) {
+    const { error: linkError } = await supabase.from("section_content").upsert({ section_id: sectionId, content_id: created.id, display_order: 0 }, { onConflict: "section_id,content_id" });
+    if (linkError) {
+      await supabase.from("content").delete().eq("id", created.id);
+      redirect("/admin/content?error=section-link-failed");
+    }
+  }
+  revalidatePath("/admin/content"); revalidatePath("/admin/sections"); revalidatePath("/app"); redirect("/admin/content?created=1");
 }
 
 export async function setContentStatus(formData: FormData) {
