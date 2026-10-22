@@ -1,0 +1,31 @@
+import Link from "next/link";
+import { requireAdmin } from "@/lib/auth";
+import { Plus, LibraryBig, Users, CalendarDays, PanelsTopLeft, TicketPercent, School, Mail, ArrowUpRight, Sparkles } from "lucide-react";
+
+const actions = [
+  { title: "Add content", description: "Publish a podcast, video, article, printable, or resource.", href: "/admin/add", icon: Plus, accent: "rose", label: "Create something" },
+  { title: "Manage content", description: "Edit, publish, unpublish, and organize your library.", href: "/admin/content", icon: LibraryBig, accent: "plum", label: "Content library" },
+  { title: "Manage members", description: "Review member accounts and membership status.", href: "/admin/members", icon: Users, accent: "gold", label: "Member directory" },
+  { title: "Codes & gifts", description: "Manage school access, discounts, and gift-code setup.", href: "/admin/codes", icon: TicketPercent, accent: "blue", label: "Access & offers" },
+  { title: "Events", description: "Create events with flyers, details, and registration links.", href: "/admin/events", icon: CalendarDays, accent: "rose", label: "Event calendar" },
+  { title: "Sections", description: "Create homepage shelves and choose where content appears.", href: "/admin/sections", icon: PanelsTopLeft, accent: "plum", label: "Homepage layout" },
+];
+export default async function Admin() {
+  const { supabase, user } = await requireAdmin();
+  const [content, members, events, sections, inquiries] = await Promise.all([
+    supabase.from("content").select("id", { count: "exact", head: true }),
+    supabase.from("profiles").select("id", { count: "exact", head: true }),
+    supabase.from("events").select("id", { count: "exact", head: true }),
+    supabase.from("sections").select("id", { count: "exact", head: true }),
+    supabase.from("inquiries").select("id", { count: "exact", head: true }),
+  ]);
+  return <div className="studio-dashboard">
+    <div className="studio-welcome"><div><span className="studio-eyebrow"><Sparkles size={14}/> YOUR CREATIVE WORKSPACE</span><h1>Your dashboard</h1><p>Welcome back{user.email ? `, ${user.email}` : ""}. What would you like to work on today?</p></div><Link href="/admin/add" className="studio-primary-button"><Plus size={18}/> Add content</Link></div>
+    <div className="studio-stats">
+      {[["Content items", content.count, LibraryBig], ["Members", members.count, Users], ["Events", events.count, CalendarDays], ["Sections", sections.count, PanelsTopLeft]].map(([label, value, Icon]: any) => <div className="studio-stat" key={label}><span className="studio-stat-icon"><Icon size={18}/></span><span className="studio-stat-label">{label}</span><strong>{value ?? "—"}</strong></div>)}
+    </div>
+    <div className="studio-section-heading"><div><h2>Quick actions</h2><p>Everything you manage, organized in one place.</p></div></div>
+    <div className="studio-action-grid">{actions.map(({title,description,href,icon:Icon,accent,label})=><Link className={`studio-action-card ${accent}`} href={href} key={href}><span className="studio-action-icon"><Icon size={21}/></span><span className="studio-action-kicker">{label}</span><strong>{title}</strong><p>{description}</p><span className="studio-action-arrow"><ArrowUpRight size={17}/></span></Link>)}</div>
+    <div className="studio-bottom-grid"><Link href="/admin/schools" className="studio-shortcut"><span className="studio-shortcut-icon"><School size={18}/></span><span><strong>School access</strong><small>School accounts and codes</small></span><ArrowUpRight size={16}/></Link><Link href="/admin/inquiries" className="studio-shortcut"><span className="studio-shortcut-icon"><Mail size={18}/></span><span><strong>Inbox</strong><small>{inquiries.count ?? 0} contact and school inquiries</small></span><ArrowUpRight size={16}/></Link></div>
+  </div>;
+}

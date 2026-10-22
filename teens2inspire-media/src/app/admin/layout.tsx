@@ -1,0 +1,26 @@
+import Link from "next/link";
+import { requireAdmin } from "@/lib/auth";
+import { ArrowLeft, LayoutDashboard, LibraryBig, PanelsTopLeft, CalendarDays, Users, TicketPercent, School, Mail } from "lucide-react";
+
+const nav = [
+  ["Dashboard", "/admin", LayoutDashboard],
+  ["Content", "/admin/content", LibraryBig],
+  ["Sections", "/admin/sections", PanelsTopLeft],
+  ["Events", "/admin/events", CalendarDays],
+  ["Members", "/admin/members", Users],
+  ["Codes & gifts", "/admin/codes", TicketPercent],
+  ["School access", "/admin/schools", School],
+  ["Inquiries", "/admin/inquiries", Mail],
+] as const;
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  await requireAdmin();
+  return <div className="admin-studio">
+    <header className="studio-topbar">
+      <Link href="/admin" className="studio-brand"><span className="studio-brand-mark">T</span><span>Teens2Inspire<small>CONTENT STUDIO</small></span></Link>
+      <div className="studio-topbar-right"><span className="studio-live-dot"/> Admin workspace <Link href="/app" className="studio-view-site"><ArrowLeft size={15}/> View app</Link></div>
+    </header>
+    <main className="studio-main">{children}</main>
+    <nav className="studio-mobile-nav" aria-label="Admin navigation">{nav.map(([label, href, Icon]) => <Link href={href} key={href}><Icon size={17}/><span>{label}</span></Link>)}</nav>
+  </div>;
+}
