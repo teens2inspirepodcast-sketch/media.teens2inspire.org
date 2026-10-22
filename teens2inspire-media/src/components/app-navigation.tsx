@@ -1,10 +1,11 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, Search, Bookmark, Settings2 } from "lucide-react";
+import { Compass, Search, Bookmark, Settings2, Headphones } from "lucide-react";
 
 const items = [
   { label: "Explore", href: "/app", Icon: Compass },
+  { label: "Podcast", href: "/app/podcast", Icon: Headphones },
   { label: "Search", href: "/app/search", Icon: Search },
   { label: "Library", href: "/app/library", Icon: Bookmark },
   { label: "Settings", href: "/app/profile", Icon: Settings2 },

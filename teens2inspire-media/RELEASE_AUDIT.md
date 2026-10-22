@@ -29,3 +29,16 @@ Audit date: 2026-10-21
 - PWA install behavior and cross-domain authentication need browser tests on deployed domains.
 
 This archive is a release candidate, not a claim of fully verified production readiness.
+
+
+## Podcast hub update (2026-10-22)
+- Added `/app/podcast` with episode-cover cards from published podcast content and the embedded full-show Spotify player.
+- Added a podcast promotion shelf and Spotify player to the media-app home page.
+- Confirm Spotify show ID and published episode cover art after deployment.
+
+
+## Admin management additions (2026-10-22)
+- Content Studio now supports editing content fields and deleting content records, in addition to status changes.
+- Events admin supports editing/deleting events and attaching a flyer image URL. Flyer file uploads use the public R2 bucket and require `R2_PUBLIC_BASE_URL` (or `NEXT_PUBLIC_R2_PUBLIC_URL`) plus the existing server-side R2 credentials. The public bucket must allow the media app origin in CORS.
+- School Access lists school-code records with active/revoked status, usage limits, usage counts, and expiry; admins can revoke/reactivate/delete codes and delete school records. Existing raw school codes cannot be recovered because only SHA-256 hashes are stored; the plaintext is displayed once when a code is first generated.
+- These changes are source updates only; deploy and verify with an administrator account before production use.

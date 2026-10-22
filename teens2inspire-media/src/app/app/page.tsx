@@ -124,9 +124,14 @@ export default async function AppHome() {
       <section className="app-category-strip" aria-label="Explore categories">
         <span>EXPLORE BY FORMAT</span>
         <Link href="/app/explore?type=video">Watch</Link>
-        <Link href="/app/explore?type=podcast">Listen</Link>
+        <Link href="/app/podcast">Podcast</Link>
         <Link href="/app/explore?type=article">Read</Link>
         <Link href="/app/explore?type=resource">Resources</Link>
+      </section>
+
+      <section className="app-shelf podcast-promo-shelf">
+        <div className="shelf-heading"><div><h2>The Teens2Inspire Podcast</h2><p>Real conversations and meaningful moments.</p></div><Link href="/app/podcast">Explore podcast <ArrowRight size={14} /></Link></div>
+        <div className="podcast-promo-panel"><div><span className="app-overline">LISTEN ON SPOTIFY</span><h3>Every episode, all in one place.</h3><p>Explore episode covers in the library or listen to the full show on Spotify.</p><Link className="app-primary-button" href="/app/podcast">Open podcast page <ArrowRight size={14}/></Link></div><iframe src="https://open.spotify.com/embed/show/4rpRDVE1wGkP8trMxKfxZo?utm_source=generator&theme=0" title="Teens2Inspire Podcast on Spotify" width="100%" height="232" frameBorder="0" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" allowFullScreen /></div>
       </section>
 
       {shelves.map((shelf) => (

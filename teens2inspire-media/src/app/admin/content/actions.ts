@@ -55,3 +55,37 @@ export async function setContentStatus(formData: FormData) {
   if (error) redirect("/admin/content?error=save-failed");
   revalidatePath("/admin/content"); revalidatePath("/app"); redirect("/admin/content?updated=1");
 }
+
+
+export async function updateContent(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = String(formData.get("id") || "");
+  const title = String(formData.get("title") || "").trim();
+  const slug = slugify(String(formData.get("slug") || title));
+  const type = String(formData.get("type") || "video");
+  const status = String(formData.get("status") || "draft");
+  const description = String(formData.get("description") || "").trim();
+  const category = String(formData.get("category") || "").trim() || null;
+  const tags = String(formData.get("tags") || "").split(",").map(tag => tag.trim()).filter(Boolean).slice(0, 20);
+  const coverRaw = String(formData.get("cover_url") || "").trim();
+  const cover_url = coverRaw ? safeHttps(coverRaw) : null;
+  const externalRaw = String(formData.get("external_url") || "").trim();
+  const external_url = externalRaw ? safeHttps(externalRaw) : null;
+  const key = String(formData.get("r2_media_key") || "").trim() || null;
+  const durationRaw = String(formData.get("duration_seconds") || "").trim();
+  const duration_seconds = durationRaw ? Number(durationRaw) : null;
+  if (!id || !title || !slug || !types.has(type) || !statuses.has(status) || (coverRaw && !cover_url) || (externalRaw && !external_url) || (duration_seconds !== null && (!Number.isInteger(duration_seconds) || duration_seconds < 0 || duration_seconds > 86400)) || (key && (!/^(podcasts|videos|downloads)\/[A-Za-z0-9._/-]+$/.test(key) || /(^|\/)\.\.?($|\/)/.test(key)))) redirect("/admin/content?error=invalid");
+  const { error } = await supabase.from("content").update({ title, slug, type, status, description, category, tags, cover_url, external_url, r2_media_key: key, duration_seconds, member_only: formData.get("member_only") === "on", featured: formData.get("featured") === "on", published_at: status === "published" ? new Date().toISOString() : null, updated_at: new Date().toISOString() }).eq("id", id);
+  if (error) redirect(`/admin/content?error=${encodeURIComponent(error.code === "23505" ? "duplicate-slug" : "save-failed")}`);
+  revalidatePath("/admin/content"); revalidatePath("/admin/sections"); revalidatePath("/app"); redirect("/admin/content?updated=1");
+}
+
+export async function deleteContent(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = String(formData.get("id") || "");
+  if (!id) redirect("/admin/content?error=invalid");
+  await supabase.from("section_content").delete().eq("content_id", id);
+  const { error } = await supabase.from("content").delete().eq("id", id);
+  if (error) redirect("/admin/content?error=delete-failed");
+  revalidatePath("/admin/content"); revalidatePath("/admin/sections"); revalidatePath("/app"); redirect("/admin/content?deleted=1");
+}
