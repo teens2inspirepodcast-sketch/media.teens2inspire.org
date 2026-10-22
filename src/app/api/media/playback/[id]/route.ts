@@ -38,7 +38,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
     return NextResponse.json({ error: "An active membership or participating-school access is required." }, { status: 403 });
   }
 
-  const bucket = process.env.R2_BUCKET_NAME;
+  const bucket = process.env.R2_PRIVATE_BUCKET_NAME || process.env.R2_BUCKET_NAME;
   const r2 = createR2Client();
   const key = content.r2_media_key;
   if (!bucket || !r2 || !key || key.length > 1024 || /[\u0000-\u001f\u007f]/.test(key)) {

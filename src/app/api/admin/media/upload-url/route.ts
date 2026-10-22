@@ -45,7 +45,7 @@ export async function POST(request: Request) {
   if (!Number.isSafeInteger(size) || size < 1 || size > MAX_UPLOAD_BYTES) {
     return NextResponse.json({ error: "File must be smaller than 500 MB." }, { status: 400 });
   }
-  const bucket = process.env.R2_BUCKET_NAME;
+  const bucket = process.env.R2_PRIVATE_BUCKET_NAME || process.env.R2_BUCKET_NAME;
   const client = r2Client();
   if (!bucket || !client) {
     return NextResponse.json({ error: "R2 is not configured. Check the server-side R2 environment variables." }, { status: 503 });

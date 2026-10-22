@@ -58,9 +58,11 @@ Required server-only Vercel environment variables on `media.teens2inspire.org`:
 - `R2_ACCOUNT_ID`
 - `R2_ACCESS_KEY_ID`
 - `R2_SECRET_ACCESS_KEY`
-- `R2_BUCKET_NAME`
+- `R2_PRIVATE_BUCKET_NAME` (preferred private bucket variable)
+- `R2_BUCKET_NAME` (backward-compatible fallback if the private name is not set)
+- `R2_PUBLIC_BUCKET_NAME` is optional and is not used by the current private-media upload/playback code.
 
-Never prefix these variables with `NEXT_PUBLIC_` and never commit actual credentials.
+Never prefix credentials with `NEXT_PUBLIC_` and never commit actual credentials. The upload and playback routes prefer `R2_PRIVATE_BUCKET_NAME`, then fall back to `R2_BUCKET_NAME`.
 
 ### Required R2 bucket CORS
 
@@ -91,3 +93,10 @@ Migration `006_restore_guarded_family_profile_rpcs.sql` aligns the `family_profi
 
 ### Fresh-install schema compatibility
 Migration `007_complete_app_schema.sql` brings older base migrations up to the current app schema, including section metadata, R2 content keys, categories, membership/subscription tables, Stripe webhook idempotency records, and current access-control policies. Apply migrations in numeric order through `007` before configuring production credentials.
+
+
+## Root URL and environment variable mapping
+
+The domain root (`https://media.teens2inspire.org/`) redirects to `/app`, so the marketing site's sign-in handoff and the installed app entry point work without a root-page 404. The app reads `NEXT_PUBLIC_SUPABASE_URL` and either `NEXT_PUBLIC_SUPABASE_ANON_KEY` or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Private media uses `R2_PRIVATE_BUCKET_NAME` (preferred) or the existing `R2_BUCKET_NAME` fallback, plus `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, and `R2_SECRET_ACCESS_KEY`.
+
+Stripe secrets and price IDs are not read by this Next.js media app. The marketing site's checkout invokes the Supabase `stripe-checkout` Edge Function; keep `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_PERSONAL`, and `STRIPE_PRICE_ID_FAMILY` in Supabase Edge Function secrets. Configure Stripe's webhook to the Supabase `stripe-webhook` function URL, not the Vercel `/api/stripe/webhook` placeholder route.
