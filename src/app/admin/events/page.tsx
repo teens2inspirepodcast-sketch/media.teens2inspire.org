@@ -1,7 +1,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { createEvent, setEventStatus, updateEvent, deleteEvent } from "./actions";
 import { EventFlyerUpload } from "@/components/event-flyer-upload";
-export default async function EventsAdmin({ searchParams }: { searchParams: Promise<{ error?: string; created?: string; updated?: string }> }) {
+export default async function EventsAdmin({ searchParams }: { searchParams: Promise<{ error?: string; created?: string; updated?: string; deleted?: string }> }) {
   const { supabase } = await requireAdmin(); const query = await searchParams;
   const { data } = await supabase.from("events").select("id,title,description,starts_at,ends_at,status,location,registration_url,image_url").order("starts_at");
   return <>
