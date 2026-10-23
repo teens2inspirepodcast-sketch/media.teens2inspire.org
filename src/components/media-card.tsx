@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import Image from "next/image";
 import { Play, Headphones, BookOpen, FileText, Bookmark } from "lucide-react";
 
 type MediaCardProps = { id: string; title: string; description?: string | null; type: string; cover_url?: string | null; variant?: "landscape" | "portrait" };
