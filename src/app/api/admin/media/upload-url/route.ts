@@ -4,7 +4,7 @@ import { getContext } from "@/lib/auth";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const MAX_UPLOAD_BYTES = 500 * 1024 * 1024;
-const ALLOWED_TYPES = new Set(["video/mp4", "video/webm", "video/quicktime", "audio/mpeg", "audio/mp4", "audio/aac", "audio/wav", "audio/x-wav", "audio/ogg", "audio/webm"]);
+const ALLOWED_TYPES = new Set(["video/mp4", "video/webm", "video/quicktime", "audio/mpeg", "audio/mp4", "audio/aac", "audio/wav", "audio/x-wav", "audio/ogg", "audio/webm", "application/pdf", "image/jpeg", "image/png", "image/webp"]);
 
 export async function POST(request: Request) {
   const { user, profile, supabase } = await getContext();
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const filename = typeof body.filename === "string" ? body.filename.trim().slice(0, 180) : "";
   const contentType = typeof body.contentType === "string" ? body.contentType.toLowerCase().trim() : "";
   const size = Number(body.size);
-  if (!filename || /[\u0000-\u001f\u007f]/.test(filename) || !ALLOWED_TYPES.has(contentType)) return NextResponse.json({ error: "Choose a supported audio or video file." }, { status: 400 });
+  if (!filename || /[\u0000-\u001f\u007f]/.test(filename) || !ALLOWED_TYPES.has(contentType)) return NextResponse.json({ error: "Choose a supported audio, video, PDF, or image file." }, { status: 400 });
   if (!Number.isSafeInteger(size) || size < 1 || size > MAX_UPLOAD_BYTES) return NextResponse.json({ error: "File must be smaller than 500 MB." }, { status: 400 });
   const { data: { session } } = await supabase.auth.getSession();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

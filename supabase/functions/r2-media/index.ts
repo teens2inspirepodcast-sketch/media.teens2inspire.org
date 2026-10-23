@@ -38,10 +38,10 @@ Deno.serve(async (req: Request) => {
   if (body.action === "upload-url") {
     if (!isAdmin) return respond({ error: "Administrator access required to upload media." }, 403, origin);
     const contentType = typeof body.contentType === "string" ? body.contentType.toLowerCase() : "";
-    if (!/^(video\/(mp4|webm|quicktime)|audio\/(mpeg|mp4|wav|x-wav|aac|ogg|webm))$/.test(contentType)) return respond({ error: "Unsupported media type." }, 400, origin);
+    if (!/^(video\/(mp4|webm|quicktime)|audio\/(mpeg|mp4|wav|x-wav|aac|ogg|webm)|application\/pdf|image\/(jpeg|png|webp))$/.test(contentType)) return respond({ error: "Unsupported media type." }, 400, origin);
     const size = Number(body.size);
     if (!Number.isSafeInteger(size) || size < 1 || size > 500 * 1024 * 1024) return respond({ error: "File must be smaller than 500 MB." }, 400, origin);
-    const prefix = contentType.startsWith("video/") ? "videos" : "podcasts";
+    const prefix = contentType.startsWith("video/") ? "videos" : contentType.startsWith("audio/") ? "podcasts" : "downloads";
     const ext = safeFilename((body.filename ?? "media-file").split(".").pop() || "media-file").slice(0, 12);
     const key = `${prefix}/${new Date().toISOString().slice(0,10)}/${crypto.randomUUID()}.${ext}`;
     const uploadUrl = await getSignedUrl(r2, new PutObjectCommand({ Bucket: PRIVATE_BUCKET, Key: key, ContentType: contentType }), { expiresIn: 300 });

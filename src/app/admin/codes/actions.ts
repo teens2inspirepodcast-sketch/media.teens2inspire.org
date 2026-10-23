@@ -28,3 +28,11 @@ export async function setPromoCodeActive(formData: FormData) {
   if (error) redirect("/admin/codes?error=save-failed");
   revalidatePath("/admin/codes"); redirect("/admin/codes?updated=1");
 }
+
+export async function deletePromoCode(formData: FormData) {
+  const { supabase } = await requireAdmin(); const id = String(formData.get("id") || "");
+  if (!id) redirect("/admin/codes?error=invalid");
+  const { error } = await supabase.from("promo_codes").delete().eq("id", id);
+  if (error) redirect("/admin/codes?error=delete-failed");
+  revalidatePath("/admin/codes"); redirect("/admin/codes?deleted=1");
+}

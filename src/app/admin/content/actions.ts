@@ -55,3 +55,13 @@ export async function setContentStatus(formData: FormData) {
   if (error) redirect("/admin/content?error=save-failed");
   revalidatePath("/admin/content"); revalidatePath("/app"); redirect("/admin/content?updated=1");
 }
+
+export async function deleteContent(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = String(formData.get("id") || "");
+  if (!/^[0-9a-f-]{36}$/i.test(id)) redirect("/admin/content?error=invalid");
+  const { error } = await supabase.from("content").delete().eq("id", id);
+  if (error) redirect("/admin/content?error=delete-failed");
+  revalidatePath("/admin/content"); revalidatePath("/app"); revalidatePath("/app/explore");
+  redirect("/admin/content?deleted=1");
+}

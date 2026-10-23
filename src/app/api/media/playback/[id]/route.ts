@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
-export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) return NextResponse.json({ error: "Content is unavailable." }, { status: 404 });
   const supabase = await createClient();
@@ -16,6 +16,7 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
     const response = await fetch(`${url}/functions/v1/r2-media`, { method: "POST", headers: { "Authorization": `Bearer ${session.access_token}`, "apikey": anonKey, "Content-Type": "application/json" }, body: JSON.stringify({ action: "playback-url", contentId: id }), cache: "no-store" });
     const result = await response.json();
     if (!response.ok) return NextResponse.json({ error: result.error || "Playback is unavailable." }, { status: response.status, headers: { "Cache-Control": "private, no-store, max-age=0", Pragma: "no-cache" } });
+    if (new URL(request.url).searchParams.get("download") === "1" && typeof result.url === "string") return NextResponse.redirect(result.url, { headers: { "Cache-Control": "private, no-store, max-age=0", Pragma: "no-cache" } });
     return NextResponse.json(result, { headers: { "Cache-Control": "private, no-store, max-age=0", Pragma: "no-cache" } });
   } catch (error) {
     console.error("Supabase R2 playback authorization failed", error instanceof Error ? error.message : "Unknown error");

@@ -10,7 +10,7 @@ export async function getContext() {
   // The profiles table intentionally does not duplicate auth.users.email.
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("id,display_name,role,membership_status,membership_tier,profile_color")
+    .select("id,display_name,role,membership_status,membership_tier,profile_color,stripe_subscription_id,cancel_at_period_end,membership_period_end")
     .eq("id", user.id)
     .maybeSingle();
 

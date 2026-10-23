@@ -1,8 +1,8 @@
 import { requireAdmin } from "@/lib/auth";
-import { createContent, setContentStatus } from "./actions";
+import { createContent, setContentStatus, deleteContent } from "./actions";
 import { R2MediaUpload } from "@/components/r2-media-upload";
 
-export default async function ContentAdmin({ searchParams }: { searchParams: Promise<{ error?: string; created?: string; updated?: string }> }) {
+export default async function ContentAdmin({ searchParams }: { searchParams: Promise<{ error?: string; created?: string; updated?: string; deleted?: string }> }) {
   const { supabase } = await requireAdmin();
   const query = await searchParams;
   const [{ data }, { data: sections }] = await Promise.all([supabase.from("content").select("id,title,type,status,updated_at,slug").order("updated_at", { ascending: false }).limit(100), supabase.from("sections").select("id,name,is_active").order("display_order")]);
@@ -11,7 +11,7 @@ export default async function ContentAdmin({ searchParams }: { searchParams: Pro
     <h1 style={{ fontSize: 42 }}>Content Studio</h1>
     <p>Create content records and publish/unpublish items. Upload audio/video directly to your private Cloudflare R2 bucket here, or enter an existing private object key.</p>
     {query.error && <p className="notice" role="alert">{errorText[query.error] || "Something went wrong."}</p>}
-    {query.created && <p className="notice">Content saved.</p>}{query.updated && <p className="notice">Content status updated.</p>}
+    {query.created && <p className="notice">Content saved.</p>}{query.updated && <p className="notice">Content status updated.</p>}{query.deleted && <p className="notice">Content deleted.</p>}{query.error === "delete-failed" && <p className="notice" role="alert">Could not delete this content. It may be linked to another record.</p>}
     <section className="panel" style={{ margin: "22px 0" }}><h2 style={{ fontSize: 30 }}>Add content</h2><p>Save content metadata in Supabase. Upload media to Cloudflare R2 or use an individual external podcast player URL. Assigning a section links the content to that reusable carousel.</p>
       <form action={createContent} className="admin-form">
         <label>Title<input name="title" required maxLength={140}/></label>
@@ -32,6 +32,6 @@ export default async function ContentAdmin({ searchParams }: { searchParams: Pro
       </form>
     </section>
     <h2 style={{ fontSize: 30 }}>Existing content</h2>
-    <div className="table-wrap"><table><thead><tr><th>Title</th><th>Type</th><th>Status</th><th>Updated</th><th>Change status</th></tr></thead><tbody>{(data || []).map(x=><tr key={x.id}><td>{x.title}</td><td>{x.type}</td><td>{x.status}</td><td>{new Date(x.updated_at).toLocaleDateString()}</td><td><form action={setContentStatus} className="inline-form"><input type="hidden" name="id" value={x.id}/><select name="status" defaultValue={x.status}><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select><button className="btn secondary">Save</button></form></td></tr>)}</tbody></table></div>
+    <div className="table-wrap"><table><thead><tr><th>Title</th><th>Type</th><th>Status</th><th>Updated</th><th>Change status</th><th>Delete</th></tr></thead><tbody>{(data || []).map(x=><tr key={x.id}><td>{x.title}</td><td>{x.type}</td><td>{x.status}</td><td>{new Date(x.updated_at).toLocaleDateString()}</td><td><form action={setContentStatus} className="inline-form"><input type="hidden" name="id" value={x.id}/><select name="status" defaultValue={x.status}><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select><button className="btn secondary">Save</button></form></td><td><form action={deleteContent}><input type="hidden" name="id" value={x.id}/><button className="btn secondary" formAction={deleteContent}>Delete</button></form></td></tr>)}</tbody></table></div>
   </>;
 }

@@ -9,7 +9,7 @@ export function R2MediaUpload() {
 
   async function upload() {
     const file = inputRef.current?.files?.[0];
-    if (!file) { setMessage("Choose an audio or video file first."); return; }
+    if (!file) { setMessage("Choose a file first."); return; }
     setBusy(true); setMessage("Preparing secure upload…"); setKey("");
     try {
       const response = await fetch("/api/admin/media/upload-url", {
@@ -31,11 +31,11 @@ export function R2MediaUpload() {
   }
 
   return <div className="wide" style={{ display: "grid", gap: 10 }}>
-    <label>Upload audio/video to private Cloudflare R2
-      <input ref={inputRef} type="file" accept="video/mp4,video/webm,video/quicktime,audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/x-wav,audio/ogg,audio/webm" disabled={busy} />
-      <small>Maximum 500 MB. Uploads go directly to your private R2 bucket; public file URLs are not created.</small>
+    <label>Upload a file to private Cloudflare R2
+      <input ref={inputRef} type="file" accept="video/mp4,video/webm,video/quicktime,audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/x-wav,audio/ogg,audio/webm,application/pdf,image/jpeg,image/png,image/webp" disabled={busy} />
+      <small>Maximum 500 MB. Supports audio, video, PDF, and common image files. Files stay in private R2 storage.</small>
     </label>
-    <div><button className="btn secondary" type="button" onClick={upload} disabled={busy}>{busy ? "Uploading…" : "Upload media to R2"}</button></div>
+    <div><button className="btn secondary" type="button" onClick={upload} disabled={busy}>{busy ? "Uploading…" : "Upload file to R2"}</button></div>
     {message && <p role="status" aria-live="polite" className="notice">{message}</p>}
     <label>R2 object key<input name="r2_media_key" value={key} onChange={event => setKey(event.target.value)} maxLength={1024} placeholder="Upload a file above or enter an existing private object key"/><small>Save the content after the upload completes. This key is used by the secure playback route.</small></label>
   </div>;

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { MediaCard } from "@/components/media-card";
-const types = [{ label: "Everything", value: "all" }, { label: "Watch", value: "video" }, { label: "Listen", value: "podcast" }, { label: "Read", value: "article" }, { label: "Resources", value: "resource" }, { label: "Printables", value: "printable" }];
+const types = [{ label: "Everything", value: "all" }, { label: "Watch", value: "video" }, { label: "Listen", value: "podcast" }, { label: "Read", value: "article" }, { label: "Resources", value: "resource" }, { label: "Printables", value: "printable" }, { label: "Originals", value: "original" }, { label: "Recipes", value: "recipe" }, { label: "Picks", value: "pick" }, { label: "Events", value: "event" }];
 export default async function Explore({ searchParams }: { searchParams: Promise<{ type?: string }> }) {
   const { supabase } = await requireUser("/app/explore"); const params = await searchParams;
   const type = types.some(item => item.value === params.type) ? params.type! : "all";
