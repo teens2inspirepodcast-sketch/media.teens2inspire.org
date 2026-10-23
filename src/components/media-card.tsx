@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+import Image from "next/image";
 import { Play, Headphones, BookOpen, FileText, Bookmark } from "lucide-react";
 
 type MediaCardProps = { id: string; title: string; description?: string | null; type: string; cover_url?: string | null; variant?: "landscape" | "portrait" };
@@ -7,7 +9,7 @@ export function MediaCard({ id, title, description, type, cover_url, variant = "
   const Icon = iconFor(type);
   return <Link className={`media-card ${variant === "portrait" ? "media-card-portrait" : ""}`} href={`/app/content/${id}`}>
     <div className={`media-card-art ${cover_url ? "has-cover" : `fallback-${type}`}`} style={cover_url ? { backgroundImage: `linear-gradient(0deg,rgba(22,9,17,.76),rgba(22,9,17,.02) 72%),url("${cover_url}")` } : undefined}>
-      {!cover_url && <span className="fallback-monogram">{type === "podcast" ? "LISTEN" : type === "article" || type === "resource" ? "READ" : type === "printable" ? "SAVE" : "WATCH"}</span>}
+      {!cover_url && <span className="fallback-logo-wrap"><Image src="/teens2inspire-logo.png" alt="Teens2Inspire" width={420} height={140} className="fallback-logo" /></span>}
       <span className="media-card-play" aria-hidden="true"><Icon size={15} fill={type === "video" ? "currentColor" : "none"}/></span>
       <span className="media-card-type">{type}</span>
     </div>

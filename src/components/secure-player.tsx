@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
 import { LockKeyhole, Play } from "lucide-react";
 
 export function SecurePlayer({ contentId, poster, type }: { contentId: string; poster?: string | null; type?: string }) {
@@ -23,6 +24,7 @@ export function SecurePlayer({ contentId, poster, type }: { contentId: string; p
       <button className="secure-play-button" onClick={load} disabled={busy} aria-label={busy ? "Checking access" : "Play content"}><Play size={25} fill="currentColor"/></button>
       <div className="secure-player-copy"><span>TEENS2INSPIRE ORIGINALS</span><h2>{busy ? "Checking your access…" : "Ready when you are."}</h2><p>Playback is authorized securely before the media is delivered.</p></div>
       {message && <p className="secure-player-error" role="status">{message}</p>}
+      {!poster && <div className="secure-fallback-logo"><Image src="/teens2inspire-logo.png" alt="Teens2Inspire" width={520} height={180}/></div>}
     </div>}
   </section>;
 }

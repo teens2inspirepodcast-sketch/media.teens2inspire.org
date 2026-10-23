@@ -1,23 +1,40 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, Search, Bookmark, Settings2 } from "lucide-react";
+import { Compass, Search, Bookmark, Settings2, Headphones, Video, BookOpen, FileDown, CalendarDays } from "lucide-react";
 
-const items = [
+const desktopItems = [
   { label: "Explore", href: "/app", Icon: Compass },
+  { label: "Listen", href: "/app/explore?type=podcast", Icon: Headphones },
+  { label: "Watch", href: "/app/explore?type=video", Icon: Video },
+  { label: "Read", href: "/app/explore?type=article", Icon: BookOpen },
+  { label: "Printables", href: "/app/explore?type=printable", Icon: FileDown },
+  { label: "Events", href: "/app/events", Icon: CalendarDays },
   { label: "Search", href: "/app/search", Icon: Search },
-  { label: "Library", href: "/app/library", Icon: Bookmark },
+  { label: "My List", href: "/app/library", Icon: Bookmark },
   { label: "Settings", href: "/app/profile", Icon: Settings2 },
 ];
-
+const bottomItems = [
+  { label: "Explore", href: "/app", Icon: Compass },
+  { label: "Listen", href: "/app/explore?type=podcast", Icon: Headphones },
+  { label: "Printables", href: "/app/explore?type=printable", Icon: FileDown },
+  { label: "Events", href: "/app/events", Icon: CalendarDays },
+  { label: "My List", href: "/app/library", Icon: Bookmark },
+];
 export function AppNavigation({ placement }: { placement: "desktop" | "bottom" }) {
   const rawPathname = usePathname();
-  const routeAliases: Record<string, string> = { "/": "/app", "/explore": "/app/explore", "/search": "/app/search", "/library": "/app/library", "/profile": "/app/profile" };
-  const pathname = routeAliases[rawPathname] || rawPathname;
-  const active = (href: string) => href === "/app" ? pathname === "/app" || pathname === "/app/explore" || pathname.startsWith("/app/content/") : pathname === href || pathname.startsWith(`${href}/`);
+  const pathname = rawPathname || "/app";
+  const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+  const type = params?.get("type") || "";
+  const items = placement === "bottom" ? bottomItems : desktopItems;
+  const active = (href: string) => {
+    if (href === "/app") return pathname === "/app" || pathname === "/app/explore" && !type || pathname.startsWith("/app/content/");
+    if (href.includes("?type=")) return pathname === "/app/explore" && type === href.split("type=")[1];
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
   return <nav className={placement === "bottom" ? "app-bottom-nav" : "app-desktop-nav"} aria-label="Media app navigation">
     {items.map(({ label, href, Icon }) => <Link href={href} key={href} className={active(href) ? "is-active" : ""} aria-current={active(href) ? "page" : undefined}>
-      <Icon size={placement === "bottom" ? 21 : 17} strokeWidth={active(href) ? 2.4 : 1.8}/><span>{label}</span>
+      <Icon size={placement === "bottom" ? 20 : 15} strokeWidth={active(href) ? 2.4 : 1.8}/><span>{label}</span>
     </Link>)}
   </nav>;
 }

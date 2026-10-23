@@ -1,6 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import { requireAdmin } from "@/lib/auth";
-import { ArrowLeft, LayoutDashboard, LibraryBig, PanelsTopLeft, CalendarDays, Users, TicketPercent, School, Mail } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, LibraryBig, PanelsTopLeft, CalendarDays, Users, TicketPercent, School, Mail, Handshake, SlidersHorizontal, Radio } from "lucide-react";
 
 const nav = [
   ["Dashboard", "/admin", LayoutDashboard],
@@ -11,13 +12,16 @@ const nav = [
   ["Codes & gifts", "/admin/codes", TicketPercent],
   ["School access", "/admin/schools", School],
   ["Inquiries", "/admin/inquiries", Mail],
+  ["Partnerships", "/admin/partnerships", Handshake],
+  ["Site settings", "/admin/site-settings", SlidersHorizontal],
+  ["Podcast platforms", "/admin/podcast-platforms", Radio],
 ] as const;
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   await requireAdmin();
   return <div className="admin-studio">
     <header className="studio-topbar">
-      <Link href="/admin" className="studio-brand"><span className="studio-brand-mark">T</span><span>Teens2Inspire<small>CONTENT STUDIO</small></span></Link>
+      <Link href="/admin" className="studio-brand"><Image src="/teens2inspire-logo.png" alt="Teens2Inspire" width={175} height={55}/><span><small>CONTENT STUDIO</small></span></Link>
       <div className="studio-topbar-right"><span className="studio-live-dot"/> Admin workspace <Link href="/app" className="studio-view-site"><ArrowLeft size={15}/> View app</Link></div>
     </header>
     <main className="studio-main">{children}</main>

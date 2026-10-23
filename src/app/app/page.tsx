@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Play, Sparkles } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { MediaCard } from "@/components/media-card";
@@ -95,6 +96,7 @@ export default async function AppHome() {
             backgroundImage: `linear-gradient(90deg,rgba(28,8,19,.86) 0%,rgba(28,8,19,.47) 52%,rgba(28,8,19,.04) 100%),linear-gradient(0deg,rgba(28,8,19,.5),transparent 55%),url("${hero.cover_url}")`,
           } : undefined}
         >
+          {!hero.cover_url && <div className="featured-fallback-logo"><Image src="/teens2inspire-logo.png" alt="Teens2Inspire" width={520} height={170} /></div>}
           <div className="featured-copy">
             <span className="featured-label"><span /> FEATURED FOR YOU</span>
             <h2>{hero.title}</h2>
@@ -127,6 +129,11 @@ export default async function AppHome() {
         <Link href="/app/explore?type=podcast">Listen</Link>
         <Link href="/app/explore?type=article">Read</Link>
         <Link href="/app/explore?type=resource">Resources</Link>
+        <Link href="/app/explore?type=printable">Printables</Link>
+        <Link href="/app/explore?type=recipe">Recipes</Link>
+        <Link href="/app/explore?type=pick">Picks</Link>
+        <Link href="/app/events">Events</Link>
+        <Link href="/app/explore?type=original">Originals</Link>
       </section>
 
       {shelves.map((shelf) => (

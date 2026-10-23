@@ -32,7 +32,7 @@ export function R2MediaUpload() {
 
   return <div className="wide" style={{ display: "grid", gap: 10 }}>
     <label>Upload a file to private Cloudflare R2
-      <input ref={inputRef} type="file" accept="video/mp4,video/webm,video/quicktime,audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/x-wav,audio/ogg,audio/webm,application/pdf,image/jpeg,image/png,image/webp" disabled={busy} />
+      <input ref={inputRef} type="file" accept="video/mp4,video/webm,video/quicktime,video/x-matroska,audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/x-wav,audio/ogg,audio/webm,audio/flac,application/pdf,image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/plain,text/csv" disabled={busy} />
       <small>Maximum 500 MB. Supports audio, video, PDF, and common image files. Files stay in private R2 storage.</small>
     </label>
     <div><button className="btn secondary" type="button" onClick={upload} disabled={busy}>{busy ? "Uploading…" : "Upload file to R2"}</button></div>
