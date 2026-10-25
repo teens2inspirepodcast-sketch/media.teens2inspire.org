@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Compass, Search, Bookmark, Settings2, Headphones, Video, BookOpen, FileDown, CalendarDays } from "lucide-react";
 
 const desktopItems = [
@@ -23,9 +23,9 @@ const bottomItems = [
 ];
 export function AppNavigation({ placement }: { placement: "desktop" | "bottom" }) {
   const rawPathname = usePathname();
+  const searchParams = useSearchParams();
   const pathname = rawPathname || "/app";
-  const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-  const type = params?.get("type") || "";
+  const type = searchParams.get("type") || "";
   const items = placement === "bottom" ? bottomItems : desktopItems;
   const active = (href: string) => {
     if (href === "/app") return pathname === "/app" || pathname === "/app/explore" && !type || pathname.startsWith("/app/content/");
@@ -34,7 +34,7 @@ export function AppNavigation({ placement }: { placement: "desktop" | "bottom" }
   };
   return <nav className={placement === "bottom" ? "app-bottom-nav" : "app-desktop-nav"} aria-label="Media app navigation">
     {items.map(({ label, href, Icon }) => <Link href={href} key={href} className={active(href) ? "is-active" : ""} aria-current={active(href) ? "page" : undefined}>
-      <Icon size={placement === "bottom" ? 20 : 15} strokeWidth={active(href) ? 2.4 : 1.8}/><span>{label}</span>
+      <Icon size={placement === "bottom" ? 24 : 15} strokeWidth={active(href) ? 2.4 : 1.8}/><span>{label}</span>
     </Link>)}
   </nav>;
 }

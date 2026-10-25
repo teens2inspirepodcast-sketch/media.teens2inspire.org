@@ -9,7 +9,7 @@
 1. Apply `supabase/migrations/008_media_studio_customization.sql` to the correct Supabase project after migrations 001–007.
 2. Ensure the Vercel project has the environment variables listed in `.env.example`. R2 playback/upload requires `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, and `R2_PRIVATE_BUCKET_NAME` (or the supported bucket fallback).
 3. Confirm the R2 bucket CORS allows browser `PUT` requests from `https://media.teens2inspire.org` and the relevant Vercel preview origin during testing.
-4. Verify Stripe checkout and webhook configuration in Supabase Edge Function secrets, as described in `.env.example`; the media app requires a server-only `STRIPE_SECRET_KEY` in Vercel for its cancellation API, while checkout/webhook secrets must also be set in Supabase Edge Function secrets.
+4. Verify Stripe checkout and webhook configuration in Supabase Edge Function secrets, as described in `.env.example`; this app does not contain Stripe secret keys.
 5. Deploy to a Vercel preview first and test login, content create/edit, upload/playback, membership gating, and mobile layout before promoting to production.
 
 ## Known incomplete functionality

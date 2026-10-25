@@ -5,8 +5,8 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY") ?? "";
-const PERSONAL_PRICE = Deno.env.get("STRIPE_PRICE_ID_PERSONAL") ?? "price_1ULE0PIgMA67dR4JrQy2EINd";
-const FAMILY_PRICE = Deno.env.get("STRIPE_PRICE_ID_FAMILY") ?? "price_1ULE7KIgMA67dR4JCMyFbFo4";
+const PERSONAL_PRICE = "price_1ULE0PIgMA67dR4JrQy2EINd";
+const FAMILY_PRICE = "price_1ULE7KIgMA67dR4JCMyFbFo4";
 const SITE_ORIGIN = "https://teens2inspire.org";
 const ALLOWED_ORIGINS = new Set([SITE_ORIGIN, "https://www.teens2inspire.org", "http://localhost:3000"]);
 function cors(origin: string | null) { return { "Access-Control-Allow-Origin": origin && ALLOWED_ORIGINS.has(origin) ? origin : SITE_ORIGIN, "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS", "Vary": "Origin" }; }
@@ -17,7 +17,7 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "Method not allowed." }, 405, origin);
   if (origin && !ALLOWED_ORIGINS.has(origin)) return json({ error: "Origin not allowed." }, 403, origin);
   if (!SUPABASE_URL || !ANON_KEY || !SERVICE_ROLE_KEY || !STRIPE_SECRET_KEY) return json({ error: "Checkout is not fully configured yet. Please try again later." }, 503, origin);
-  let payload: { plan?: unknown; email?: unknown; userId?: unknown; accessToken?: unknown; discountCode?: unknown };
+  let payload: { plan?: unknown; email?: unknown; userId?: unknown; discountCode?: unknown };
   try { payload = await req.json(); } catch { return json({ error: "Invalid checkout request." }, 400, origin); }
   if (payload.plan !== "personal" && payload.plan !== "family") return json({ error: "Choose a valid membership plan." }, 400, origin);
 

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ArrowRight, Play, Sparkles } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { MediaCard } from "@/components/media-card";
+import { cookies } from "next/headers";
 
 type MediaItem = {
   id: string;
@@ -20,7 +21,7 @@ type Shelf = {
 };
 
 export default async function AppHome() {
-  const { supabase, profile } = await requireUser("/app");
+  const { supabase, profile, user } = await requireUser("/app");
 
   const [{ data: content, error: contentError }, { data: sections, error: sectionsError }] =
     await Promise.all([
@@ -76,7 +77,14 @@ export default async function AppHome() {
     })
   );
 
-  const name = profile?.display_name?.trim().split(" ")[0];
+  const cookieStore = await cookies();
+  const selectedId = cookieStore.get("t2i-active-family-profile")?.value;
+  let activeName = profile?.display_name || "";
+  if (selectedId && selectedId !== "owner" && profile?.membership_tier === "family" && profile?.membership_status === "active") {
+    const { data } = await supabase.from("family_profiles").select("display_name").eq("id", selectedId).eq("owner_id", user!.id).maybeSingle();
+    if (data?.display_name) activeName = data.display_name;
+  }
+  const name = activeName.trim().split(" ")[0];
 
   return (
     <main className="app-content app-home">

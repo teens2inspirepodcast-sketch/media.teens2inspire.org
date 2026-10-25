@@ -9,8 +9,8 @@ export async function createClient() {
   const trustedDomain = host === "teens2inspire.org" || host.endsWith(".teens2inspire.org");
   const secure = headerStore.get("x-forwarded-proto") === "https" || process.env.NODE_ENV === "production";
   const cookieOptions = trustedDomain
-    ? { domain: ".teens2inspire.org", sameSite: "lax" as const, secure: true }
-    : { sameSite: "lax" as const, secure };
+    ? { domain: ".teens2inspire.org", sameSite: "lax" as const, secure: true, maxAge: 60 * 60 * 24 * 365 }
+    : { sameSite: "lax" as const, secure, maxAge: 60 * 60 * 24 * 365 };
   return createServerClient(url, key, {
     cookieOptions,
     cookies: {

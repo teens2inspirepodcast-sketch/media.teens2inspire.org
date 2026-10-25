@@ -1,1 +1,10 @@
-import type { NextConfig } from "next"; const config:NextConfig={poweredByHeader:false}; export default config;
+import type { NextConfig } from "next";
+
+const config: NextConfig = {
+  poweredByHeader: false,
+  experimental: {
+    serverActions: { bodySizeLimit: "4mb" },
+  },
+};
+
+export default config;

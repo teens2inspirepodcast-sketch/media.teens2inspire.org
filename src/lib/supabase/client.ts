@@ -6,7 +6,7 @@ export function createClient() {
   const host = typeof window !== "undefined" ? window.location.hostname.toLowerCase() : "";
   const trustedDomain = host === "teens2inspire.org" || host.endsWith(".teens2inspire.org");
   const cookieOptions = trustedDomain
-    ? { domain: ".teens2inspire.org", sameSite: "lax" as const, secure: true }
-    : { sameSite: "lax" as const, secure: typeof window !== "undefined" && window.location.protocol === "https:" };
+    ? { domain: ".teens2inspire.org", sameSite: "lax" as const, secure: true, maxAge: 60 * 60 * 24 * 365 }
+    : { sameSite: "lax" as const, secure: typeof window !== "undefined" && window.location.protocol === "https:", maxAge: 60 * 60 * 24 * 365 };
   return createBrowserClient(url, key, { cookieOptions });
 }
