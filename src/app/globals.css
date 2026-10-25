@@ -406,3 +406,39 @@ button,a,[role=button]{touch-action:manipulation}
 .settings-layout :where(button,a.button,.button) { color:#fff !important; }
 .settings-layout :where(a:not(.button)) { color:#8c2455; text-decoration-thickness:1px; text-underline-offset:3px; }
 .settings-layout :where(input,textarea,select,button,a):focus-visible { outline:3px solid #b52f6b !important; outline-offset:3px; }
+
+/* Final contrast correction based on live-device screenshots (Oct 25, 2026).
+   Keep dark app canvas; never place low-contrast pale-pink text on white surfaces. */
+.app-shell .app-content,
+.app-shell .app-page-content { color: #f7eff4 !important; }
+.app-shell .app-category-strip { background: #19121b !important; border-color: #3b2b38 !important; }
+.app-shell .app-category-strip > span { color: #f2b4ce !important; }
+.app-shell .app-category-strip > a,
+.app-shell .filter-pills > a { background: #28202b !important; color: #fff1f7 !important; border: 1px solid #624258 !important; }
+.app-shell .app-category-strip > a:hover,
+.app-shell .filter-pills > a:hover,
+.app-shell .app-category-strip > a:focus-visible,
+.app-shell .filter-pills > a:focus-visible { background: #4a293d !important; color: #ffffff !important; border-color: #f06b9f !important; }
+.app-shell .empty-state,
+.app-shell .shelf-empty,
+.app-shell .empty-library-panel,
+.app-shell .content-access-note { background: #211922 !important; color: #f7eff4 !important; border-color: #493545 !important; }
+.app-shell .empty-state h2,
+.app-shell .empty-state h3,
+.app-shell .empty-state strong,
+.app-shell .empty-library-panel h2 { color: #fff7fb !important; }
+.app-shell .empty-state p,
+.app-shell .empty-library-panel p,
+.app-shell .shelf-empty { color: #d8c8d2 !important; }
+.app-shell .empty-state a:not(.app-primary-button),
+.app-shell .empty-library-panel a:not(.app-primary-button) { color: #ff9fc4 !important; }
+.app-shell .featured-empty { background: linear-gradient(110deg,#241621,#392035 62%,#4b2940) !important; color: #fff7fb !important; }
+.app-shell .featured-empty:before { background: linear-gradient(90deg,rgba(16,10,16,.78),rgba(16,10,16,.25)) !important; }
+.app-shell .featured-empty .featured-copy h2 { color: #fff7fb !important; }
+.app-shell .featured-empty .featured-copy p { color: #f0e2e9 !important; }
+.app-shell .featured-empty .featured-kind { color: #ffd0e2 !important; }
+.app-shell .app-primary-button { color: #24131d !important; }
+.app-shell .app-secondary-button { background: #302431 !important; color: #fff1f7 !important; border-color: #634459 !important; }
+.app-shell :where(input,textarea,select) { background: #19121b !important; color: #fff7fb !important; border-color: #64475b !important; }
+.app-shell :where(input,textarea)::placeholder { color: #c9b7c3 !important; opacity: 1 !important; }
+.app-shell :where(button,a):focus-visible { outline: 3px solid #ff9fc4 !important; outline-offset: 3px !important; }
