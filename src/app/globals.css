@@ -367,3 +367,20 @@ button,a,[role=button]{touch-action:manipulation}
 .profile-add-cancel{margin-top:20px}
 @media(max-width:680px){.app-topbar{justify-content:flex-start;padding-left:14px;padding-right:64px}.app-wordmark{width:44px;height:44px}.app-wordmark img{width:38px!important;height:38px!important}.app-bottom-nav{height:calc(92px + env(safe-area-inset-bottom))!important;min-height:92px!important}.app-shell{padding-bottom:calc(100px + env(safe-area-inset-bottom))!important}.app-bottom-nav a{height:76px!important;min-height:66px!important;font-size:12px!important}.app-bottom-nav a svg{width:30px!important;height:30px!important}.profile-picker-page{min-height:100svh;padding:28px 16px 40px}.profile-picker-brand{margin-bottom:50px}.cinematic-profile-grid{gap:25px 16px;margin:34px auto 28px}.cinematic-profile{min-width:92px}.cinematic-avatar,.cinematic-plus{width:clamp(88px,25vw,120px);height:clamp(88px,25vw,120px);border-radius:17px;font-size:34px}.cinematic-profile strong{font-size:12px}.profile-picker-footer{margin-top:60px}}
 @media(prefers-reduced-motion:reduce){.cinematic-avatar,.cinematic-plus{transition:none}}
+
+/* Accessibility and stable navigation refinement — October 2026 */
+@media (max-width: 1024px) {
+  .app-bottom-nav { position: fixed !important; inset-inline: 0 !important; bottom: 0 !important; z-index: 100 !important; height: calc(82px + env(safe-area-inset-bottom)) !important; min-height: calc(82px + env(safe-area-inset-bottom)) !important; padding: 6px 4px env(safe-area-inset-bottom) !important; transform: none !important; }
+  .app-bottom-nav a { height: 68px !important; min-height: 60px !important; font-size: 11px !important; gap: 5px !important; }
+  .app-bottom-nav a svg { width: 30px !important; height: 30px !important; }
+  .app-shell { padding-bottom: calc(100px + env(safe-area-inset-bottom)) !important; }
+}
+.app-bottom-nav { position: fixed; }
+.app-bottom-nav a { color: #e5dbe3 !important; }
+.app-bottom-nav a.is-active { color: #ffb6d2 !important; }
+:where(.app-content, .app-page-content, .settings-layout, .settings-links) { color: #f8f2f7; }
+:where(.app-content, .app-page-content) :where(h1,h2,h3,h4,strong,label) { color: #fff7fb; }
+:where(.app-content, .app-page-content) :where(p,small,.page-intro p) { color: #d0c0cc; }
+:where(.app-content, .app-page-content) :where(input,textarea,select) { background: #171019; color: #fff7fb; border-color: #64475b; }
+:where(a,button,input,textarea,select):focus-visible { outline: 3px solid #ff91bd !important; outline-offset: 3px !important; }
+@media (prefers-reduced-motion: no-preference) and (min-width: 1025px) { .media-card, .app-shelf, .page-intro { animation: app-enter .45s ease-out both; } .media-card:nth-child(2n) { animation-delay: .04s; } .media-card:nth-child(3n) { animation-delay: .08s; } }

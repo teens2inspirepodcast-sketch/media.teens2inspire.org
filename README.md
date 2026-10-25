@@ -104,3 +104,6 @@ Stripe secrets and price IDs are not read by this Next.js media app. The marketi
 ## Latest mobile and family-profile updates
 
 See [FAMILY_PROFILE_SWITCHING_AND_AVATARS.md](./FAMILY_PROFILE_SWITCHING_AND_AVATARS.md) for profile switching, private avatar uploads, navigation sizing, and release checks.
+
+
+Family profile creation fix: see `FAMILY_PROFILE_CREATION_ENTITLEMENT_FIX.md`.
