@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { cookies } from "next/headers";
 import { requireUser } from "@/lib/auth";
 import { AppNavigation } from "@/components/app-navigation";
+import { AppStartupSplash } from "@/components/app-startup-splash";
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const { user, profile, supabase } = await requireUser("/app");
   const cookieStore = await cookies();
@@ -20,6 +21,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
   }
   const displayName = activeProfile.display_name;
   return <div className="app-shell">
+    <AppStartupSplash />
     <header className="app-topbar">
       <Link className="app-wordmark" href="/app" aria-label="Teens2Inspire home"><Image src="/teens2inspire-logo.png" alt="Teens2Inspire — a media platform for Jewish teen girls" width={520} height={130} priority /></Link>
       <AppNavigation placement="desktop" />

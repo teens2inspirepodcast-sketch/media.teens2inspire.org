@@ -4,6 +4,7 @@ import { ArrowRight, Play, Sparkles } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { MediaCard } from "@/components/media-card";
 import { cookies } from "next/headers";
+import { switchFamilyProfile, switchToOwnerProfile } from "./profile/actions";
 
 type MediaItem = {
   id: string;
@@ -85,6 +86,17 @@ export default async function AppHome() {
     if (data?.display_name) activeName = data.display_name;
   }
   const name = activeName.trim().split(" ")[0];
+  const isFamilyMembership = profile?.membership_tier === "family" && profile?.membership_status === "active";
+  const { data: familyProfiles } = isFamilyMembership
+    ? await supabase.from("family_profiles").select("id,display_name,avatar_path").eq("owner_id", user!.id).order("created_at")
+    : { data: [] as Array<{id:string;display_name:string;avatar_path:string|null}> };
+  const ownerAvatarUrl = profile?.avatar_path
+    ? (await supabase.storage.from("profile-avatars").createSignedUrl(profile.avatar_path, 3600)).data?.signedUrl || null
+    : null;
+  const familyPickerProfiles = await Promise.all((familyProfiles || []).map(async item => ({
+    ...item,
+    avatarUrl: item.avatar_path ? (await supabase.storage.from("profile-avatars").createSignedUrl(item.avatar_path, 3600)).data?.signedUrl || null : null,
+  })));
 
   return (
     <main className="app-content app-home">
@@ -96,6 +108,15 @@ export default async function AppHome() {
         </div>
         <div className="greeting-sparkle"><Sparkles size={20} /></div>
       </div>
+
+      {isFamilyMembership && <section className="home-family-picker" aria-label="Family profile selection">
+        <div className="home-family-picker-heading"><span className="app-overline">FAMILY MEMBERSHIP</span><h2>Who’s watching today?</h2><p>Choose a profile to make Teens2Inspire feel like yours.</p></div>
+        <div className="netflix-profile-picker home-netflix-profile-picker">
+          <form action={switchToOwnerProfile} className="netflix-profile-card-form"><button className="netflix-profile-card" type="submit" aria-label={`Use ${profile?.display_name || "account holder"} profile`}><span className="netflix-profile-art">{ownerAvatarUrl ? <img src={ownerAvatarUrl} alt=""/> : <span>{(profile?.display_name || user!.email || "T").slice(0,1).toUpperCase()}</span>}</span><strong>{profile?.display_name || "Account holder"}</strong>{(!selectedId || selectedId === "owner") && <small>Currently using</small>}</button></form>
+          {familyPickerProfiles.map(item => <form action={switchFamilyProfile} className="netflix-profile-card-form" key={item.id}><input type="hidden" name="profile_id" value={item.id}/><button className="netflix-profile-card" type="submit" aria-label={`Use ${item.display_name} profile`}><span className="netflix-profile-art">{item.avatarUrl ? <img src={item.avatarUrl} alt=""/> : <span>{item.display_name.slice(0,1).toUpperCase()}</span>}</span><strong>{item.display_name}</strong>{selectedId === item.id && <small>Currently using</small>}</button></form>)}
+          {(familyProfiles || []).length < 2 && <Link href="/app/profile#family-add-form" className="netflix-profile-card netflix-add-profile-card"><span className="netflix-add-profile-plus">+</span><strong>Add a profile</strong></Link>}
+        </div>
+      </section>}
 
       {hero ? (
         <section
