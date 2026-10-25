@@ -384,3 +384,25 @@ button,a,[role=button]{touch-action:manipulation}
 :where(.app-content, .app-page-content) :where(input,textarea,select) { background: #171019; color: #fff7fb; border-color: #64475b; }
 :where(a,button,input,textarea,select):focus-visible { outline: 3px solid #ff91bd !important; outline-offset: 3px !important; }
 @media (prefers-reduced-motion: no-preference) and (min-width: 1025px) { .media-card, .app-shelf, .page-intro { animation: app-enter .45s ease-out both; } .media-card:nth-child(2n) { animation-delay: .04s; } .media-card:nth-child(3n) { animation-delay: .08s; } }
+
+/* 2026-10-25: high-contrast, polished settings and form surfaces */
+.app-content .settings-layout,
+.app-page-content .settings-layout,
+.settings-layout { color:#21151d !important; }
+.settings-layout > *, .settings-layout .settings-card,
+.settings-layout .settings-section, .settings-layout .settings-panel,
+.settings-layout article, .settings-layout fieldset {
+  color:#21151d;
+}
+.settings-layout .settings-card, .settings-layout .settings-section,
+.settings-layout .settings-panel, .settings-layout article {
+  background:#fffafd; border:1px solid #eadce4; border-radius:18px;
+  box-shadow:0 12px 32px rgba(36,12,27,.07); padding:clamp(18px,3vw,26px);
+}
+.settings-layout :where(h1,h2,h3,h4,strong,label,legend,p,small,span,li) { color:#21151d; }
+.settings-layout :where(.muted,.description,.helper-text,.settings-description) { color:#66515e !important; }
+.settings-layout :where(input,textarea,select) { background:#fff !important; color:#21151d !important; border:1px solid #b9a2af !important; }
+.settings-layout :where(input,textarea,select)::placeholder { color:#705b68 !important; opacity:1; }
+.settings-layout :where(button,a.button,.button) { color:#fff !important; }
+.settings-layout :where(a:not(.button)) { color:#8c2455; text-decoration-thickness:1px; text-underline-offset:3px; }
+.settings-layout :where(input,textarea,select,button,a):focus-visible { outline:3px solid #b52f6b !important; outline-offset:3px; }
