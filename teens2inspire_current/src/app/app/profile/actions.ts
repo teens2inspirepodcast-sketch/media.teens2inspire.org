@@ -12,24 +12,30 @@ const ALLOWED_AVATAR_TYPES: Record<string, string> = { "image/jpeg": "jpg", "ima
 function avatarRedirect(message: string): never { redirect(`/app/profile?avatar=${message}`); }
 
 export async function createFamilyProfile(formData: FormData) {
-  const { supabase, profile } = await requireUser("/app/profile");
-  const firstName = String(formData.get("first_name") || "").trim().slice(0, 60);
-  const displayName = String(formData.get("display_name") || "").trim().slice(0, 40);
-  if (!firstName || !displayName || profile?.membership_tier !== "family" || profile?.membership_status !== "active") {
-    redirect("/app/profile?family=unavailable");
+  const returnTo = String(formData.get("return_to") || "picker");
+  const errorBase = returnTo === "add-page" ? "/app/profiles/add?error=" : "/app/profiles?error=";
+  const { supabase, profile } = await requireUser(returnTo === "add-page" ? "/app/profiles/add" : "/app/profiles");
+  // Keep profile creation intentionally simple: one name, no picture or customization required.
+  const displayName = String(formData.get("display_name") || formData.get("first_name") || "").trim().slice(0, 40);
+  if (!displayName || profile?.membership_tier !== "family" || profile?.membership_status !== "active") {
+    redirect(`${errorBase}unavailable`);
   }
   const { error } = await supabase.rpc("add_family_profile", {
-    p_first_name: firstName,
+    p_first_name: displayName.slice(0, 60),
     p_display_name: displayName,
     p_interests: [],
   });
   if (error) {
-    const message = /active Family membership/i.test(error.message) ? "unavailable"
+    console.error("Family profile creation failed", error.message);
+    const message = /active Family membership|membership/i.test(error.message) ? "unavailable"
       : /three profiles|two additional|limit/i.test(error.message) ? "limit" : "save-failed";
-    redirect(`/app/profile?family=${message}`);
+    redirect(`${errorBase}${message}`);
   }
+  revalidatePath("/app/profiles");
   revalidatePath("/app/profile");
-  redirect("/app/profiles");
+  revalidatePath("/app");
+  // Return to the dedicated profile picker so the newly saved profile is immediately visible.
+  redirect("/app/profiles?created=1");
 }
 
 export async function deleteFamilyProfile(formData: FormData) {
