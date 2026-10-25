@@ -4,6 +4,7 @@ import { ArrowRight, Play, Sparkles } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { MediaCard } from "@/components/media-card";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { switchFamilyProfile, switchToOwnerProfile } from "./profile/actions";
 
 type MediaItem = {
@@ -23,6 +24,8 @@ type Shelf = {
 
 export default async function AppHome() {
   const { supabase, profile, user } = await requireUser("/app");
+  const initialCookies = await cookies();
+  if (profile?.membership_tier === "family" && profile?.membership_status === "active" && initialCookies.get("t2i-picker-dismissed")?.value !== "1") redirect("/app/profiles");
 
   const [{ data: content, error: contentError }, { data: sections, error: sectionsError }] =
     await Promise.all([
@@ -102,21 +105,12 @@ export default async function AppHome() {
     <main className="app-content app-home">
       <div className="app-greeting">
         <div>
-          <span className="app-overline">YOUR LITTLE CORNER OF THE INTERNET</span>
-          <h1>{name ? `Hi, ${name}.` : "A little inspiration, just for you."}</h1>
+          <span className="app-overline">INSPIRED LIVING</span>
+          <h1>{name ? `Welcome back, ${name}.` : "A little inspiration, just for you."}</h1>
           <p>Find something meaningful to watch, listen to, or read today.</p>
         </div>
         <div className="greeting-sparkle"><Sparkles size={20} /></div>
       </div>
-
-      {isFamilyMembership && <section className="home-family-picker" aria-label="Family profile selection">
-        <div className="home-family-picker-heading"><span className="app-overline">FAMILY MEMBERSHIP</span><h2>Who’s watching today?</h2><p>Choose a profile to make Teens2Inspire feel like yours.</p></div>
-        <div className="netflix-profile-picker home-netflix-profile-picker">
-          <form action={switchToOwnerProfile} className="netflix-profile-card-form"><button className="netflix-profile-card" type="submit" aria-label={`Use ${profile?.display_name || "account holder"} profile`}><span className="netflix-profile-art">{ownerAvatarUrl ? <img src={ownerAvatarUrl} alt=""/> : <span>{(profile?.display_name || user!.email || "T").slice(0,1).toUpperCase()}</span>}</span><strong>{profile?.display_name || "Account holder"}</strong>{(!selectedId || selectedId === "owner") && <small>Currently using</small>}</button></form>
-          {familyPickerProfiles.map(item => <form action={switchFamilyProfile} className="netflix-profile-card-form" key={item.id}><input type="hidden" name="profile_id" value={item.id}/><button className="netflix-profile-card" type="submit" aria-label={`Use ${item.display_name} profile`}><span className="netflix-profile-art">{item.avatarUrl ? <img src={item.avatarUrl} alt=""/> : <span>{item.display_name.slice(0,1).toUpperCase()}</span>}</span><strong>{item.display_name}</strong>{selectedId === item.id && <small>Currently using</small>}</button></form>)}
-          {(familyProfiles || []).length < 2 && <Link href="/app/profile#family-add-form" className="netflix-profile-card netflix-add-profile-card"><span className="netflix-add-profile-plus">+</span><strong>Add a profile</strong></Link>}
-        </div>
-      </section>}
 
       {hero ? (
         <section

@@ -23,7 +23,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
   return <div className="app-shell">
     <AppStartupSplash />
     <header className="app-topbar">
-      <Link className="app-wordmark" href="/app" aria-label="Teens2Inspire home"><Image src="/teens2inspire-logo.png" alt="Teens2Inspire — a media platform for Jewish teen girls" width={520} height={130} priority /></Link>
+      <Link className="app-wordmark" href="/app" aria-label="Teens2Inspire home"><Image src="/icon-512.png" alt="Teens2Inspire Media" width={64} height={64} priority /></Link>
       <AppNavigation placement="desktop" />
       <Link href="/app/profile" className="app-account">{avatarUrl ? <img className="account-avatar account-avatar-photo" src={avatarUrl} alt="" /> : <span className="account-avatar" style={{ backgroundColor: profile?.profile_color || "#e94d8a", color: "#fff" }}>{displayName.slice(0,1).toUpperCase()}</span>}<span className="account-name">{displayName}</span><ChevronDown size={14}/></Link>
     </header>

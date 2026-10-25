@@ -13,7 +13,7 @@ export function AppStartupSplash() {
   return (
     <div className="app-startup-splash" role="status" aria-live="polite" aria-label="Loading Teens2Inspire">
       <div className="app-startup-splash-card">
-        <Image src="/teens2inspire-logo.png" alt="Teens2Inspire" width={520} height={130} priority />
+        <Image src="/icon-512.png" alt="Teens2Inspire Media" width={104} height={104} priority />
         <p>A little inspiration, loading…</p>
         <div className="app-startup-splash-track" aria-hidden="true"><span /></div>
       </div>

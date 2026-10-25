@@ -29,7 +29,7 @@ export async function createFamilyProfile(formData: FormData) {
     redirect(`/app/profile?family=${message}`);
   }
   revalidatePath("/app/profile");
-  redirect("/app/profile?family=created");
+  redirect("/app/profiles");
 }
 
 export async function deleteFamilyProfile(formData: FormData) {
@@ -58,6 +58,7 @@ export async function saveProfileSettings(formData: FormData) {
 export async function switchToOwnerProfile() {
   await requireUser("/app/profile");
   const cookieStore = await cookies();
+  cookieStore.set("t2i-picker-dismissed", "1", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/" });
   cookieStore.set(ACTIVE_PROFILE_COOKIE, "owner", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 365 });
   revalidatePath("/app"); revalidatePath("/app/profile");
   redirect("/app");
@@ -70,6 +71,7 @@ export async function switchFamilyProfile(formData: FormData) {
   const { data, error } = await supabase.from("family_profiles").select("id").eq("id", id).eq("owner_id", user!.id).maybeSingle();
   if (error || !data) redirect("/app/profile?family=save-failed");
   const cookieStore = await cookies();
+  cookieStore.set("t2i-picker-dismissed", "1", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/" });
   cookieStore.set(ACTIVE_PROFILE_COOKIE, id, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 365 });
   revalidatePath("/app"); revalidatePath("/app/profile");
   redirect("/app");
