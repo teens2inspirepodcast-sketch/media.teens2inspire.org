@@ -1,3 +1,5 @@
+> **Production release notes:** Read [`START_HERE_PRODUCTION.md`](./START_HERE_PRODUCTION.md) before uploading this repository to GitHub or connecting it to Vercel. Build verification is pending because npm registry DNS was unavailable in the preparation environment. The included GitHub Actions workflow runs the typecheck and production build after upload.
+
 # Teens2Inspire Media — Member App
 
 This is the **light, app-like media experience** for `media.teens2inspire.org`, separate from the dark marketing site.
@@ -12,7 +14,7 @@ This is the **light, app-like media experience** for `media.teens2inspire.org`, 
 ## Included
 - App home, Explore with functional type filters, Search, My List/favorites, Settings, content detail, and secure-player interface
 - Admin dashboard and content/sections/events/members/schools/inquiries pages
-- Login and signup on the media domain, plus email-verification callback
+- Login on the media domain, canonical marketing-domain signup redirect, and email-verification callback
 - PWA manifest, service-worker registration, actual logo asset, and app icon
 - School-code administration API, shared Supabase migrations, environment example
 
@@ -34,7 +36,7 @@ The redesign's TypeScript/TSX files passed a syntax parse. A production build ha
 ## Repair notes
 - Corrected profile lookup to avoid selecting the nonexistent `profiles.email` column.
 - Corrected section and section-content query column names to match the known Supabase schema.
-- Required public Vercel variables are shown in `.env.example`. Do not add Stripe secret keys to Vercel.
+- Public Vercel variables are shown in `.env.example`. The media app also requires `STRIPE_SECRET_KEY` as a server-only Vercel variable for subscription cancellation; never prefix it with `NEXT_PUBLIC_` or commit its value.
 - The project ZIP has not been proven production-ready by a live deployment/build; test authentication, entitlements, content shelves, and admin access after upload.
 
 
@@ -61,20 +63,21 @@ Required server-only Vercel environment variables on `media.teens2inspire.org`:
 - `R2_PRIVATE_BUCKET_NAME` (preferred private bucket variable)
 - `R2_BUCKET_NAME` (backward-compatible fallback if the private name is not set)
 - `R2_PUBLIC_BUCKET_NAME` is optional and is not used by the current private-media upload/playback code.
+- `STRIPE_SECRET_KEY` is required server-side by `/api/membership/cancel` and must use the same live Stripe account as the subscriptions. Set it as a Vercel server-only variable and separately in Supabase Edge Function secrets.
 
 Never prefix credentials with `NEXT_PUBLIC_` and never commit actual credentials. The upload and playback routes prefer `R2_PRIVATE_BUCKET_NAME`, then fall back to `R2_BUCKET_NAME`.
 
-### Required R2 bucket CORS
+### Verified R2 bucket CORS
 
-In Cloudflare Dashboard → R2 → your bucket → Settings → CORS, add a rule that allows the exact production origin and any preview origin used for testing. Example for production:
+The connected Cloudflare account has the following CORS rule configured on `teens2inspire-media` and re-read after the update: production origins `https://teens2inspire.org` and `https://media.teens2inspire.org`; methods `PUT`, `GET`, and `HEAD`; request headers `Content-Type`, `Range`, and `x-amz-*`; exposed response headers `ETag`, `Accept-Ranges`, `Content-Length`, `Content-Range`, and `Content-Type`; max age 3600 seconds. If you use preview deployments, add their exact origin separately and keep the production rule intact. Example JSON equivalent:
 
 ```json
 [
   {
-    "AllowedOrigins": ["https://media.teens2inspire.org"],
+    "AllowedOrigins": ["https://teens2inspire.org", "https://media.teens2inspire.org"],
     "AllowedMethods": ["PUT", "GET", "HEAD"],
-    "AllowedHeaders": ["content-type", "x-amz-*"],
-    "ExposeHeaders": ["etag"],
+    "AllowedHeaders": ["Content-Type", "Range", "x-amz-*"],
+    "ExposeHeaders": ["ETag", "Accept-Ranges", "Content-Length", "Content-Range", "Content-Type"],
     "MaxAgeSeconds": 3600
   }
 ]
@@ -99,4 +102,4 @@ Migration `007_complete_app_schema.sql` brings older base migrations up to the c
 
 The domain root (`https://media.teens2inspire.org/`) redirects to `/app`, so the marketing site's sign-in handoff and the installed app entry point work without a root-page 404. The app reads `NEXT_PUBLIC_SUPABASE_URL` and either `NEXT_PUBLIC_SUPABASE_ANON_KEY` or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Private media uses `R2_PRIVATE_BUCKET_NAME` (preferred) or the existing `R2_BUCKET_NAME` fallback, plus `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, and `R2_SECRET_ACCESS_KEY`.
 
-Stripe secrets and price IDs are not read by this Next.js media app. The marketing site's checkout invokes the Supabase `stripe-checkout` Edge Function; keep `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_PERSONAL`, and `STRIPE_PRICE_ID_FAMILY` in Supabase Edge Function secrets. Configure Stripe's webhook to the Supabase `stripe-webhook` function URL, not the Vercel `/api/stripe/webhook` placeholder route.
+The media app reads `STRIPE_SECRET_KEY` server-side only for its subscription-cancellation route; configure that secret in Vercel as well as in Supabase Edge Function secrets. The marketing site's checkout invokes the Supabase `stripe-checkout` Edge Function. Keep `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_PERSONAL`, and `STRIPE_PRICE_ID_FAMILY` in Supabase Edge Function secrets, and configure Stripe's webhook to the Supabase `stripe-webhook` function URL, not the Vercel `/api/stripe/webhook` placeholder route.

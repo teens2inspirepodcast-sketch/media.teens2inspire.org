@@ -17,7 +17,7 @@ Status: release candidate; not cleared for public paid launch until the deployme
 - No `.env`, `.env.local`, or PEM credential files were included in the archive.
 - The media domain root now redirects to `/app` instead of returning a root-page 404.
 - R2 upload/playback now prefer `R2_PRIVATE_BUCKET_NAME` and retain `R2_BUCKET_NAME` as a backward-compatible fallback.
-- Environment examples clarify that Stripe secrets and price IDs are consumed by Supabase Edge Functions, not the media app.
+- Environment examples distinguish the media app’s server-only `STRIPE_SECRET_KEY` (used by its cancellation API) from the checkout/webhook secrets that must also be configured in Supabase Edge Functions.
 
 ## Added in this repair pass
 - Added migrations `009_stripe_promo_code_integration.sql` and `010_promo_code_redemption_tracking.sql` so a fresh database can reproduce the Stripe promo-code schema and idempotent webhook redemption logic. They are written to tolerate the already-present columns/table on the connected project.
@@ -36,3 +36,11 @@ This archive is a release candidate, not a claim of fully verified production re
 - Added an index on `promo_code_redemptions.user_id` to address the current foreign-key index advisor finding.
 - Updated local migrations 009/010 to match the live redemption table and RPC parameter names. These local files still need to be committed to GitHub and build-verified before a future clean install can be considered reproducible.
 - Production checkout, promo redemption, R2 upload/playback, and full app build remain unverified end to end.
+
+
+## Production prep pass 2026-10-25
+- Added GitHub Actions validation workflow for install, TypeScript check, and Next.js build.
+- Added exact Node/npm runtime metadata and pinned the direct dependency versions from the supplied manifest.
+- Corrected the Apple Podcasts URL to the project's current listing and added a data-correction migration.
+- Corrected newly generated school access code display prefix to use the full Teens2Inspire brand name.
+- The complete production build remains unverified because registry DNS is unavailable in this environment; no lockfile was fabricated.

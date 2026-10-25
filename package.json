@@ -9,20 +9,24 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.7.0",
-    "@supabase/supabase-js": "^2.57.4",
-    "lucide-react": "^0.468.0",
+    "@supabase/ssr": "0.7.0",
+    "@supabase/supabase-js": "2.57.4",
+    "lucide-react": "0.468.0",
     "next": "16.3.3",
     "react": "19.2.0",
     "react-dom": "19.2.0",
-    "stripe": "^18.5.0",
-    "@aws-sdk/client-s3": "^3.883.0",
-    "@aws-sdk/s3-request-presigner": "^3.883.0"
+    "stripe": "18.5.0",
+    "@aws-sdk/client-s3": "3.883.0",
+    "@aws-sdk/s3-request-presigner": "3.883.0"
   },
   "devDependencies": {
-    "@types/node": "^24.5.2",
-    "@types/react": "^19.1.13",
-    "@types/react-dom": "^19.1.9",
-    "typescript": "^5.9.2"
-  }
+    "@types/node": "24.5.2",
+    "@types/react": "19.1.13",
+    "@types/react-dom": "19.1.9",
+    "typescript": "5.9.2"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "packageManager": "npm@10.9.2"
 }

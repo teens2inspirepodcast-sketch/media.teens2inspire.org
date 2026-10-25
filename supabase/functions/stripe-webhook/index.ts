@@ -7,8 +7,8 @@ const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const stripe = stripeSecret ? new Stripe(stripeSecret) : null;
 const db = supabaseUrl && serviceRole ? createClient(supabaseUrl, serviceRole, { auth: { persistSession: false, autoRefreshToken: false } }) : null;
-const PERSONAL_PRICE = "price_1ULE0PIgMA67dR4JrQy2EINd";
-const FAMILY_PRICE = "price_1ULE7KIgMA67dR4JCMyFbFo4";
+const PERSONAL_PRICE = Deno.env.get("STRIPE_PRICE_ID_PERSONAL") ?? "price_1ULE0PIgMA67dR4JrQy2EINd";
+const FAMILY_PRICE = Deno.env.get("STRIPE_PRICE_ID_FAMILY") ?? "price_1ULE7KIgMA67dR4JCMyFbFo4";
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "Method not allowed." }, 405);
   if (!stripe || !webhookSecret || !db) return json({ error: "Stripe webhook secrets are not configured." }, 503);
