@@ -442,3 +442,11 @@ button,a,[role=button]{touch-action:manipulation}
 .app-shell :where(input,textarea,select) { background: #19121b !important; color: #fff7fb !important; border-color: #64475b !important; }
 .app-shell :where(input,textarea)::placeholder { color: #c9b7c3 !important; opacity: 1 !important; }
 .app-shell :where(button,a):focus-visible { outline: 3px solid #ff9fc4 !important; outline-offset: 3px !important; }
+
+
+/* Brand asset correction: use the full transparent Teens2Inspire wordmark, not the square app symbol. */
+.app-topbar .app-wordmark{width:clamp(150px,22vw,220px)!important;height:auto!important;min-height:0!important;max-width:58vw!important;overflow:visible!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;flex-shrink:0!important}
+.app-topbar .app-wordmark img{display:block!important;width:100%!important;height:auto!important;max-height:52px!important;object-fit:contain!important;object-position:left center!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.featured-fallback-logo{position:absolute;right:6%;top:9%;width:min(40%,310px);padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.featured-fallback-logo img{display:block;width:100%;height:auto;object-fit:contain;background:transparent!important}
+@media(max-width:680px){.app-topbar .app-wordmark{width:clamp(145px,48vw,190px)!important;max-width:58vw!important;height:auto!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important}.app-topbar .app-wordmark img{width:100%!important;height:auto!important;max-height:43px!important}.featured-fallback-logo{right:5%;top:6%;width:min(54%,230px)}}
