@@ -755,3 +755,209 @@ body::before { content:""; position:fixed; inset:0; z-index:-1; pointer-events:n
  .app-shell .app-bottom-nav a.is-active { color:#ffb8d7!important;
  background:rgba(238,117,176,.13)!important; }
 }
+
+
+/* ========================================================================
+   TEENS2INSPIRE ACCESSIBLE DARK-THEME TEXT POLICY · 2026-10-27
+   DARK SURFACE  -> white / very light pink text, including nested content.
+   LIGHT SURFACE -> deep-plum text only where a light surface is intentional.
+   Added LAST so legacy white-theme declarations cannot override contrast.
+   Visual styles only: does not change API, authentication, payment, or data.
+   ======================================================================== */
+:root {
+  --t2i-text-on-dark: #fff8fc;
+  --t2i-secondary-on-dark: #f0dce9;
+  --t2i-link-on-dark: #ffd2e8;
+  --t2i-text-on-light: #291522;
+  color-scheme: dark;
+}
+html body :is(.app-shell,.admin-studio,.media-auth-page,.page,.admin,.app-startup-splash) {
+  color: var(--t2i-text-on-dark) !important;
+}
+/* Guarantee that legacy text colors do not leak through on dark surfaces. */
+html body :is(.app-shell,.admin-studio,.media-auth-page,.page,.admin,.app-startup-splash) * {
+  color: var(--t2i-text-on-dark) !important;
+}
+/* Secondary copy is light pink / lilac, never gray-on-plum or near black. */
+html body :is(.app-shell,.admin-studio,.media-auth-page,.page,.admin) :is(
+  p,small,time,figcaption,legend,dd,dt,th,.muted,.helper-text,.description,
+  .app-greeting p,.page-intro p,.media-card-meta,.studio-section-heading p,
+  .studio-stat-label,.studio-action-kicker,.studio-shortcut small,.content-description,
+  .settings-description,.settings-helper,.admin-help,.studio-help,.app-footer
+) {
+  color: var(--t2i-secondary-on-dark) !important;
+}
+html body :is(.app-shell,.admin-studio,.media-auth-page,.page,.admin) :is(a:hover,a:focus-visible) {
+  color: #ffe2ef !important;
+}
+/* Correct legacy white cards/fields so the light-text rule never lands on white. */
+html body :is(.app-shell,.admin-studio,.media-auth-page,.page,.admin) :is(
+  .settings-layout,.settings-card,.settings-section,.settings-panel,
+  .settings-profile-card,.settings-membership,.family-profile-row,.settings-links>a,
+  .app-content .panel,.app-content .form,.app-content .notice,
+  .app-content .settings-layout,.app-page-content .settings-layout,
+  .page .card,.page .panel,.sidebar,.metric,.table-wrap,
+  .secure-player-shell,.secure-player-placeholder,.rss-episode-player,
+  .download-detail-card,.article-reading-content,.events-library-card,
+  .empty-state,.empty-library-panel,.shelf-empty,.generated-code,
+  .studio-view-site,.studio-secondary-button,.studio-stat,.studio-action-card,
+  .studio-type-card,.studio-shortcut,.studio-form-section,.site-setting-card,
+  .app-secondary-button,.secondary,.settings-signout button
+) {
+  background: #231827 !important;
+  border-color: rgba(255,220,242,.20) !important;
+  color: var(--t2i-text-on-dark) !important;
+}
+/* Specificity guard for previous .settings-layout overrides, which used !important. */
+html body .app-shell .settings-layout,
+html body .app-shell .settings-layout :is(.settings-card,.settings-section,.settings-panel,article),
+html body .app-shell .settings-layout :is(input,textarea,select) {
+  background: #241827 !important;
+  color: var(--t2i-text-on-dark) !important;
+  border-color: rgba(255,220,242,.24) !important;
+}
+html body :is(.app-shell,.admin-studio,.media-auth-page,.page,.admin) :is(input,textarea,select,option) {
+  background-color: #241927 !important;
+  color: #fffafd !important;
+  border-color: rgba(255,222,243,.34) !important;
+  color-scheme: dark;
+}
+html body :is(.app-shell,.admin-studio,.media-auth-page,.page,.admin) :is(input,textarea)::placeholder {
+  color: #e4cddd !important;
+  opacity: 1;
+}
+html body :is(.app-shell,.admin-studio,.media-auth-page,.page,.admin) :is(input,textarea,select):focus-visible {
+  outline: 2px solid #ffb6d6;
+  outline-offset: 2px;
+}
+/* Saturated rose actions keep white labels clearly visible (including hover). */
+html body :is(.app-shell,.admin-studio,.media-auth-page,.page,.admin) :is(
+  .app-primary-button,.studio-primary-button,.btn.primary,.primary,.admin-button,
+  .media-auth-submit,.secure-play-button
+) {
+  background: #982554 !important;
+  color: #ffffff !important;
+  border-color: #c8699a !important;
+  box-shadow: 0 9px 24px rgba(0,0,0,.22);
+}
+html body :is(.app-shell,.admin-studio,.media-auth-page,.page,.admin) :is(
+  .app-primary-button,.studio-primary-button,.btn.primary,.primary,.admin-button,
+  .media-auth-submit,.secure-play-button
+):hover { background:#ad306a !important; color:#fff !important; }
+/* Explicit light exceptions: avatar, play icon, pale monograms and splash. */
+html body .app-shell :is(.media-card-play,.greeting-sparkle,.empty-library-mark,.events-library-icon,
+  .account-avatar,.fallback-logo-wrap,.logo-fallback-cover,.secure-fallback-logo,
+  .app-startup-splash-card) {
+  color: var(--t2i-text-on-light) !important;
+}
+html body .app-shell :is(.media-card-play,.greeting-sparkle,.empty-library-mark,.events-library-icon,
+  .account-avatar,.fallback-logo-wrap,.logo-fallback-cover,.secure-fallback-logo,
+  .app-startup-splash-card) * { color:var(--t2i-text-on-light) !important; }
+/* Splashes are an intentional white card; interior text must remain readable. */
+html body .app-startup-splash .app-startup-splash-card { background:#fff9fc !important; }
+/* Colors for high-visibility accent labels against dark panels. */
+html body .app-shell :is(.shelf-heading>a,.app-overline,.content-type-line,.studio-back-link,
+  .members-only-label,.studio-action-arrow,.studio-editor-page a,.app-footer a) {
+  color: var(--t2i-link-on-dark) !important;
+}
+/* Keep gallery/card overlays legible in all states. */
+html body .app-shell :is(.featured-copy,.featured-panel,.media-card-type) *,
+html body .app-shell .media-card-type {
+  color:#fffafd !important;
+}
+/* Native options and dark scrollbars remain readable in both light/dark OS modes. */
+html body :is(.app-shell,.admin-studio,.media-auth-page,.page,.admin) { scrollbar-color:#80536c #170f1c; }
+
+/* ==========================================================================
+   TEENS2INSPIRE / MEDIA HOUSE  — LAYOUT RELEASE
+   Deliberate editorial redesign: header, cinematic feature, curated rails,
+   admin studio. Existing player / profile / billing functionality untouched.
+   ========================================================================= */
+html body .app-shell{background:radial-gradient(ellipse at 75% -10%,#41284651,transparent 38%),#100c15!important;color:#fff8fc!important}
+html body .app-shell .app-topbar{height:88px;background:rgba(15,10,19,.97)!important;border-bottom:1px solid #ffbdd72d!important;padding-inline:clamp(18px,5.3vw,88px);box-shadow:0 20px 50px #0003}
+.app-topbar .app-wordmark{width:220px}
+.app-topbar .app-wordmark img{object-fit:contain}
+html body .app-shell .app-desktop-nav{align-items:center;gap:6px}
+html body .app-shell .app-desktop-nav a{min-height:42px;padding:11px 18px;border-radius:4px;font-size:11px;font-weight:750;letter-spacing:.01em;transition:background .2s,color .2s}
+html body .app-shell .app-desktop-nav a.is-active{background:linear-gradient(115deg,#62334f88,#3e203988)!important;border:1px solid #eaa9ca60;color:#fff5fa!important}
+html body .app-shell .app-account{gap:12px;border:1px solid #ffcbe143;border-radius:30px;padding:5px 13px 5px 6px;background:#241828}
+html body .app-shell .app-content{max-width:1610px;padding:0 clamp(21px,5.9vw,95px) 105px}
+.media-edition-ribbon{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:23px 0;border-bottom:1px solid #f6c6e237;font-size:9px;letter-spacing:.20em;font-weight:800;color:#ebbbd3}
+.media-edition-ribbon span{color:#f7c7dd!important}
+.media-edition-center{opacity:.72}
+html body .app-shell .media-editorial-greeting{display:flex;align-items:end;justify-content:space-between;padding:59px 0 38px;margin:0;position:relative;gap:30px}
+html body .app-shell .media-editorial-greeting .app-overline{font-size:10px!important;letter-spacing:.24em!important;color:#f5a9ce!important}
+html body .app-shell .media-editorial-greeting h1{max-width:980px;font:500 clamp(43px,4.4vw,76px)/1.04 'Playfair Display',Georgia,serif;letter-spacing:-.065em;margin:17px 0 16px;color:#fff9fd!important}
+html body .app-shell .media-editorial-greeting p{font-size:16px!important;line-height:1.7;color:#ecd6e3!important;margin:0}
+html body .app-shell .media-editorial-greeting .greeting-sparkle{border:1px solid #f7bcda59;background:radial-gradient(circle at 30% 30%,#83415f,#311d32)!important;width:73px;height:73px;border-radius:50%;display:grid;place-items:center;box-shadow:0 0 0 12px #f2a9d00c;color:#ffe0ef!important}
+html body .app-shell .media-editorial-greeting .greeting-sparkle svg{color:#ffe0ef!important}
+html body .app-shell .featured-panel{min-height:clamp(410px,39vw,580px);padding:clamp(35px,6.4vw,92px)!important;border-radius:3px!important;border:1px solid #f7d6e458!important;background-color:#3b2340!important;box-shadow:11px 12px 0 -2px #1a121a,11px 12px 0 #c38cad50,0 40px 90px #000a;position:relative;isolation:isolate;overflow:hidden}
+html body .app-shell .featured-panel:before{background:linear-gradient(90deg,rgba(19,10,25,.97),rgba(31,13,34,.78) 50%,rgba(30,11,32,.16)),radial-gradient(ellipse at 77% 40%,#e78bb533,transparent 48%)!important}
+html body .app-shell .featured-panel:after{content:"";position:absolute;inset:23px;border:1px solid #ffe7f324;pointer-events:none;z-index:0;border-radius:0;background:none}
+html body .app-shell .featured-panel .featured-copy{max-width:670px;position:relative;z-index:2}
+html body .app-shell .featured-panel .featured-label{font-size:10px;letter-spacing:.26em;color:#ffe8f4!important}
+html body .app-shell .featured-panel .featured-copy h2{font:500 clamp(49px,6.9vw,106px)/1.04 'Playfair Display',Georgia,serif;letter-spacing:-.07em;margin:30px 0 19px;max-width:730px;color:white!important}
+html body .app-shell .featured-panel .featured-copy p{font-size:clamp(14px,1.38vw,19px);color:#f2deec!important;line-height:1.75;max-width:500px}
+html body .app-shell .featured-panel .featured-actions{margin-top:31px}
+html body .app-shell .featured-panel .featured-actions .app-primary-button{min-height:54px;border-radius:3px!important;padding:0 27px;letter-spacing:.04em;font-weight:800;background:#a12f62!important;border:1px solid #ef9ec5!important;color:white!important}
+html body .app-shell .featured-panel .featured-kind{letter-spacing:.19em;text-transform:uppercase;font-size:10px;color:#fce1ef!important}
+html body .app-shell .featured-side-note{align-self:flex-end;position:absolute;bottom:65px;right:62px;z-index:2;text-align:right;padding-top:19px;border-top:1px solid #f5bed777}
+html body .app-shell .featured-side-note b{font:italic 500 clamp(23px,2.5vw,37px)/1.1 'Playfair Display',Georgia,serif;letter-spacing:-.04em;color:#ffe9f5!important}
+html body .app-shell .featured-side-note span{font-size:9px;color:#f6c2dd!important}
+.media-editorial-categories{margin-top:38px;display:flex;align-items:center;gap:10px;padding:0 0 36px!important;border-bottom:1px solid #f6c4db3b!important}
+.media-editorial-categories>span{font-size:9px!important;letter-spacing:.22em!important;color:#f6c0da!important;margin-right:12px}
+html body .app-shell .media-editorial-categories>a{background:#2d1e31!important;border:1px solid #e9aecb48!important;color:#fff2f9!important;min-height:42px;padding:11px 18px!important;border-radius:3px!important;font-size:11px!important;font-weight:750!important;letter-spacing:.025em}
+html body .app-shell .media-editorial-categories>a:hover{background:#59334c!important;border-color:#f4b5d1!important;color:#fff!important}
+html body .app-shell .app-shelf{padding:27px 0 20px;margin-top:40px!important;position:relative}
+html body .app-shell .app-shelf:before{content:"";position:absolute;left:0;right:0;top:0;border-top:1px solid #ffdbed1e}
+html body .app-shell .shelf-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:22px}
+html body .app-shell .shelf-heading h2{font:500 clamp(29px,3.2vw,43px)/1.13 'Playfair Display',Georgia,serif;letter-spacing:-.054em;color:#fff9fc!important}
+html body .app-shell .shelf-heading p{font-size:13px!important;color:#e4ccdb!important;max-width:530px}
+html body .app-shell .shelf-heading>a{font-size:11px;font-weight:800;letter-spacing:.04em;color:#f5bbd4!important;border-bottom:1px solid #f5bbd477;padding-bottom:7px;white-space:nowrap}
+html body .app-shell .media-shelf-row{grid-auto-columns:minmax(190px,21%);gap:22px;padding:8px 0 26px}
+html body .app-shell .media-card{border:1px solid #ffdaef1a;padding:12px 12px 16px!important;border-radius:4px!important;background:linear-gradient(165deg,#281a2c,#1d1422)!important;box-shadow:0 13px 30px #0004;transition:transform .25s,border-color .25s,box-shadow .25s}
+html body .app-shell .media-card:hover{transform:translateY(-9px);border-color:#f5afcf88;box-shadow:0 26px 45px #0009}
+html body .app-shell .media-card-art{border-radius:3px!important;box-shadow:none!important;aspect-ratio:1/1.09;border:1px solid #fff6fb1c}
+html body .app-shell .media-card-copy h3{font:500 clamp(16px,1.35vw,21px)/1.25 'Playfair Display',Georgia,serif!important;letter-spacing:-.035em;margin:16px 4px 7px;color:#fff9fc!important}
+html body .app-shell .media-card-copy p{margin:0 4px;color:#e0c7d7!important;font-size:11px}
+html body .app-shell .media-card-type{background:#322037cf!important;border:1px solid #f8d7e54d!important;border-radius:3px!important;padding:8px 10px!important;color:#fff7fd!important;font-size:9px!important;letter-spacing:.14em}
+html body .app-shell .media-card-type *{color:#fff7fd!important}
+html body .app-shell .media-card-play{border-radius:50%!important;background:#f5c4dc!important;width:38px;height:38px;box-shadow:0 6px 20px #0007}
+html body .app-shell .media-card-play svg{color:#3c1733!important}
+html body .app-shell .app-footer{margin-top:60px;border-top:1px solid #efb8d433!important;padding-top:30px}
+html body .app-shell :is(.app-page-content,.content-detail,.app-home){color:#fff7fc!important}
+/* The admin studio is a real console rather than a collection of floating cards. */
+html body .admin-studio{background:radial-gradient(ellipse at 80% 0%,#4b2a5040,transparent 33%),#100c15!important}
+html body .admin-studio .studio-topbar{height:86px!important;background:#150e1beb!important;border-bottom:1px solid #f6bfde3a!important}
+html body .admin-studio .studio-main{max-width:1580px;padding:clamp(30px,4.8vw,72px) clamp(18px,5.4vw,80px) 120px}
+html body .admin-studio .studio-welcome{padding:5px 0 30px;border-bottom:1px solid #f6c0dc2b}
+html body .admin-studio .studio-welcome h1{font:500 clamp(54px,5.4vw,86px)/1.06 'Playfair Display',Georgia,serif;letter-spacing:-.063em;color:#fff9fc!important;margin:14px 0}
+html body .admin-studio .studio-welcome p{font-size:14px!important;color:#e6cddd!important}
+html body .admin-studio .studio-stats{gap:17px;margin-top:2px}
+html body .admin-studio :is(.studio-stat,.studio-action-card,.studio-type-card,.studio-shortcut,.studio-form-section,.site-setting-card){border-radius:5px!important;background:linear-gradient(145deg,#2b1d2f,#1b1323)!important;border:1px solid #f5c2dc2c!important;box-shadow:0 18px 40px #0004}
+html body .admin-studio .studio-stat{min-height:155px;padding:27px!important;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between}
+html body .admin-studio .studio-stat strong{font:500 clamp(31px,3vw,46px) 'Playfair Display',Georgia,serif;color:#fff8fc!important}
+html body .admin-studio .studio-section-heading h2{font:500 clamp(30px,3.3vw,46px) 'Playfair Display',Georgia,serif;letter-spacing:-.04em;color:#fff8fc!important}
+html body .admin-studio .studio-action-grid{gap:17px}
+html body .admin-studio .studio-action-card{min-height:250px!important;padding:30px!important;position:relative;overflow:hidden}
+html body .admin-studio .studio-action-card:after{content:"";position:absolute;width:175px;height:175px;border:1px solid #e69dbb27;border-radius:50%;top:-95px;right:-48px;pointer-events:none;box-shadow:0 0 0 30px #ecaed016}
+html body .admin-studio .studio-action-icon{width:52px;height:52px;border-radius:50%!important;background:#57344e!important;border:1px solid #f0b7d17d!important;color:#f8deeb!important}
+html body .admin-studio .studio-action-icon svg{color:#fff1fa!important}
+html body .admin-studio .studio-action-card strong{font:500 26px/1.1 'Playfair Display',Georgia,serif!important;letter-spacing:-.03em;color:#fff8fc!important}
+html body .admin-studio .studio-action-card p{font-size:12px!important;line-height:1.65;color:#e6cddd!important}
+html body .admin-studio .studio-action-kicker{color:#f6bdda!important;font-size:9px!important;letter-spacing:.18em}
+html body .admin-studio .studio-action-card:hover{transform:translateY(-7px);border-color:#e9abc980!important}
+.studio-promo-spotlight{display:grid;grid-template-columns:76px minmax(0,1fr) auto;gap:26px;align-items:center;min-height:190px;padding:31px 37px;margin:14px 0 27px;border:1px solid #ffd0e67b;border-radius:5px;background:radial-gradient(circle at 90% 25%,#ad6d957e,transparent 36%),linear-gradient(115deg,#4e2848,#251728 75%);box-shadow:0 30px 65px #0007;position:relative;overflow:hidden}
+.studio-promo-sigil{width:74px;height:74px;border:1px solid #ffccdf8c;border-radius:50%;display:grid;place-items:center;background:#fed0e80c;color:#ffe3f1!important}
+.studio-promo-text{display:flex;flex-direction:column;gap:9px}
+.studio-promo-text small{font-size:10px!important;letter-spacing:.2em;font-weight:800;color:#f7c6e0!important}
+.studio-promo-text strong{font:500 clamp(26px,2.6vw,42px)/1.14 'Playfair Display',Georgia,serif;color:#fff7fb!important;letter-spacing:-.048em}
+.studio-promo-text>span{font-size:13px;line-height:1.65;max-width:580px;color:#eed7e7!important}
+.studio-promo-action{display:inline-flex;align-items:center;gap:11px;padding:16px 18px;border:1px solid #ffe2ef;background:#edb6d0;color:#34182d!important;border-radius:3px;font-size:12px;font-weight:800;white-space:nowrap}
+.studio-promo-action svg{color:#34182d!important}
+html body .admin-studio .studio-primary-button{background:#9f2f62!important;border-radius:4px!important;color:#fff!important;border:1px solid #ef9bc2!important}
+html body .admin-studio .studio-mobile-nav{background:#1d1323!important}
+@media(max-width:1000px){.media-edition-ribbon .media-edition-center{display:none}.media-shelf-row{grid-auto-columns:minmax(175px,31%)}.studio-promo-spotlight{grid-template-columns:60px 1fr}.studio-promo-sigil{width:60px;height:60px}.studio-promo-action{grid-column:1/-1;justify-self:start}}
+@media(max-width:760px){html body .app-shell .app-topbar{height:69px;padding-inline:16px}html body .app-shell .app-content{padding-inline:19px;padding-bottom:100px}.media-edition-ribbon{padding:16px 0;font-size:8px}.media-edition-ribbon span:last-child{display:none}html body .app-shell .media-editorial-greeting{padding:38px 0 27px}html body .app-shell .media-editorial-greeting h1{font-size:clamp(39px,9vw,56px)}html body .app-shell .media-editorial-greeting p{font-size:13px!important}html body .app-shell .media-editorial-greeting .greeting-sparkle{width:47px;height:47px}html body .app-shell .featured-panel{min-height:430px;padding:35px 28px!important;box-shadow:5px 7px 0 -1px #241a26,5px 7px 0 #c38cad50,0 25px 60px #0008}html body .app-shell .featured-panel:after{inset:14px}html body .app-shell .featured-panel .featured-copy h2{font-size:clamp(43px,10vw,66px)}html body .app-shell .featured-panel .featured-copy p{font-size:13px}html body .app-shell .featured-side-note{display:none}.media-editorial-categories{flex-wrap:nowrap;overflow-x:auto;padding:25px 0!important;scrollbar-width:none}.media-editorial-categories::-webkit-scrollbar{display:none}.media-editorial-categories>a{flex-shrink:0}html body .app-shell .media-shelf-row{grid-auto-columns:minmax(165px,55%);gap:13px}html body .app-shell .media-card{padding:9px 9px 14px!important}html body .app-shell .media-card-copy h3{font-size:17px!important}html body .app-shell .shelf-heading h2{font-size:31px}html body .admin-studio .studio-main{padding:33px 17px calc(130px + env(safe-area-inset-bottom))}html body .admin-studio .studio-welcome h1{font-size:55px}html body .admin-studio .studio-action-card{min-height:225px!important;padding:22px!important}.studio-promo-spotlight{padding:24px;grid-template-columns:45px 1fr;gap:15px}.studio-promo-sigil{width:44px;height:44px}.studio-promo-sigil svg{width:20px}.studio-promo-text strong{font-size:29px}.studio-promo-action{padding:13px 15px}}
+@media(max-width:460px){html body .app-shell .app-content{padding-inline:16px}.media-edition-ribbon{font-size:7px}.media-editorial-greeting .greeting-sparkle{display:none!important}html body .app-shell .media-editorial-greeting h1{font-size:42px}.featured-panel{margin-right:-7px;margin-left:-7px}.studio-promo-spotlight{display:flex;flex-direction:column;align-items:flex-start}.studio-promo-action{align-self:flex-start}.studio-promo-text>span{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.studio-promo-spotlight,.media-card,.studio-action-card{transition:none!important}}

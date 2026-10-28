@@ -102,8 +102,9 @@ export default async function AppHome() {
   })));
 
   return (
-    <main className="app-content app-home">
-      <div className="app-greeting">
+    <main className="app-content app-home media-editorial-home">
+      <div className="media-edition-ribbon"><span>THE TEENS2INSPIRE EDIT</span><span className="media-edition-center">A LITTLE MORE INSPIRATION, EVERY DAY</span><span>EST. WITH PURPOSE ✳</span></div>
+      <div className="app-greeting media-editorial-greeting">
         <div>
           <span className="app-overline">INSPIRED LIVING</span>
           <h1>{name ? `Welcome back, ${name}.` : "A little inspiration, just for you."}</h1>
@@ -146,7 +147,7 @@ export default async function AppHome() {
         </section>
       )}
 
-      <section className="app-category-strip" aria-label="Explore categories">
+      <section className="app-category-strip media-editorial-categories" aria-label="Explore categories">
         <span>EXPLORE BY FORMAT</span>
         <Link href="/app/explore?type=video">Watch</Link>
         <Link href="/app/explore?type=podcast">Listen</Link>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { requireAdmin } from "@/lib/auth";
-import { ArrowLeft, LayoutDashboard, LibraryBig, PanelsTopLeft, CalendarDays, Users, TicketPercent, School, Mail, Handshake, SlidersHorizontal, Radio } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, LibraryBig, PanelsTopLeft, CalendarDays, Users, TicketPercent, School, Mail, Handshake, SlidersHorizontal, Radio, Megaphone } from "lucide-react";
 
 const nav = [
   ["Dashboard", "/admin", LayoutDashboard],
@@ -13,6 +13,7 @@ const nav = [
   ["School access", "/admin/schools", School],
   ["Inquiries", "/admin/inquiries", Mail],
   ["Partnerships", "/admin/partnerships", Handshake],
+  ["Website pop-up", "https://teens2inspire.org/admin/popup", Megaphone],
   ["Site settings", "/admin/site-settings", SlidersHorizontal],
   ["Podcast platforms", "/admin/podcast-platforms", Radio],
 ] as const;
