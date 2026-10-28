@@ -21,7 +21,7 @@ export default async function ContentAdmin({ searchParams }: { searchParams: Pro
         <label>Category<input name="category" maxLength={80}/></label>
         <label>Carousel / Section<select name="section_id" defaultValue=""><option value="">No section</option>{(sections || []).map(section=><option key={section.id} value={section.id}>{section.name}{section.is_active ? "" : " (draft)"}</option>)}</select><small>Choose the carousel this content should appear in. Manage reusable sections under Sections &amp; Collections.</small></label>
         <label>Tags (comma-separated)<input name="tags" placeholder="friendship, emunah, confidence"/></label>
-        <label>Cover image URL (HTTPS)<input name="cover_url" type="url" placeholder="https://…"/></label>
+        <div className="wide"><R2MediaUpload fieldName="cover_url" artwork/></div>
         <label className="wide">External player URL (RSS.com episode embed or other HTTPS media)<input name="external_url" type="url" placeholder="https://player.rss.com/teens2inspire/…"/><small>For podcasts, paste the individual episode player URL. This lets each episode play inside Teens2Inspire.</small></label>
         <R2MediaUpload />
         <label>Duration (seconds)<input name="duration_seconds" placeholder="e.g. 1440" type="number" min={0} max={86400}/></label>

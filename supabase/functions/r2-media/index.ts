@@ -40,7 +40,7 @@ function hasActiveEntitlement(profile: Record<string, unknown> | null) {
   if (tier === "personal" || tier === "family") return typeof profile.stripe_subscription_id === "string" && profile.stripe_subscription_id.length > 0;
   return false;
 }
-function validContentKey(key: unknown): key is string { return typeof key === "string" && /^(podcasts|videos|downloads)\/[A-Za-z0-9._/-]+$/.test(key) && !/(^|\/)\.\.?($|\/)/.test(key); }
+function validContentKey(key: unknown): key is string { return typeof key === "string" && /^(podcasts|videos|downloads|artwork)\/[A-Za-z0-9._/-]+$/.test(key) && !/(^|\/)\.\.?($|\/)/.test(key); }
 
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin");
@@ -61,7 +61,7 @@ Deno.serve(async (req: Request) => {
     .eq("id", authData.user.id).maybeSingle();
   if (profileError) return respond({ error: "Unable to verify your account access." }, 500, origin);
   const isAdmin = authData.user.id === ADMIN_ID && String(profile?.role ?? "").toLowerCase() === "administrator";
-  let body: { action?: string; contentId?: string; filename?: string; contentType?: string; size?: number };
+  let body: { action?: string; contentId?: string; filename?: string; contentType?: string; size?: number; artwork?: boolean; key?: string };
   try { body = await req.json(); } catch { return respond({ error: "Invalid JSON request." }, 400, origin); }
   let r2: S3Client;
   try { r2 = getR2(); } catch { return respond({ error: "R2 server secrets are missing or incomplete." }, 503, origin); }
@@ -74,7 +74,9 @@ Deno.serve(async (req: Request) => {
     if (!Number.isSafeInteger(size) || size < 1 || size > 500 * 1024 * 1024) return respond({ error: "Choose a file smaller than 500 MB." }, 400, origin);
     const filename = typeof body.filename === "string" ? body.filename : "media-file";
     const extension = safeFilename(filename.split(".").pop() || "media-file").slice(0, 12).toLowerCase();
-    const prefix = contentType.startsWith("video/") ? "videos" : contentType.startsWith("audio/") ? "podcasts" : "downloads";
+    const isArtwork = body.artwork === true;
+    if (isArtwork && !contentType.startsWith("image/")) return respond({ error: "Cover artwork must be an image." }, 400, origin);
+    const prefix = isArtwork ? "artwork" : contentType.startsWith("video/") ? "videos" : contentType.startsWith("audio/") ? "podcasts" : "downloads";
     const key = `${prefix}/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${extension}`;
     try {
       const uploadUrl = await getSignedUrl(r2, new PutObjectCommand({ Bucket: PRIVATE_BUCKET, Key: key, ContentType: contentType }), { expiresIn: 300 });
@@ -82,6 +84,18 @@ Deno.serve(async (req: Request) => {
     } catch (error) {
       console.error("R2 upload URL signing failed", error instanceof Error ? error.name : "unknown");
       return respond({ error: "R2 could not prepare the upload. Check the private bucket and access-key permissions." }, 502, origin);
+    }
+  }
+
+
+  if (body.action === "artwork-url") {
+    if (typeof body.key !== "string" || !/^artwork\/[A-Za-z0-9._/-]+$/.test(body.key) || /(^|\/)\.\.?($|\/)/.test(body.key)) return respond({ error: "Invalid artwork key." }, 400, origin);
+    try {
+      const url = await getSignedUrl(r2, new GetObjectCommand({ Bucket: PRIVATE_BUCKET, Key: body.key }), { expiresIn: 3600 });
+      return respond({ url, expiresIn: 3600 }, 200, origin);
+    } catch (error) {
+      console.error("R2 artwork URL signing failed", error instanceof Error ? error.name : "unknown");
+      return respond({ error: "Could not prepare the cover image." }, 502, origin);
     }
   }
 
@@ -101,5 +115,5 @@ Deno.serve(async (req: Request) => {
       return respond({ error: "R2 could not prepare secure playback. Please contact support if this continues." }, 502, origin);
     }
   }
-  return respond({ error: "Unknown action. Use upload-url or playback-url." }, 400, origin);
+  return respond({ error: "Unknown action. Use upload-url, artwork-url, or playback-url." }, 400, origin);
 });

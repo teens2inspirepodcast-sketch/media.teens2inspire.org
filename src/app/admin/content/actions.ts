@@ -18,7 +18,7 @@ export async function createContent(formData: FormData) {
   const category = String(formData.get("category") || "").trim() || null;
   const tags = String(formData.get("tags") || "").split(",").map(tag => tag.trim()).filter(Boolean).slice(0, 20);
   const coverUrlRaw = String(formData.get("cover_url") || "").trim();
-  const cover_url = coverUrlRaw ? safeHttps(coverUrlRaw) : null;
+  const cover_url = coverUrlRaw ? (/^\/api\/media\/artwork\/[A-Za-z0-9._/-]+$/.test(coverUrlRaw) && !coverUrlRaw.includes("..") ? coverUrlRaw : safeHttps(coverUrlRaw)) : null;
   const externalUrlRaw = String(formData.get("external_url") || "").trim();
   const external_url = externalUrlRaw ? safeHttps(externalUrlRaw) : null;
   const r2_media_key = String(formData.get("r2_media_key") || "").trim() || null;
