@@ -10,7 +10,7 @@ const actions = [
   { title: "Events", description: "Create events with flyers, details, and registration links.", href: "/admin/events", icon: CalendarDays, accent: "rose", label: "Event calendar" },
   { title: "Sections", description: "Create homepage shelves and choose where content appears.", href: "/admin/sections", icon: PanelsTopLeft, accent: "plum", label: "Homepage layout" },
   { title: "Partnerships", description: "Control the looping partner carousel on the public homepage.", href: "/admin/partnerships", icon: Handshake, accent: "rose", label: "Public website" },
-  { title: "Site & About copy", description: "Edit the homepage mission, founder bio, and podcast description.", href: "/admin/site-settings", icon: SlidersHorizontal, accent: "plum", label: "Marketing CMS" },
+  { title: "Website editor", description: "Edit the homepage, mission, founder bio, brand logo, images and podcast copy.", href: "/admin/site-settings", icon: SlidersHorizontal, accent: "plum", label: "Marketing CMS" },
   { title: "Website pop-up", description: "Upload a promotional image or video and publish a homepage announcement on Teens2Inspire.org.", href: "https://teens2inspire.org/admin/popup", icon: Megaphone, accent: "rose", label: "Marketing control" },
   { title: "Podcast platforms", description: "Manage all click-through listening services shown on the podcast page.", href: "/admin/podcast-platforms", icon: Radio, accent: "gold", label: "Podcast distribution" },
 ];

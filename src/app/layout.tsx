@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./streaming-refresh.css";
 import { PWARegister } from "@/components/pwa-register";
 export const metadata: Metadata = {
   title: { default: "Teens2Inspire — Your media space", template: "%s | Teens2Inspire" },
@@ -10,5 +11,5 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon-v2.png", sizes: "180x180", type: "image/png" }],
   },
 };
-export const viewport: Viewport = { themeColor: "#10090e", width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { themeColor: "#ee4387", width: "device-width", initialScale: 1 };
 export default function RootLayout({ children }: { children: React.ReactNode }) { return <html lang="en"><body>{children}<PWARegister /></body></html>; }

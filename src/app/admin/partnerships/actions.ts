@@ -44,3 +44,19 @@ export async function deletePartnership(formData: FormData) {
   if (error) redirect("/admin/partnerships?error=save-failed");
   revalidatePath("/admin/partnerships"); redirect("/admin/partnerships?deleted=1");
 }
+
+
+export async function updatePartnership(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = clean(formData, "id", 50);
+  const name = clean(formData, "name", 100);
+  const logo_url = logoUrl(clean(formData, "logo_url", 1000));
+  const website_url = websiteUrl(clean(formData, "website_url", 1000));
+  const description = clean(formData, "description", 500) || null;
+  const display_order = Number(clean(formData, "display_order", 8) || "0");
+  const is_active = formData.get("is_active") === "on";
+  if (!/^[0-9a-f-]{36}$/i.test(id) || name.length < 2 || !logo_url || !website_url || !Number.isInteger(display_order) || display_order < 0 || display_order > 10000) redirect("/admin/partnerships?error=invalid");
+  const { error } = await supabase.from("partnerships").update({ name, logo_url, website_url, description, display_order, is_active, updated_at: new Date().toISOString() }).eq("id", id);
+  if (error) redirect(`/admin/partnerships?error=${error.code === "23505" ? "duplicate" : "save-failed"}`);
+  revalidatePath("/admin/partnerships"); revalidatePath("/admin"); revalidatePath("/"); redirect("/admin/partnerships?saved=1");
+}

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ArrowRight, Play, Sparkles } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { MediaCard } from "@/components/media-card";
+import { FeaturedCarousel } from "@/components/featured-carousel";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { switchFamilyProfile, switchToOwnerProfile } from "./profile/actions";
@@ -89,111 +90,12 @@ export default async function AppHome() {
     if (data?.display_name) activeName = data.display_name;
   }
   const name = activeName.trim().split(" ")[0];
-  const isFamilyMembership = profile?.membership_tier === "family" && profile?.membership_status === "active";
-  const { data: familyProfiles } = isFamilyMembership
-    ? await supabase.from("family_profiles").select("id,display_name,avatar_path").eq("owner_id", user!.id).order("created_at")
-    : { data: [] as Array<{id:string;display_name:string;avatar_path:string|null}> };
-  const ownerAvatarUrl = profile?.avatar_path
-    ? (await supabase.storage.from("profile-avatars").createSignedUrl(profile.avatar_path, 3600)).data?.signedUrl || null
-    : null;
-  const familyPickerProfiles = await Promise.all((familyProfiles || []).map(async item => ({
-    ...item,
-    avatarUrl: item.avatar_path ? (await supabase.storage.from("profile-avatars").createSignedUrl(item.avatar_path, 3600)).data?.signedUrl || null : null,
-  })));
-
-  return (
-    <main className="app-content app-home media-editorial-home">
-      <div className="media-edition-ribbon"><span>THE TEENS2INSPIRE EDIT</span><span className="media-edition-center">A LITTLE MORE INSPIRATION, EVERY DAY</span><span>EST. WITH PURPOSE ✳</span></div>
-      <div className="app-greeting media-editorial-greeting">
-        <div>
-          <span className="app-overline">INSPIRED LIVING</span>
-          <h1>{name ? `Welcome back, ${name}.` : "A little inspiration, just for you."}</h1>
-          <p>Find something meaningful to watch, listen to, or read today.</p>
-        </div>
-        <div className="greeting-sparkle"><Sparkles size={20} /></div>
-      </div>
-
-      {hero ? (
-        <section
-          className="featured-panel"
-          style={hero.cover_url ? {
-            backgroundImage: `linear-gradient(90deg,rgba(28,8,19,.86) 0%,rgba(28,8,19,.47) 52%,rgba(28,8,19,.04) 100%),linear-gradient(0deg,rgba(28,8,19,.5),transparent 55%),url("${hero.cover_url}")`,
-          } : undefined}
-        >
-          {!hero.cover_url && <div className="featured-fallback-logo"><Image src="/teens2inspire-logo.png" alt="Teens2Inspire" width={520} height={170} /></div>}
-          <div className="featured-copy">
-            <span className="featured-label"><span /> FEATURED FOR YOU</span>
-            <h2>{hero.title}</h2>
-            <p>{hero.description || "A conversation worth coming back to."}</p>
-            <div className="featured-actions">
-              <Link className="app-primary-button" href={`/app/content/${hero.id}`}>
-                <Play size={15} fill="currentColor" />
-                {hero.type === "podcast" ? "Listen now" : hero.type === "article" || hero.type === "resource" ? "Read now" : "Watch now"}
-              </Link>
-              <span className="featured-kind">{hero.type}</span>
-            </div>
-          </div>
-          <div className="featured-side-note"><span>THE TEENS2INSPIRE EDIT</span><b>Stories with<br />something to say.</b></div>
-        </section>
-      ) : (
-        <section className="featured-panel featured-empty">
-          <div className="featured-copy">
-            <span className="featured-label"><span /> WELCOME TO TEENS2INSPIRE</span>
-            <h2>A little inspiration<br />goes a long way.</h2>
-            <p>Your media library is being curated. New episodes and stories will appear here as they are published.</p>
-            <Link className="app-primary-button" href="/app/explore">Explore the library <ArrowRight size={15} /></Link>
-          </div>
-          <div className="empty-feature-art"><div className="empty-feature-circle" /><span>WATCH · LISTEN · READ</span></div>
-        </section>
-      )}
-
-      <section className="app-category-strip media-editorial-categories" aria-label="Explore categories">
-        <span>EXPLORE BY FORMAT</span>
-        <Link href="/app/explore?type=video">Watch</Link>
-        <Link href="/app/explore?type=podcast">Listen</Link>
-        <Link href="/app/explore?type=article">Read</Link>
-        <Link href="/app/explore?type=resource">Resources</Link>
-        <Link href="/app/explore?type=printable">Printables</Link>
-        <Link href="/app/explore?type=recipe">Recipes</Link>
-        <Link href="/app/explore?type=pick">Picks</Link>
-        <Link href="/app/events">Events</Link>
-        <Link href="/app/explore?type=original">Originals</Link>
-      </section>
-
-      {shelves.map((shelf) => (
-        <section className="app-shelf" key={shelf.id}>
-          <div className="shelf-heading">
-            <div><h2>{shelf.title}</h2>{shelf.description && <p>{shelf.description}</p>}</div>
-            {shelf.items.length > 0 && <Link href="/app/explore">View all <ArrowRight size={14} /></Link>}
-          </div>
-          {shelf.items.length
-            ? <div className="media-shelf-row">{shelf.items.map((item) => <MediaCard key={item.id} {...item} />)}</div>
-            : <p className="shelf-empty">New additions will appear here as this collection grows.</p>}
-        </section>
-      ))}
-
-      {!shelves.length && items.length > 0 && (
-        <section className="app-shelf">
-          <div className="shelf-heading">
-            <div><h2>Latest releases</h2><p>Fresh from the Teens2Inspire library.</p></div>
-            <Link href="/app/explore">View all <ArrowRight size={14} /></Link>
-          </div>
-          <div className="media-shelf-row">{items.map((item) => <MediaCard key={item.id} {...item} />)}</div>
-        </section>
-      )}
-
-      {!items.length && (
-        <section className="empty-library-panel">
-          <div className="empty-library-mark"><Sparkles size={22} /></div>
-          <div><h2>Good things are on the way.</h2><p>There is no published content yet. Check back soon, or explore the available collections.</p></div>
-          <Link className="app-secondary-button" href="/app/explore">Explore content <ArrowRight size={15} /></Link>
-        </section>
-      )}
-
-      <footer className="app-footer">
-        <span>Teens2Inspire</span><span>Inspiring Jewish teen girls.</span>
-        <Link href="https://teens2inspire.org">About the platform</Link>
-      </footer>
-    </main>
-  );
+  return <main className="app-content app-home t2i-stream-home">
+    <section className="t2i-stream-welcome"><div><span className="t2i-stream-overline">YOUR TEENS2INSPIRE</span><h1>{name ? `Hi, ${name}.` : "Welcome to Teens2Inspire."}</h1><p>Something good is always worth discovering.</p></div><Link className="t2i-stream-explore-link" href="/app/explore">Browse all <ArrowRight size={17}/></Link></section>
+    <FeaturedCarousel items={[...items.filter(item=>item.featured), ...items.filter(item=>!item.featured)].slice(0,4)} />
+    <section className="t2i-stream-category-area"><div className="t2i-stream-category-title"><strong>Explore what inspires you</strong><span>Find your next favorite.</span></div><nav className="t2i-stream-category-scroll" aria-label="Content categories">{[{label:"All",href:"/app/explore"},{label:"Videos",href:"/app/explore?type=video"},{label:"Podcasts",href:"/app/explore?type=podcast"},{label:"Articles",href:"/app/explore?type=article"},{label:"Printables",href:"/app/explore?type=printable"},{label:"Recipes",href:"/app/explore?type=recipe"},{label:"Resources",href:"/app/explore?type=resource"},{label:"Events",href:"/app/events"}].map(item=><Link key={item.href} href={item.href}>{item.label}</Link>)}</nav></section>
+    {shelves.filter(shelf=>shelf.items.length > 0).map((shelf) => <section className="app-shelf t2i-stream-shelf" key={shelf.id}><div className="shelf-heading"><div><h2>{shelf.title}</h2>{shelf.description && <p>{shelf.description}</p>}</div><Link href="/app/explore">See all <ArrowRight size={16}/></Link></div><div className="media-shelf-row">{shelf.items.map(item=><MediaCard key={item.id} {...item}/>)}</div></section>)}
+    <section className="app-shelf t2i-stream-shelf"><div className="shelf-heading"><div><h2>Recently added</h2><p>Fresh from your library.</p></div><Link href="/app/explore">See all <ArrowRight size={16}/></Link></div>{items.length ? <div className="media-shelf-row">{items.slice(0,14).map(item=><MediaCard key={item.id} {...item}/>)}</div> : <div className="t2i-stream-empty"><h3>Great things are coming.</h3><p>New content will appear here as it’s published to Teens2Inspire.</p><Link href="/app/explore">Explore the library <ArrowRight size={15}/></Link></div>}</section>
+    <section className="t2i-stream-community"><span>MORE TO DISCOVER</span><h2>A little inspiration, wherever you go.</h2><p>New conversations, meaningful stories, and original content — all in one thoughtful space.</p><Link href="/app/library">Your saved library <ArrowRight size={17}/></Link></section>
+  </main>;
 }

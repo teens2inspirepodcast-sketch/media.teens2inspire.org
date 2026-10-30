@@ -65,3 +65,43 @@ export async function deleteContent(formData: FormData) {
   revalidatePath("/admin/content"); revalidatePath("/app"); revalidatePath("/app/explore");
   redirect("/admin/content?deleted=1");
 }
+
+/** Edit an existing record in place, without changing the existing upload or access API. */
+export async function updateContent(formData: FormData) {
+  const { supabase } = await requireAdmin();
+  const id = String(formData.get("id") || "");
+  const title = String(formData.get("title") || "").trim();
+  const slug = slugify(String(formData.get("slug") || title));
+  const type = String(formData.get("type") || "video");
+  const status = String(formData.get("status") || "draft");
+  const description = String(formData.get("description") || "").trim();
+  const category = String(formData.get("category") || "").trim() || null;
+  const tags = String(formData.get("tags") || "").split(",").map(tag => tag.trim()).filter(Boolean).slice(0, 20);
+  const coverRaw = String(formData.get("cover_url") || "").trim();
+  const cover_url = coverRaw ? (/^\/api\/media\/artwork\/[A-Za-z0-9._/-]+$/.test(coverRaw) && !coverRaw.includes("..") ? coverRaw : safeHttps(coverRaw)) : null;
+  const externalRaw = String(formData.get("external_url") || "").trim();
+  const external_url = externalRaw ? safeHttps(externalRaw) : null;
+  const r2_media_key = String(formData.get("r2_media_key") || "").trim() || null;
+  const durationRaw = String(formData.get("duration_seconds") || "").trim();
+  const duration_seconds = durationRaw ? Number(durationRaw) : null;
+  if (!/^[0-9a-f-]{36}$/i.test(id) || !title || title.length > 140 || !slug || !types.has(type) || !statuses.has(status) || description.length > 5000 || (coverRaw && !cover_url) || (externalRaw && !external_url) || (duration_seconds !== null && (!Number.isInteger(duration_seconds) || duration_seconds < 0 || duration_seconds > 86400)) || (r2_media_key && (!/^(podcasts|videos|downloads)\/[A-Za-z0-9._/-]+$/.test(r2_media_key) || /(^|\/)\.\.?($|\/)/.test(r2_media_key)))) redirect("/admin/content?error=invalid");
+  const { data: existing } = await supabase.from("content").select("id,status,published_at").eq("id", id).maybeSingle();
+  if (!existing) redirect("/admin/content?error=invalid");
+  const { error } = await supabase.from("content").update({
+    title, slug, type, status, description, category, tags, cover_url, external_url, r2_media_key, duration_seconds,
+    body: String(formData.get("body_content") || "").trim() || null,
+    member_only: formData.get("member_only") === "on", featured: formData.get("featured") === "on",
+    updated_at: new Date().toISOString(),
+    published_at: status === "published" ? (existing.published_at || new Date().toISOString()) : existing.published_at,
+  }).eq("id", id);
+  if (error) redirect(`/admin/content/${id}/edit?error=${error.code === "23505" ? "duplicate-slug" : "save-failed"}`);
+  const sectionId = String(formData.get("section_id") || "").trim();
+  if (sectionId) {
+    const { data: section } = await supabase.from("sections").select("id").eq("id", sectionId).maybeSingle();
+    if (!section) redirect(`/admin/content/${id}/edit?error=invalid-section`);
+    const { error: sectionError } = await supabase.from("section_content").upsert({ section_id: sectionId, content_id: id, display_order: 0 }, { onConflict: "section_id,content_id" });
+    if (sectionError) redirect(`/admin/content/${id}/edit?error=section-link-failed`);
+  }
+  revalidatePath("/admin/content"); revalidatePath(`/app/content/${id}`); revalidatePath("/app"); revalidatePath("/app/explore"); revalidatePath("/admin/sections");
+  redirect("/admin/content?updated=1");
+}

@@ -33,3 +33,11 @@ export async function removeSectionContent(formData: FormData) {
   if (error) redirect("/admin/sections?error=assign-failed");
   revalidatePath("/admin/sections"); revalidatePath("/app"); redirect("/admin/sections?updated=1");
 }
+
+export async function updateSection(formData: FormData) {
+ const {supabase}=await requireAdmin();const id=String(formData.get("id")||"");const name=String(formData.get("title")||"").trim();const slug=slugify(String(formData.get("slug")||name));const description=String(formData.get("description")||"").trim();const display_order=Number(formData.get("display_order")||0);const is_active=formData.get("is_active")==="on";
+ if(!/^[0-9a-f-]{36}$/i.test(id)||!name||!slug||name.length>120||description.length>2000||!Number.isInteger(display_order)||display_order<0||display_order>10000)redirect("/admin/sections?error=invalid");
+ const {error}=await supabase.from("sections").update({name,slug,description,display_order,is_active}).eq("id",id);
+ if(error)redirect(`/admin/sections?error=${error.code==="23505"?"duplicate":"save-failed"}`);
+ revalidatePath("/admin/sections");revalidatePath("/app");redirect("/admin/sections?updated=1");
+}

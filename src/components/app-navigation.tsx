@@ -16,10 +16,10 @@ const desktopItems = [
 ];
 const bottomItems = [
   { label: "Explore", href: "/app", Icon: Compass },
-  { label: "Listen", href: "/app/explore?type=podcast", Icon: Headphones },
-  { label: "Printables", href: "/app/explore?type=printable", Icon: FileDown },
+  { label: "Search", href: "/app/search", Icon: Search },
+  { label: "Library", href: "/app/library", Icon: Bookmark },
   { label: "Events", href: "/app/events", Icon: CalendarDays },
-  { label: "My List", href: "/app/library", Icon: Bookmark },
+  { label: "Settings", href: "/app/profile", Icon: Settings2 },
 ];
 export function AppNavigation({ placement }: { placement: "desktop" | "bottom" }) {
   const rawPathname = usePathname();

@@ -1,30 +1,16 @@
 "use client";
-import { useState } from "react";
-import Image from "next/image";
-import { LockKeyhole, Play } from "lucide-react";
+import { Play, LockKeyhole } from "lucide-react";
+import { usePersistentPlayer } from "@/components/persistent-media-player";
 
-export function SecurePlayer({ contentId, poster, type }: { contentId: string; poster?: string | null; type?: string }) {
-  const [url, setUrl] = useState<string | null>(null);
-  const [message, setMessage] = useState("");
-  const [busy, setBusy] = useState(false);
-  async function load() {
-    setBusy(true); setMessage("");
-    try {
-      const response = await fetch(`/api/media/playback/${encodeURIComponent(contentId)}`, { cache: "no-store" });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Playback is unavailable.");
-      if (typeof data.url !== "string" || !data.url.startsWith("https://")) throw new Error("The media provider returned an invalid playback URL.");
-      setUrl(data.url);
-    } catch (error) { setMessage(error instanceof Error ? error.message : "Playback is unavailable."); }
-    finally { setBusy(false); }
-  }
-  return <section className="secure-player-shell" aria-label="Secure media player">
-    {url ? (type === "podcast" ? <audio controls src={url} className="secure-audio" autoPlay /> : <video controls playsInline poster={poster || undefined} src={url} className="secure-video" autoPlay />) : <div className="secure-player-placeholder" style={poster ? { backgroundImage: `linear-gradient(0deg,rgba(30,8,20,.9),rgba(30,8,20,.18)),url("${poster}")` } : undefined}>
-      <div className="secure-player-lock"><LockKeyhole size={17}/><span>SECURE PLAYBACK</span></div>
-      <button className="secure-play-button" onClick={load} disabled={busy} aria-label={busy ? "Checking access" : "Play content"}><Play size={25} fill="currentColor"/></button>
-      <div className="secure-player-copy"><span>TEENS2INSPIRE ORIGINALS</span><h2>{busy ? "Checking your access…" : "Ready when you are."}</h2><p>Playback is authorized securely before the media is delivered.</p></div>
-      {message && <p className="secure-player-error" role="status">{message}</p>}
-      {!poster && <div className="secure-fallback-logo"><Image src="/teens2inspire-logo.png" alt="Teens2Inspire" width={520} height={180}/></div>}
-    </div>}
+export function SecurePlayer({ contentId, title, poster, type }: { contentId: string; title: string; poster?: string | null; type?: string }) {
+  const { playContent, loading, error, current, open } = usePersistentPlayer();
+  const isCurrent = current?.id === contentId;
+  return <section className="secure-player-shell t2i-streaming-play-prompt" aria-label="Secure media player">
+    <div className="t2i-play-prompt-art" style={poster ? { backgroundImage: `linear-gradient(0deg,rgba(24,8,20,.52),rgba(24,8,20,.1)),url("${poster.replaceAll('"', '%22')}")` } : undefined}>
+      <span className="t2i-player-auth-label"><LockKeyhole size={13}/> SECURE MEMBERSHIP PLAYBACK</span>
+      <button className="t2i-big-play-button" type="button" disabled={loading} aria-label={isCurrent ? "Open current player" : `Play ${title}`} onClick={() => isCurrent && !error ? open() : void playContent({ id: contentId, title, poster, type: type || "video" })}><Play size={32} fill="currentColor"/></button>
+      <span className="t2i-prompt-hint">{loading ? "Checking access…" : isCurrent ? "Continue in the player" : "Tap to play"}</span>
+    </div>
+    {isCurrent && error && <p className="secure-player-error" role="status">{error}</p>}
   </section>;
 }

@@ -1,6 +1,8 @@
 import { requireAdmin } from "@/lib/auth";
 import { createContent, setContentStatus, deleteContent } from "./actions";
 import { R2MediaUpload } from "@/components/r2-media-upload";
+import { AdminUploadForm } from "@/components/admin-upload-form";
+import Link from "next/link";
 
 export default async function ContentAdmin({ searchParams }: { searchParams: Promise<{ error?: string; created?: string; updated?: string; deleted?: string }> }) {
   const { supabase } = await requireAdmin();
@@ -9,11 +11,11 @@ export default async function ContentAdmin({ searchParams }: { searchParams: Pro
   const errorText: Record<string, string> = { invalid: "Check the required fields and use HTTPS for cover images.", "duplicate-slug": "That slug is already in use. Choose a unique slug.", "save-failed": "The change could not be saved.", "section-link-failed": "Content was not saved because its section could not be linked. Check the sections schema and try again." };
   return <>
     <h1 style={{ fontSize: 42 }}>Content Studio</h1>
-    <p>Create content records and publish/unpublish items. Upload audio/video directly to your private Cloudflare R2 bucket here, or enter an existing private object key.</p>
+    <p>Create content records and publish/unpublish items. Choose media and cover images, then press Save once. Upload to R2 and database save happen in one workflow.</p>
     {query.error && <p className="notice" role="alert">{errorText[query.error] || "Something went wrong."}</p>}
     {query.created && <p className="notice">Content saved.</p>}{query.updated && <p className="notice">Content status updated.</p>}{query.deleted && <p className="notice">Content deleted.</p>}{query.error === "delete-failed" && <p className="notice" role="alert">Could not delete this content. It may be linked to another record.</p>}
     <section className="panel" style={{ margin: "22px 0" }}><h2 style={{ fontSize: 30 }}>Add content</h2><p>Save content metadata in Supabase. Upload media to Cloudflare R2 or use an individual external podcast player URL. Assigning a section links the content to that reusable carousel.</p>
-      <form action={createContent} className="admin-form">
+      <AdminUploadForm action={createContent} className="admin-form">
         <label>Title<input name="title" required maxLength={140}/></label>
         <label>Slug (optional)<input name="slug" maxLength={90} placeholder="Generated from title if blank"/></label>
         <label>Type<select name="type" defaultValue="video">{["video","podcast","article","resource","printable","pick","event","recipe","original"].map(x=><option key={x} value={x}>{x}</option>)}</select></label>
@@ -28,10 +30,10 @@ export default async function ContentAdmin({ searchParams }: { searchParams: Pro
         <label className="wide">Description<textarea name="description" rows={3} maxLength={5000}/></label>
         <label className="check-label"><input type="checkbox" name="member_only"/> Members only</label>
         <label className="check-label"><input type="checkbox" name="featured"/> Featured</label>
-        <div className="wide"><button className="btn primary">Save content</button></div>
-      </form>
+        <div className="wide"><button className="btn primary">Upload & save content</button></div>
+      </AdminUploadForm>
     </section>
     <h2 style={{ fontSize: 30 }}>Existing content</h2>
-    <div className="table-wrap"><table><thead><tr><th>Title</th><th>Type</th><th>Status</th><th>Updated</th><th>Change status</th><th>Delete</th></tr></thead><tbody>{(data || []).map(x=><tr key={x.id}><td>{x.title}</td><td>{x.type}</td><td>{x.status}</td><td>{new Date(x.updated_at).toLocaleDateString()}</td><td><form action={setContentStatus} className="inline-form"><input type="hidden" name="id" value={x.id}/><select name="status" defaultValue={x.status}><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select><button className="btn secondary">Save</button></form></td><td><form action={deleteContent}><input type="hidden" name="id" value={x.id}/><button className="btn secondary" formAction={deleteContent}>Delete</button></form></td></tr>)}</tbody></table></div>
+    <div className="table-wrap"><table><thead><tr><th>Title</th><th>Type</th><th>Status</th><th>Updated</th><th>Change status</th><th>Edit</th><th>Delete</th></tr></thead><tbody>{(data || []).map(x=><tr key={x.id}><td>{x.title}</td><td>{x.type}</td><td>{x.status}</td><td>{new Date(x.updated_at).toLocaleDateString()}</td><td><form action={setContentStatus} className="inline-form"><input type="hidden" name="id" value={x.id}/><select name="status" defaultValue={x.status}><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select><button className="btn secondary">Save</button></form></td><td><Link className="btn primary" href={`/admin/content/${x.id}/edit`}>Edit</Link></td><td><form action={deleteContent}><input type="hidden" name="id" value={x.id}/><button className="btn secondary" formAction={deleteContent}>Delete</button></form></td></tr>)}</tbody></table></div>
   </>;
 }
