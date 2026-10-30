@@ -1,6 +1,8 @@
 import { requireAdmin } from "@/lib/auth";
 import { createContent, setContentStatus, deleteContent } from "./actions";
 import { R2MediaUpload } from "@/components/r2-media-upload";
+import { CaptionFileUpload } from "@/components/caption-file-upload";
+import { ContentLanguageEditor } from "@/components/content-language-editor";
 import { AdminUploadForm } from "@/components/admin-upload-form";
 import Link from "next/link";
 
@@ -26,10 +28,12 @@ export default async function ContentAdmin({ searchParams }: { searchParams: Pro
         <div className="wide"><R2MediaUpload fieldName="cover_url" artwork/></div>
         <label className="wide">External player URL (RSS.com episode embed or other HTTPS media)<input name="external_url" type="url" placeholder="https://player.rss.com/teens2inspire/…"/><small>For podcasts, paste the individual episode player URL. This lets each episode play inside Teens2Inspire.</small></label>
         <R2MediaUpload />
+        <div className="wide"><CaptionFileUpload /></div>
         <label>Duration (seconds)<input name="duration_seconds" placeholder="e.g. 1440" type="number" min={0} max={86400}/></label>
         <label className="wide">Description<textarea name="description" rows={3} maxLength={5000}/></label>
         <label className="check-label"><input type="checkbox" name="member_only"/> Members only</label>
         <label className="check-label"><input type="checkbox" name="featured"/> Featured</label>
+        <div className="wide"><ContentLanguageEditor /></div>
         <div className="wide"><button className="btn primary">Upload & save content</button></div>
       </AdminUploadForm>
     </section>

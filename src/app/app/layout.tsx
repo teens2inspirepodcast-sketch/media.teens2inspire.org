@@ -6,8 +6,11 @@ import { requireUser } from "@/lib/auth";
 import { PersistentPlayerProvider } from "@/components/persistent-media-player";
 import { AppNavigation } from "@/components/app-navigation";
 import { AppStartupSplash } from "@/components/app-startup-splash";
+import { AppLocalization } from "@/components/app-localization";
+import { getAppLanguage } from "@/lib/app-language";
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const { user, profile, supabase } = await requireUser("/app");
+  const language = await getAppLanguage(supabase, user!.id);
   const cookieStore = await cookies();
   const selectedId = cookieStore.get("t2i-active-family-profile")?.value;
   let activeProfile: { display_name: string; avatar_path: string | null } = { display_name: profile?.display_name?.trim() || user?.email?.split("@")[0] || "Your account", avatar_path: profile?.avatar_path || null };
@@ -23,7 +26,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
   const { data: brandSetting } = await supabase.from("marketing_settings").select("setting_value").eq("setting_key", "brand_logo_url").maybeSingle();
   const brandLogo = brandSetting?.setting_value && /^https:\/\//.test(brandSetting.setting_value) ? brandSetting.setting_value : null;
   const displayName = activeProfile.display_name;
-  return <PersistentPlayerProvider><div className="app-shell t2i-light-streaming">
+  return <AppLocalization language={language}><PersistentPlayerProvider><div className="app-shell t2i-light-streaming">
     <AppStartupSplash />
     <header className="app-topbar">
       <Link className="app-wordmark" href="/app" aria-label="Teens2Inspire home">{brandLogo ? <img src={brandLogo} alt="Teens2Inspire" width={260} height={87}/> : <Image src="/teens2inspire-logo.png" alt="Teens2Inspire" width={260} height={87} priority />}</Link>
@@ -32,5 +35,5 @@ export default async function Layout({ children }: { children: React.ReactNode }
     </header>
     <div className="app-main-wrap">{children}</div>
     <AppNavigation placement="bottom" />
-  </div></PersistentPlayerProvider>;
+  </div></PersistentPlayerProvider></AppLocalization>;
 }

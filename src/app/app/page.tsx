@@ -2,6 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Play, Sparkles } from "lucide-react";
 import { requireUser } from "@/lib/auth";
+import { getAppLanguage } from "@/lib/app-language";
+import { localizeContentRows } from "@/lib/localized-content";
 import { MediaCard } from "@/components/media-card";
 import { FeaturedCarousel } from "@/components/featured-carousel";
 import { cookies } from "next/headers";
@@ -47,7 +49,8 @@ export default async function AppHome() {
   if (contentError) console.error("Media library query failed", contentError.message);
   if (sectionsError) console.error("Media sections query failed", sectionsError.message);
 
-  const items = (content || []) as MediaItem[];
+  const appLanguage = await getAppLanguage(supabase, user!.id);
+  const items = await localizeContentRows(supabase, (content || []) as MediaItem[], appLanguage);
   const hero = items.find((item) => item.featured) || items[0];
 
   const shelves: Shelf[] = await Promise.all(
@@ -69,9 +72,8 @@ export default async function AppHome() {
             .eq("status", "published")
         : { data: [] as MediaItem[] };
 
-      const lookup = new Map(
-        ((mappedItems.data || []) as MediaItem[]).map((item) => [item.id, item])
-      );
+      const translatedItems = await localizeContentRows(supabase, (mappedItems.data || []) as MediaItem[], appLanguage);
+      const lookup = new Map(translatedItems.map((item) => [item.id, item]));
 
       return {
         id: section.id,

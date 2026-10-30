@@ -1,0 +1,70 @@
+/* Teens2Inspire watch page + persistent audio/video player, and multilingual settings.
+   Loaded AFTER earlier themes so the player is never pushed behind the bottom navigation. */
+.t2i-language-settings{margin:24px 0 30px;padding:clamp(19px,3vw,28px);background:#fff8fb;border:1px solid #efd4e1;border-radius:22px;color:#291d29;box-shadow:0 6px 28px #71415a0c}
+.t2i-language-heading h2{margin:10px 0 6px;font:700 clamp(23px,4vw,29px)/1.2 system-ui,sans-serif;color:#291d29}
+.t2i-language-heading p,.t2i-language-note{color:#685563!important;line-height:1.7;font-size:14px}
+.t2i-language-note{font-size:12px;margin-top:17px;max-width:70ch}
+.t2i-language-form{display:flex;align-items:end;flex-wrap:wrap;gap:12px;margin:20px 0}
+.t2i-language-form label{display:block;flex-basis:100%;font-weight:750;font-size:13px;color:#352436}
+.t2i-language-form select{min-width:min(100%,280px);height:47px;max-width:100%;border:1px solid #d9b7c9;border-radius:12px;padding:0 14px;background:#fff;color:#2d1e2c;font-size:15px}
+.t2i-language-form .app-primary-button{min-height:47px;display:inline-flex;align-items:center;justify-content:center;padding:10px 23px}
+.app-shell[dir="rtl"]{direction:rtl;text-align:right}
+.app-shell[dir="rtl"] .app-topbar,.app-shell[dir="rtl"] .app-desktop-nav,.app-shell[dir="rtl"] .app-bottom-nav{direction:rtl}
+.app-shell[dir="rtl"] .app-topbar .app-wordmark{direction:ltr}
+.app-shell[dir="rtl"] .app-bottom-nav :is(a,span){text-align:center}
+.app-shell[dir="rtl"] input[type="email"],.app-shell[dir="rtl"] input[type="url"],.app-shell[dir="rtl"] .media-card-title{unicode-bidi:plaintext}
+.app-shell[dir="rtl"] .media-shelf-row,.app-shell[dir="rtl"] .t2i-stream-category-scroll{direction:rtl}
+.app-shell[dir="rtl"] .t2i-player-timeline{direction:ltr}
+/* The video node is globally mounted; only its presentation changes when browsing. */
+.t2i-persistent-player.is-mini .t2i-watch-video-stage{display:none!important}
+.t2i-persistent-player .t2i-watch-video-stage{background:#100e13;position:relative;width:100%;overflow:hidden;border-radius:17px;display:none}
+.t2i-persistent-player:is(.is-page,.is-expanded) .t2i-watch-video-stage{display:flex;align-items:center;justify-content:center;aspect-ratio:16/9;max-height:min(62dvh,610px)}
+.t2i-persistent-player:is(.is-page,.is-expanded) .t2i-watch-video-stage .t2i-video-playback{display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:contain!important;border-radius:0!important;background:#100e13!important;order:0!important}
+.t2i-persistent-player .t2i-watch-video-stage button{position:absolute;border:0;display:grid;place-items:center;cursor:pointer;border-radius:50%;color:#fff;background:#18151bb8;backdrop-filter:blur(8px);transition:opacity .2s,transform .2s}
+.t2i-persistent-player .t2i-watch-video-stage .t2i-video-stage-play{left:50%;top:50%;transform:translate(-50%,-50%);width:58px;height:58px;opacity:.55}
+.t2i-persistent-player .t2i-watch-video-stage .t2i-video-stage-play:focus-visible,.t2i-persistent-player .t2i-watch-video-stage .t2i-video-stage-play:hover{opacity:1}
+.t2i-persistent-player .t2i-watch-video-stage .t2i-video-stage-fullscreen{right:15px;bottom:15px;width:43px;height:43px;opacity:.95}
+.t2i-persistent-player .t2i-player-top-actions{display:flex;gap:8px;align-items:center}
+.t2i-persistent-player .t2i-player-return{display:inline-flex;gap:8px;align-items:center;color:#7f2254;text-decoration:none;font-size:13px;letter-spacing:0;font-weight:750;max-width:80%}
+.t2i-persistent-player .t2i-player-bottom-controls button:disabled{opacity:.45;cursor:not-allowed}
+.t2i-persistent-player .t2i-player-bottom-controls button.is-active{background:#ffe2ef;color:#7a1d4c}
+.t2i-persistent-player .t2i-player-bottom-controls button{padding:9px 12px;border-radius:12px;gap:7px}
+/* Episode player behaves like a watch PAGE, not a pop-up or bottom bar. */
+.t2i-persistent-player.is-page{position:fixed!important;inset:0!important;bottom:0!important;z-index:240!important;padding:clamp(12px,3vw,24px);background:#fffafc;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;overscroll-behavior:contain}
+.t2i-persistent-player.is-page .t2i-player-frame{position:relative;display:flex;flex-direction:column;align-items:center;gap:15px;min-height:0;width:min(100%,1080px);max-width:1080px;margin:0 auto;border:0!important;border-radius:25px!important;box-shadow:0 12px 50px #24122113!important;background:#fff!important;padding:clamp(15px,2.7vw,30px)!important;overflow:visible!important}
+.t2i-persistent-player.is-page .t2i-player-topline{order:-5;position:relative;z-index:2}
+.t2i-persistent-player.is-page .t2i-watch-video-stage{order:-4}
+.t2i-persistent-player.is-page .t2i-player-title{order:-3;width:100%;text-align:start;gap:4px;margin-top:2px}
+.t2i-persistent-player.is-page .t2i-player-title strong{font-size:clamp(17px,2.7vw,25px);white-space:normal;line-height:1.28;color:#241722!important}
+.t2i-persistent-player.is-page .t2i-player-title span{font-size:12px;color:#715a69!important}
+.t2i-persistent-player.is-page .t2i-player-controls{order:-1;gap:30px}
+.t2i-persistent-player.is-page .t2i-player-controls button{color:#7c2254}
+.t2i-persistent-player.is-page .t2i-player-controls .t2i-player-primary-control{width:53px;height:53px;color:#fff!important;background:#b42568!important}
+.t2i-persistent-player.is-page .t2i-player-expanded-body{order:-2;width:100%;display:flex;flex-direction:column;gap:16px}
+.t2i-persistent-player.is-page .t2i-player-timeline{font-size:12px;color:#40313e!important}
+.t2i-persistent-player.is-page .t2i-player-bottom-controls{justify-content:flex-start;color:#412d3a!important}
+.t2i-persistent-player.is-page .t2i-player-bottom-controls label{color:#412d3a!important}
+/* Expanded on another page is optional; the mini-player only appears after leaving the episode. */
+.t2i-persistent-player.is-expanded.is-video{z-index:240!important;padding:14px}
+.t2i-persistent-player.is-expanded.is-video .t2i-player-frame{width:min(100%,850px)!important;max-height:calc(100dvh - 28px);overflow-y:auto!important;padding:19px!important;gap:14px!important}
+.t2i-persistent-player.is-expanded.is-video .t2i-watch-video-stage{order:-2!important}
+.t2i-persistent-player.is-expanded.is-video .t2i-player-topline{order:-3!important}
+.t2i-persistent-player.is-expanded.is-video .t2i-player-title{order:-1!important}
+.t2i-persistent-player.is-expanded.is-video .t2i-player-expanded-body{order:0!important}
+.t2i-persistent-player.is-expanded.is-video .t2i-player-controls{order:1!important}
+.t2i-persistent-player.is-expanded.is-video .t2i-player-art-button{display:none!important}
+.t2i-persistent-player .t2i-player-video-caption{display:none!important}
+.t2i-persistent-player .t2i-watch-video-stage:fullscreen{width:100vw!important;height:100vh!important;max-height:none!important;aspect-ratio:auto!important;border-radius:0!important;background:#000!important}
+.t2i-persistent-player .t2i-watch-video-stage:fullscreen video{width:100%!important;height:100%!important;object-fit:contain!important}
+@media(max-width:760px){
+ .t2i-persistent-player.is-page{padding:max(12px,env(safe-area-inset-top)) 9px max(16px,env(safe-area-inset-bottom))!important}
+ .t2i-persistent-player.is-page .t2i-player-frame{margin:0 auto;padding:15px 12px 20px!important;border-radius:18px!important;gap:14px!important}
+ .t2i-persistent-player.is-page .t2i-watch-video-stage{border-radius:10px;max-height:50dvh}
+ .t2i-persistent-player.is-page .t2i-player-bottom-controls{gap:6px;justify-content:center}
+ .t2i-persistent-player.is-page .t2i-player-bottom-controls button{padding:8px 9px;font-size:11px}
+ .t2i-persistent-player.is-page .t2i-player-controls{gap:20px}
+ .t2i-persistent-player.is-page .t2i-player-return{font-size:12px}
+ .t2i-language-form select{flex:1 1 100%}
+ .t2i-language-form .app-primary-button{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.t2i-persistent-player .t2i-watch-video-stage button{transition:none}}

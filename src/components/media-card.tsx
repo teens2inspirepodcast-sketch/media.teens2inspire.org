@@ -12,6 +12,6 @@ export function MediaCard({ id, title, description, type, cover_url, variant = "
       <span className="media-card-play" aria-hidden="true"><Icon size={15} fill={type === "video" ? "currentColor" : "none"}/></span>
       <span className="media-card-type">{type}</span>
     </div>
-    <div className="media-card-copy"><h3>{title}</h3>{description && <p>{description}</p>}</div>
+    <div className="media-card-copy"><h3 data-no-translate>{title}</h3>{description && <p data-no-translate>{description}</p>}</div>
   </Link>;
 }

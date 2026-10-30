@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./streaming-refresh.css";
+import "./visual-contrast-repair.css";
+import "./player-language-upgrade.css";
 import { PWARegister } from "@/components/pwa-register";
 export const metadata: Metadata = {
   title: { default: "Teens2Inspire — Your media space", template: "%s | Teens2Inspire" },

@@ -1,0 +1,350 @@
+/*
+ * Teens2Inspire Media — mobile visual QA repair, 2026-10-29.
+ * The existing globals.css retains legacy dark-theme selectors. This final,
+ * authenticated-app-only layer deliberately establishes accessible light
+ * surfaces and explicit light-on-dark exceptions. No application logic changes.
+ *
+ * Design contract:
+ *   White/rose/cream surface  -> deep-plum headings, readable mauve secondary copy.
+ *   Berry/photo/video surface -> white/light-rose lettering.
+ *   Interactive icons and controls must never inherit white-on-white.
+ */
+html body .app-shell.t2i-light-streaming {
+  --t2i-ink: #271b27;
+  --t2i-secondary: #675763;
+  --t2i-rose: #ad205c;
+  --t2i-rose-strong: #a51b56;
+  --t2i-line: #eddce6;
+  --t2i-canvas: #ffffff;
+  --t2i-soft: #fff7fa;
+  --t2i-blush: #fbe8f0;
+  color-scheme: light;
+  background: #fff !important;
+  color: var(--t2i-ink) !important;
+  font-family: 'DM Sans',Arial,sans-serif;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap {
+  background: linear-gradient(180deg,#fffcfe 0,#fff 280px) !important;
+  color: var(--t2i-ink) !important;
+}
+/* Cancel the legacy blanket dark-mode '* { color:#fff }' specificity. */
+html body .app-shell.t2i-light-streaming .app-main-wrap * {
+  color: var(--t2i-ink) !important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(p,small,figcaption,dd,dt,time,.muted,.description,.content-description,.page-intro p,.t2i-stream-welcome p,.media-card-copy p,.settings-links small,.shelf-heading p) {
+  color: var(--t2i-secondary) !important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(h1,h2,h3,h4,strong,.media-card-copy h3,.shelf-heading h2) {
+  color: var(--t2i-ink) !important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.app-overline,.t2i-stream-overline,.content-type-line,.settings-label,.events-library-date,.events-library-location,.back-to-library,.shelf-heading>a,.t2i-stream-explore-link,.remove-saved,.settings-link-arrow) {
+  color: var(--t2i-rose) !important;
+}
+/* Header: saturated brand wordmark is legible on white, not pink-on-pink. */
+html body .app-shell.t2i-light-streaming .app-topbar {
+  height:78px !important;
+  background:rgba(255,255,255,.98) !important;
+  border-bottom:1px solid #f2e3eb !important;
+  box-shadow:0 5px 24px rgba(116,33,71,.075) !important;
+  color:var(--t2i-ink) !important;
+  backdrop-filter:blur(16px);
+  justify-content:space-between;
+  gap:14px;
+}
+html body .app-shell.t2i-light-streaming .app-topbar::before {
+  content:"";position:absolute;left:0;right:0;top:0;height:3px;
+  background:linear-gradient(90deg,#e5327d,#ff8db5 48%,#f4cee0);
+}
+html body .app-shell.t2i-light-streaming .app-wordmark {
+  width:clamp(178px,20vw,235px) !important;
+  max-width:63vw !important;
+  padding:0 !important;
+  height:auto !important;
+  max-height:64px !important;
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  overflow:visible !important;
+}
+html body .app-shell.t2i-light-streaming .app-wordmark img {
+  width:100% !important; height:auto !important; max-height:58px !important;
+  object-fit:contain !important; filter:none !important; opacity:1 !important;
+}
+html body .app-shell.t2i-light-streaming .app-account {
+  margin-left:auto; padding:4px 7px 4px 4px;
+  background:#fff !important; color:#6a3e55 !important;
+  border:1px solid #efd3e1 !important;border-radius:999px !important;
+  box-shadow:0 3px 12px rgba(96,31,59,.06);
+}
+html body .app-shell.t2i-light-streaming .app-account :is(span,svg){color:#773c59 !important}
+html body .app-shell.t2i-light-streaming .app-account .account-avatar {
+  color:#5b2740!important;background:#fce4ed!important;
+  border:2px solid #edb1cb!important;width:38px;height:38px;
+  font-size:14px;font-weight:800;
+}
+html body .app-shell.t2i-light-streaming .app-account .account-avatar.account-avatar-photo{object-fit:cover;border-radius:50%}
+html body .app-shell.t2i-light-streaming .app-desktop-nav a {
+  color:#644f5e!important;background:transparent!important;
+  border-radius:999px!important;
+}
+html body .app-shell.t2i-light-streaming .app-desktop-nav a.is-active,
+html body .app-shell.t2i-light-streaming .app-desktop-nav a:hover {
+  color:var(--t2i-rose)!important;background:#fff1f7!important;
+  border-color:#e8c7d8!important;
+}
+/* Global page typography. */
+html body .app-shell.t2i-light-streaming .app-content {max-width:1370px;}
+html body .app-shell.t2i-light-streaming .page-intro {margin-top:18px;margin-bottom:26px;}
+html body .app-shell.t2i-light-streaming .page-intro h1 {
+  font-family:'Manrope','DM Sans',sans-serif!important;
+  font-size:clamp(32px,4vw,48px)!important;
+  font-weight:800!important;letter-spacing:-.05em!important;
+  line-height:1.12!important;color:var(--t2i-ink)!important;
+}
+html body .app-shell.t2i-light-streaming .page-intro p{font-size:clamp(13px,1.3vw,16px)!important;line-height:1.6!important}
+html body .app-shell.t2i-light-streaming .app-overline {font-size:11px!important;letter-spacing:.16em!important;}
+/* White-on-berry is the intentional contrast exception, including the cover carousel. */
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-stream-hero {
+  border-radius:26px!important;
+  background-color:#78274d!important;
+  color:#fff!important;box-shadow:0 15px 40px rgba(109,27,68,.18)!important;
+}
+/* Inline cover-art backgrounds are intentionally not overridden. */
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-stream-hero :is(.t2i-stream-feature-copy,.t2i-stream-feature-copy h2,.t2i-stream-feature-credit,.t2i-carousel-next,.t2i-carousel-next svg,.t2i-player-auth-label,.t2i-stream-play-cta svg) {
+  color:#fff!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-stream-hero :is(.t2i-stream-feature-copy p,.t2i-stream-feature-kicker) {
+  color:#ffe2ee!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-stream-feature-copy h2 {font-size:clamp(32px,4.4vw,63px)!important;line-height:1.08!important;}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-stream-play-cta {
+  color:#92234e!important;background:#fff!important;border:1px solid #fff!important;
+  border-radius:999px!important;box-shadow:0 8px 20px #1d071626!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-stream-play-cta svg {color:#92234e!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-stream-hero .t2i-carousel-next {background:#ffffff27!important;border:1px solid #fff9!important}
+/* Cards: original artwork visible, bright surfaces, crisp metadata. */
+html body .app-shell.t2i-light-streaming .app-main-wrap .media-card {
+  background:transparent!important;border:0!important;
+  box-shadow:none!important;border-radius:18px!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .media-card-art {
+  border-radius:20px!important;border:1px solid #f5e5ed!important;
+  box-shadow:0 7px 24px rgba(75,20,43,.09)!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .media-card-copy :is(h3,strong){color:#271a27!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .media-card-copy p{color:#6b5b65!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .media-card-type {
+  color:#682641!important;background:#fff9f1!important;border-radius:999px!important;
+  border:1px solid #fff!important;font-weight:800!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .media-card-type *{color:#682641!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .media-card-play,
+html body .app-shell.t2i-light-streaming .app-main-wrap .media-card-play svg{color:#b52461!important;background:#fff!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-stream-category-scroll a{color:#6f3551!important;background:#fff7fa!important;border-color:#eed6e2!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-stream-category-scroll a:hover,
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-stream-category-scroll a:first-child{background:#ad205c!important;border-color:#ad205c!important;color:#fff!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-stream-community {background:linear-gradient(125deg,#fde8f1,#fff2f7,#fbe0ec)!important;}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-stream-community :is(h2,p,span,a){color:#542d40!important}
+/* App navigation must remain visible even over the white home screen. */
+html body .app-shell.t2i-light-streaming .app-bottom-nav {
+  position:fixed!important;inset-inline:0;bottom:0;z-index:100!important;
+  min-height:calc(79px + env(safe-area-inset-bottom))!important;
+  height:calc(79px + env(safe-area-inset-bottom))!important;
+  display:flex!important;align-items:center!important;justify-content:space-around;
+  padding:6px 6px calc(7px + env(safe-area-inset-bottom))!important;
+  background:#fff!important;border-top:1px solid #eddae5!important;
+  box-shadow:0 -7px 28px rgba(82,28,53,.085)!important;
+}
+html body .app-shell.t2i-light-streaming .app-bottom-nav a {
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  flex-direction:column!important;min-width:0;min-height:60px!important;
+  padding:6px 2px!important;gap:5px!important;
+  border-radius:18px!important;border:1px solid transparent!important;
+  background:transparent!important;color:#766372!important;
+  font-size:11px!important;line-height:1.2!important;font-weight:750!important;
+}
+html body .app-shell.t2i-light-streaming .app-bottom-nav a :is(svg,span){color:inherit!important;opacity:1!important}
+html body .app-shell.t2i-light-streaming .app-bottom-nav a svg{width:25px!important;height:25px!important;stroke:currentColor!important}
+html body .app-shell.t2i-light-streaming .app-bottom-nav a svg :is(path,circle,rect,line,polyline,polygon,ellipse) {
+  color:inherit!important;stroke:currentColor!important;
+}
+html body .app-shell.t2i-light-streaming .app-bottom-nav a.is-active {
+  color:#a91e5a!important;background:#fff0f6!important;
+  border:1px solid #e8afc8!important;
+  box-shadow:inset 0 0 0 1px #fae6ef!important;
+}
+html body .app-shell.t2i-light-streaming .app-bottom-nav a.is-active::before{background:#d92f77!important;height:3px!important;width:25px!important}
+/* Settings: remove the hard dark frames and prevent dark text on dark links. */
+html body .app-shell.t2i-light-streaming .app-main-wrap .settings-layout,
+html body .app-shell.t2i-light-streaming .app-main-wrap .settings-links {
+  background:transparent!important;color:var(--t2i-ink)!important;
+  border:0!important;box-shadow:none!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.settings-profile-card,.settings-membership,.settings-links>a,.family-profile-row,.settings-card,.settings-panel,.events-library-card,.empty-state,.download-detail-card,.article-reading-content,.rss-episode-player,.saved-card,.settings-section) {
+  background:#fff9fc!important;
+  color:var(--t2i-ink)!important;
+  border:1px solid #efdce6!important;
+  border-radius:22px!important;
+  box-shadow:0 8px 25px rgba(64,27,46,.045)!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .settings-profile-card,
+html body .app-shell.t2i-light-streaming .app-main-wrap .settings-membership{padding:clamp(20px,3.4vw,32px)!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .settings-links>a {
+  display:flex;align-items:center;justify-content:space-between;
+  min-height:75px;padding:18px 20px!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .settings-links>a:hover{background:#fff0f6!important;border-color:#e3bdd1!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .settings-links>a :is(strong,span){color:#2d202b!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .settings-links>a small {color:#675763!important;font-size:12px!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .settings-links>a .settings-link-arrow {color:#ad205c!important;font-size:26px!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.settings-profile-card,.settings-membership,.family-profile-row) :is(h2,h3,strong,span,label){color:#2d202b!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.settings-profile-card,.settings-membership,.family-profile-row) :is(p,small){color:#685866!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .settings-avatar {
+  background:#f6dce9!important;color:#8d2255!important;
+  border:1px solid #e8c8d8!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .status-pill.active {
+  background:#e0f6e8!important;color:#245b3c!important;
+  border-color:#bce5c8!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .status-pill.active *{color:#245b3c!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.settings-signout button,.membership-actions button,.settings-membership button) {
+  background:#2d1d2e!important;border:1px solid #594657!important;
+  color:#fff!important;border-radius:999px!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.settings-signout button,.membership-actions button,.settings-membership button) *{color:#fff!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .app-primary-button,
+html body .app-shell.t2i-light-streaming .app-main-wrap .cinematic-primary {
+  color:#fff!important;background:#a91e5a!important;border:1px solid #a91e5a!important;
+  border-radius:999px!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .app-primary-button *{color:#fff!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .app-secondary-button {
+  background:#fff!important;color:#9b255d!important;border:1px solid #e5bed0!important;
+  border-radius:999px!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .empty-state :is(h2,p){color:#3f2c3c!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .empty-state a{color:#a91e5a!important;font-weight:800!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .empty-state-icon,
+html body .app-shell.t2i-light-streaming .app-main-wrap .empty-state-icon *{color:#9f235b!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(input,select,textarea,option) {
+  background:#fff!important;color:#2d202b!important;
+  border-color:#dcc7d4!important;color-scheme:light;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(input,textarea)::placeholder{color:#776772!important;opacity:1!important}
+/* Profile selector: soft, calm and consistent with the white media interface. */
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.profile-picker-page,.profile-add-page) {
+  background:radial-gradient(ellipse at 50% 0%,#fae7f0 0%,#fff8fc 46%,#fff 94%)!important;
+  color:var(--t2i-ink)!important;
+  min-height:calc(100dvh - 85px - env(safe-area-inset-bottom))!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .profile-picker-brand {margin-bottom:clamp(28px,5vh,60px)}
+html body .app-shell.t2i-light-streaming .app-main-wrap .profile-picker-brand :is(span,b){color:#762c50!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.profile-picker-content h1,.profile-add-card h1){color:#291826!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.profile-picker-content>p,.profile-add-card>p){color:#6e5968!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .cinematic-eyebrow{color:#ab2563!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .cinematic-avatar {
+  background:linear-gradient(145deg,#ba618a,#6a365b)!important;
+  border:2px solid #e5b5cc!important;
+  border-radius:23px!important;box-shadow:0 10px 25px rgba(102,30,67,.18)!important;
+  color:#fff!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .cinematic-avatar *{color:#fff!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .cinematic-plus {
+  border:2px dashed #c286a7!important;border-radius:23px!important;
+  color:#9b3365!important;background:#fff7fb!important;box-shadow:none!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .cinematic-profile strong{color:#332335!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .cinematic-profile small{color:#9f3c70!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.profile-picker-manage,.profile-add-cancel,.profile-add-back){color:#9d2a63!important;border-color:#e6b9ce!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .profile-picker-footer{color:#867080!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .profile-add-card{
+  background:#fff!important;border:1px solid #eddae5!important;
+  border-radius:27px!important;box-shadow:0 20px 60px rgba(75,24,51,.09)!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .cinematic-add-form label{color:#45303e!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .cinematic-add-form input{background:#fff!important;color:#271a27!important;border-color:#e1ccd7!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.netflix-profile-card strong,.family-manage-heading,.family-profile-row-name h3){color:#362637!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .netflix-add-profile-plus{color:#95315d!important;background:#fff2f8!important;border-color:#dbacc2!important}
+/* Audio/video player and search UI */
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.t2i-play-prompt-art,.t2i-player-auth-label,.t2i-prompt-hint) {color:#fff!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-big-play-button,
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-big-play-button svg{color:#a91e5a!important;background:#fff!important}
+html body .app-shell.t2i-light-streaming .app-main-wrap .filter-pills a.is-selected{background:#a91e5a!important;color:#fff!important;border-color:#a91e5a!important}
+/* Player sits outside the app shell; always use dark-on-white except its pink play circle. */
+html body .t2i-persistent-player :is(.t2i-player-title strong,.t2i-player-timeline,.t2i-player-bottom-controls,.t2i-player-bottom-controls label){color:#302231!important}
+html body .t2i-persistent-player .t2i-player-title span{color:#695866!important}
+html body .t2i-persistent-player .t2i-player-primary-control,
+html body .t2i-persistent-player .t2i-player-primary-control svg{background:#ac205e!important;color:#fff!important}
+html body .t2i-persistent-player .t2i-player-frame{background:#fff!important;border-color:#edd4e0!important}
+/* Mobile spacing, icon visibility, and no unintended horizontal overflow. */
+@media(max-width:1100px){html body .app-shell.t2i-light-streaming .app-desktop-nav{display:none!important}}
+@media(max-width:760px){
+  html body .app-shell.t2i-light-streaming .app-topbar {height:71px!important;padding:0 17px!important}
+  html body .app-shell.t2i-light-streaming .app-wordmark {width:clamp(166px,48vw,200px)!important;max-width:57vw!important}
+  html body .app-shell.t2i-light-streaming .app-wordmark img{height:auto!important;max-height:58px!important}
+  html body .app-shell.t2i-light-streaming .app-account{margin-left:auto;padding:3px!important}
+  html body .app-shell.t2i-light-streaming .app-account .account-avatar{width:39px;height:39px}
+  html body .app-shell.t2i-light-streaming .app-content{padding-inline:19px!important}
+  html body .app-shell.t2i-light-streaming .t2i-stream-hero{min-height:365px!important;padding:27px!important}
+  html body .app-shell.t2i-light-streaming .t2i-stream-feature-copy h2{font-size:clamp(30px,8vw,40px)!important}
+  html body .app-shell.t2i-light-streaming .t2i-stream-welcome h1{font-size:32px!important}
+  html body .app-shell.t2i-light-streaming .t2i-stream-community{margin-bottom:30px!important}
+  html body .app-shell.t2i-light-streaming .app-bottom-nav a{font-size:11px!important;gap:4px!important}
+  html body .app-shell.t2i-light-streaming .app-bottom-nav a svg{width:24px!important;height:24px!important}
+  html body .app-shell.t2i-light-streaming .app-main-wrap .settings-links>a{padding:17px 18px!important}
+  html body .app-shell.t2i-light-streaming .app-main-wrap .profile-picker-page{padding:25px 16px 44px!important}
+}
+@media(max-width:390px){
+  html body .app-shell.t2i-light-streaming .app-wordmark{width:155px!important}
+  html body .app-shell.t2i-light-streaming .app-bottom-nav a{font-size:10px!important}
+  html body .app-shell.t2i-light-streaming .app-bottom-nav a svg{width:22px!important;height:22px!important}
+}
+@media(min-width:1101px){html body .app-shell.t2i-light-streaming .app-bottom-nav{display:none!important}}
+@media(prefers-reduced-motion:reduce){html body .app-shell.t2i-light-streaming *{transition:none!important}}
+/* Detail / protected-player contrast: white on deliberately dark photographic panels. */
+html body .app-shell.t2i-light-streaming .app-main-wrap .secure-player-shell {
+  background:#fff!important;border:1px solid #edd8e3!important;
+  border-radius:22px!important;overflow:hidden;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .secure-player-placeholder {
+  background:linear-gradient(125deg,#552344,#26152b)!important;
+  border-radius:18px!important;color:#fff!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .secure-player-placeholder :is(h2,h3,h4,span,strong,label,.secure-player-copy,.secure-player-lock,.secure-player-lock *) {
+  color:#fff!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .secure-player-placeholder :is(p,small,.secure-player-copy p) {
+  color:#f9e3ef!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .secure-player-placeholder :is(.secure-play-button,.app-primary-button),
+html body .app-shell.t2i-light-streaming .app-main-wrap .secure-player-placeholder :is(.secure-play-button,.app-primary-button) * {
+  color:#fff!important;background:#a91e5a!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .secure-player-error {
+  background:#fff0f6!important;color:#8d2455!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .rss-episode-player {
+  background:#fffafc!important;color:#291a27!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .rss-episode-player p{color:#655362!important}
+/* Buttons whose labels were white on white in earlier settings/style layers. */
+html body .app-shell.t2i-light-streaming .app-main-wrap .app-secondary-button *,
+html body .app-shell.t2i-light-streaming .app-main-wrap .remove-saved,
+html body .app-shell.t2i-light-streaming .app-main-wrap .back-to-library{
+  color:#922559!important;
+}
+/* Native focus rings must be visible on all light surfaces. */
+html body .app-shell.t2i-light-streaming :is(a,button,input,select,textarea):focus-visible {
+  outline:3px solid #c12f72!important;outline-offset:3px!important;
+}
+/* Lucide's individual SVG paths inherited old white strokes in the legacy theme. */
+html body .app-shell.t2i-light-streaming .app-topbar .app-account svg :is(path,circle,rect,line,polyline,polygon),
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.media-card-play,.empty-state-icon,.events-library-icon,.greeting-sparkle,.t2i-big-play-button) svg :is(path,circle,rect,line,polyline,polygon) {
+  stroke:currentColor!important;color:inherit!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.media-card-play,.empty-state-icon,.events-library-icon,.greeting-sparkle) svg,
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.media-card-play,.empty-state-icon,.events-library-icon,.greeting-sparkle) svg * {
+  color:#a92460!important;
+}

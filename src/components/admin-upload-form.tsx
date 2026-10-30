@@ -38,6 +38,19 @@ export function AdminUploadForm({ action, className, children }: { action: Actio
     return supabase.storage.from("site-brand-assets").getPublicUrl(path).data.publicUrl;
   }
 
+  async function uploadCaptions(file: File): Promise<string> {
+    if (!/\.vtt$/i.test(file.name)) throw new Error("Captions must be in WebVTT (.vtt) format.");
+    if (!file.size || file.size > 5 * 1024 * 1024) throw new Error("Subtitle files must be 5 MB or smaller.");
+    const beginning = await file.slice(0, 128).text();
+    if (!/^\uFEFF?WEBVTT(?:[ \t\r\n]|$)/.test(beginning)) throw new Error("The subtitle file must begin with WEBVTT.");
+    const supabase = createClient();
+    const path = `captions/${crypto.randomUUID()}.vtt`;
+    const validVtt = new File([file], `${path.split('/').pop()}`, { type: "text/vtt" });
+    const { error } = await supabase.storage.from("media-captions").upload(path, validVtt, { contentType: "text/vtt", upsert: false });
+    if (error) throw new Error(error.message);
+    return path;
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     if (uploadedRef.current) { uploadedRef.current = false; return; }
     event.preventDefault();
@@ -58,7 +71,7 @@ export function AdminUploadForm({ action, className, children }: { action: Actio
         setProgress(`Uploading ${index + 1} of ${selected.length}: ${file.name}`);
         let urlOrKey = cacheRef.current.get(file);
         if (!urlOrKey) {
-          urlOrKey = picker.dataset.storage === "brand" ? await uploadBrandAsset(file) : await uploadR2(file, picker.dataset.artwork === "true");
+          urlOrKey = picker.dataset.storage === "captions" ? await uploadCaptions(file) : picker.dataset.storage === "brand" ? await uploadBrandAsset(file) : await uploadR2(file, picker.dataset.artwork === "true");
           cacheRef.current.set(file, urlOrKey);
         }
         field.value = urlOrKey;
