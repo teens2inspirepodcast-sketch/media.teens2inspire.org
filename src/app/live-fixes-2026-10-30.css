@@ -1,0 +1,22 @@
+/* Accessible, intentional, customer-facing account deletion card.
+   Overrides legacy dark panels/text in the white-and-blush media app. */
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-delete-account-card.panel {
+  background:#fff8fb!important;
+  color:#352331!important;
+  border:1px solid #edcbdc!important;
+  border-radius:24px!important;
+  box-shadow:0 8px 30px rgba(75,28,51,.07)!important;
+  padding:clamp(22px,4vw,38px)!important;
+  margin-top:28px!important;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-delete-account-card :is(h2,h3,strong){color:#32202f!important;}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-delete-account-card p{color:#655261!important;line-height:1.65!important;}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-delete-account-card button.btn.secondary{
+  display:inline-flex;align-items:center;justify-content:center;min-height:46px;
+  width:auto;max-width:100%;border-radius:999px!important;border:1px solid #b13b6e!important;
+  background:#fff!important;color:#892b57!important;font-weight:750!important;
+  padding:11px 20px!important;font-size:14px!important;line-height:1.3!important;cursor:pointer;
+}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-delete-account-card button.btn.secondary:disabled{opacity:.65;cursor:wait;}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-delete-account-card button.btn.secondary:hover:not(:disabled){background:#fff0f7!important;color:#752148!important;}
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-delete-account-card .notice{color:#892b57!important;}

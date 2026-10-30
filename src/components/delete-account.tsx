@@ -15,5 +15,5 @@ export function DeleteAccount() {
     catch (e) { setMessage(e instanceof Error ? e.message : t("Could not delete account.")); }
     finally { setBusy(false); }
   }
-  return <section className="panel" style={{ marginTop: 24, borderColor: "#e8cbd4" }}><h2>Delete account</h2><p>This permanently removes your account and associated profile data. Cancel any paid membership separately first; account deletion may not automatically stop Stripe billing.</p><button className="btn secondary" type="button" disabled={busy} onClick={remove}>{busy ? t("Deleting…") : t("Permanently delete my account")}</button>{message && <p className="notice" role="status">{message}</p>}</section>;
+  return <section className="panel t2i-delete-account-card"><h2>Delete account</h2><p>This permanently removes your account and associated profile data. Cancel any active subscription separately before deleting your account. Account deletion does not automatically stop recurring payments.</p><button className="btn secondary" type="button" disabled={busy} onClick={remove}>{busy ? t("Deleting…") : t("Permanently delete my account")}</button>{message && <p className="notice" role="status">{message}</p>}</section>;
 }
