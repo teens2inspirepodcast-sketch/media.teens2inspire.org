@@ -1,0 +1,17 @@
+/* Final readable rose palette for light surfaces. Loaded after legacy styles. */
+html body .app-startup-splash .app-startup-splash-card{background:#fff9fc!important;color:#34202e!important;border:1px solid #e2b9cd!important;}
+html body .app-startup-splash .app-startup-splash-card p{color:#67334f!important;font-size:14px!important;font-weight:800!important;letter-spacing:.015em!important;opacity:1!important;text-align:center!important;text-shadow:none!important;}
+html body .app-startup-splash .app-startup-splash-card .app-startup-splash-track{background:#e6c6d6!important;}
+html body .app-startup-splash .app-startup-splash-card .app-startup-splash-track span{background:linear-gradient(90deg,#a91c59,#db578c)!important;}
+html body .app-shell.t2i-light-streaming{--t2i-rose:#a11e59;--t2i-rose-strong:#982052;--t2i-secondary:#65505f;}
+/* Accent words/icons on white, ivory, and blush surfaces: never use pale baby pink. */
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.app-overline,.t2i-stream-overline,.content-type-line,.settings-label,.events-library-date,.events-library-location,.back-to-library,.shelf-heading>a,.t2i-stream-explore-link,.remove-saved,.settings-link-arrow,.t2i-stream-community>span,.t2i-stream-community>a){color:#a11e59!important;}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.app-page-content,.settings-layout,.settings-profile-card,.settings-membership,.settings-links,.settings-card,.settings-section,.events-library-card,.saved-card,.media-card-copy,.t2i-stream-empty,.article-reading-content,.download-detail-card) :is(p,small,.muted,.description){color:#665260!important;opacity:1!important;}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(input,textarea)::placeholder{color:#736170!important;opacity:1!important;}
+/* Intentionally light-on-dark: hero artwork, expanded playback, and primary actions. */
+html body .app-shell.t2i-light-streaming .app-main-wrap .t2i-stream-hero :is(.t2i-stream-feature-copy p,.t2i-stream-feature-kicker){color:#ffeaf4!important;}
+html body .app-shell.t2i-light-streaming .app-main-wrap :is(.t2i-stream-hero,.t2i-stream-hero h2,.t2i-stream-hero .t2i-stream-feature-credit){color:#fff!important;}
+html body .app-shell.t2i-light-streaming .app-bottom-nav a{color:#61515f!important;}
+html body .app-shell.t2i-light-streaming .app-bottom-nav a.is-active{color:#9d1856!important;}
+html body .app-shell.t2i-light-streaming .app-bottom-nav a :is(span,svg){color:inherit!important;}
+@media(prefers-contrast:more){html body .app-startup-splash .app-startup-splash-card p{color:#321323!important;}html body .app-shell.t2i-light-streaming .app-main-wrap :is(p,small,.muted){color:#4b3544!important;}}
