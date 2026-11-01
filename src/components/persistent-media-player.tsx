@@ -40,6 +40,30 @@ export function PersistentPlayerProvider({ children }: { children: ReactNode }) 
   const video = useRef<HTMLVideoElement>(null);
   const videoStage = useRef<HTMLDivElement>(null);
   const pending = useRef(0);
+  const pendingResume = useRef<{ id: string; seconds: number } | null>(null);
+  const lastProgressSave = useRef<{ id: string; at: number }>({ id: '', at: 0 });
+  const hasStarted = useRef(false);
+
+  // Server derives the active Family profile from an authenticated, validated cookie.
+  // The browser never sends a user ID or profile ID as a trusted input.
+  const persistPosition = useCallback((id: string, element: HTMLMediaElement | null, completed = false, keepalive = false) => {
+    if (!element || !id || !hasStarted.current) return;
+    const position = Number(element.currentTime || 0);
+    const duration = Number.isFinite(element.duration) ? element.duration : 0;
+    if (!Number.isFinite(position) || position < 0) return;
+    const body = JSON.stringify({ contentId: id, positionSeconds: Number(position.toFixed(2)), durationSeconds: Number(duration.toFixed(2)), completed });
+    void fetch('/api/media/progress', {
+      method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body, keepalive,
+    }).catch(() => { /* A transient connectivity error must not interrupt playback. */ });
+  }, []);
+
+  const saveOnInterval = useCallback((id: string, element: HTMLMediaElement) => {
+    if (!id || !hasStarted.current) return;
+    const now = Date.now();
+    if (lastProgressSave.current.id === id && now - lastProgressSave.current.at < 10_000) return;
+    lastProgressSave.current = { id, at: now };
+    persistPosition(id, element);
+  }, [persistPosition]);
   const lastPathname = useRef(pathname);
   const onContentPage = !!current && pathname === `/app/content/${current.id}`;
   const showFull = onContentPage || expanded;
@@ -53,7 +77,11 @@ export function PersistentPlayerProvider({ children }: { children: ReactNode }) 
       return;
     }
     const request = ++pending.current;
+    if (current) persistPosition(current.id, isAudio(current) ? audio.current : video.current);
     audio.current?.pause(); video.current?.pause();
+    hasStarted.current = false;
+    pendingResume.current = null;
+    lastProgressSave.current = { id: item.id, at: 0 };
     setPlaying(false); setElapsed(0); setDuration(0); setSrc(''); setError(''); setCaptionsOn(false);
     setLoading(true); setExpanded(true);
     try {
@@ -63,6 +91,17 @@ export function PersistentPlayerProvider({ children }: { children: ReactNode }) 
       if (!response.ok) throw new Error(typeof data.error === 'string' ? data.error : 'Playback is unavailable.');
       if (typeof data.url !== 'string' || !data.url.startsWith('https://')) throw new Error('The media service returned an invalid playback URL.');
       if (request !== pending.current) return;
+      // Resume is optional: playback proceeds if the bookmark service is temporarily unavailable.
+      try {
+        const bookmarkResponse = await fetch(`/api/media/progress?contentId=${encodeURIComponent(item.id)}`, { cache: 'no-store', credentials: 'same-origin' });
+        if (bookmarkResponse.ok) {
+          const bookmark = await bookmarkResponse.json();
+          if (!bookmark.completed && Number.isFinite(Number(bookmark.positionSeconds))) {
+            pendingResume.current = { id: item.id, seconds: Math.max(0, Number(bookmark.positionSeconds)) };
+          }
+        }
+      } catch { /* Bookmark retrieval should never block authorized playback. */ }
+      if (request !== pending.current) return;
       setCurrent(item); setSrc(data.url);
     } catch (cause) {
       if (request !== pending.current) return;
@@ -70,7 +109,7 @@ export function PersistentPlayerProvider({ children }: { children: ReactNode }) 
     } finally {
       if (request === pending.current) setLoading(false);
     }
-  }, [current?.id, src]);
+  }, [current?.id, src, persistPosition]);
 
   useEffect(() => {
     const element = activeElement();
@@ -111,6 +150,20 @@ export function PersistentPlayerProvider({ children }: { children: ReactNode }) 
   }, [captionsOn, current?.id, src]);
 
   useEffect(() => {
+    if (!current) return;
+    const contentId = current.id;
+    const onLeave = () => {
+      if (document.visibilityState === 'hidden') persistPosition(contentId, activeElement(), false, true);
+    };
+    document.addEventListener('visibilitychange', onLeave);
+    window.addEventListener('pagehide', onLeave);
+    return () => {
+      document.removeEventListener('visibilitychange', onLeave);
+      window.removeEventListener('pagehide', onLeave);
+    };
+  }, [current?.id, activeElement, persistPosition]);
+
+  useEffect(() => {
     document.body.classList.toggle('t2i-player-is-open', Boolean(current && showFull));
     return () => document.body.classList.remove('t2i-player-is-open');
   }, [current, showFull]);
@@ -129,8 +182,11 @@ export function PersistentPlayerProvider({ children }: { children: ReactNode }) 
   }
   function close() {
     pending.current++;
+    if (current) persistPosition(current.id, activeElement(), false, true);
     audio.current?.pause(); video.current?.pause();
     if (document.fullscreenElement) void document.exitFullscreen().catch(() => {});
+    hasStarted.current = false;
+    pendingResume.current = null;
     setCurrent(null); setSrc(''); setExpanded(false); setError(''); setPlaying(false);
     setLoading(false); setElapsed(0); setDuration(0); setCaptionsOn(false); setIsFullscreen(false);
   }
@@ -147,9 +203,36 @@ export function PersistentPlayerProvider({ children }: { children: ReactNode }) 
     } catch { setError('Fullscreen could not be opened on this device.'); }
   }
   const mediaEvents = {
-    onTimeUpdate: (event: SyntheticEvent<HTMLMediaElement>) => setElapsed(event.currentTarget.currentTime),
+    onLoadedMetadata: (event: SyntheticEvent<HTMLMediaElement>) => {
+      const element = event.currentTarget;
+      const saved = pendingResume.current;
+      if (saved && saved.id === current?.id && saved.seconds > 0) {
+        const safeEnd = Number.isFinite(element.duration) && element.duration > 5 ? element.duration - 3 : saved.seconds;
+        element.currentTime = Math.max(0, Math.min(saved.seconds, safeEnd));
+        setElapsed(element.currentTime);
+      }
+      pendingResume.current = null;
+    },
+    onTimeUpdate: (event: SyntheticEvent<HTMLMediaElement>) => {
+      setElapsed(event.currentTarget.currentTime);
+      if (current) saveOnInterval(current.id, event.currentTarget);
+    },
     onDurationChange: (event: SyntheticEvent<HTMLMediaElement>) => setDuration(Number.isFinite(event.currentTarget.duration) ? event.currentTarget.duration : 0),
-    onPlay: () => setPlaying(true), onPause: () => setPlaying(false), onEnded: () => setPlaying(false),
+    onPlay: (event: SyntheticEvent<HTMLMediaElement>) => {
+      setPlaying(true); hasStarted.current = true;
+      if (current) saveOnInterval(current.id, event.currentTarget);
+    },
+    onPause: (event: SyntheticEvent<HTMLMediaElement>) => {
+      setPlaying(false);
+      if (current) persistPosition(current.id, event.currentTarget);
+    },
+    onSeeked: (event: SyntheticEvent<HTMLMediaElement>) => {
+      if (current) persistPosition(current.id, event.currentTarget);
+    },
+    onEnded: (event: SyntheticEvent<HTMLMediaElement>) => {
+      setPlaying(false);
+      if (current) persistPosition(current.id, event.currentTarget, true);
+    },
     onError: () => setError('This media could not be played. Please try again.'),
   };
   const isVideo = current && !isAudio(current);

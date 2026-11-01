@@ -8,6 +8,7 @@ import { AppNavigation } from "@/components/app-navigation";
 import { AppStartupSplash } from "@/components/app-startup-splash";
 import { AppLocalization } from "@/components/app-localization";
 import { getAppLanguage } from "@/lib/app-language";
+import { resolveViewerProfileId } from "@/lib/viewer-profile";
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const { user, profile, supabase } = await requireUser("/app");
   const language = await getAppLanguage(supabase, user!.id);
@@ -26,7 +27,8 @@ export default async function Layout({ children }: { children: React.ReactNode }
   const { data: brandSetting } = await supabase.from("marketing_settings").select("setting_value").eq("setting_key", "brand_logo_url").maybeSingle();
   const brandLogo = brandSetting?.setting_value && /^https:\/\//.test(brandSetting.setting_value) ? brandSetting.setting_value : null;
   const displayName = activeProfile.display_name;
-  return <AppLocalization language={language}><PersistentPlayerProvider><div className="app-shell t2i-light-streaming">
+  const viewerProfileId = await resolveViewerProfileId(supabase,user!.id,profile);
+  return <AppLocalization language={language}><PersistentPlayerProvider key={viewerProfileId}><div className="app-shell t2i-light-streaming">
     <AppStartupSplash />
     <header className="app-topbar">
       <Link className="app-wordmark" href="/app" aria-label="Teens2Inspire home">{brandLogo ? <img src={brandLogo} alt="Teens2Inspire" width={260} height={87}/> : <Image src="/teens2inspire-logo.png" alt="Teens2Inspire" width={260} height={87} priority />}</Link>

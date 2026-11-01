@@ -5,6 +5,8 @@ import "./visual-contrast-repair.css";
 import "./player-language-upgrade.css";
 import "./live-fixes-2026-10-30.css";
 import "./rose-contrast-2026-10-30.css";
+import "./popup-admin-studio.css";
+import "./collection-pages.css";
 import { PWARegister } from "@/components/pwa-register";
 export const metadata: Metadata = {
   title: { default: "Teens2Inspire — Your media space", template: "%s | Teens2Inspire" },

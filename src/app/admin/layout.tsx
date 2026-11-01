@@ -13,7 +13,7 @@ const nav = [
   ["School access", "/admin/schools", School],
   ["Inquiries", "/admin/inquiries", Mail],
   ["Partnerships", "/admin/partnerships", Handshake],
-  ["Website pop-up", "https://teens2inspire.org/admin/popup", Megaphone],
+  ["Website pop-up", "/admin/popup", Megaphone],
   ["Site settings", "/admin/site-settings", SlidersHorizontal],
   ["Podcast platforms", "/admin/podcast-platforms", Radio],
 ] as const;

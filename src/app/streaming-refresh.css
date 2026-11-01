@@ -144,3 +144,18 @@ html body .app-shell.t2i-light-streaming .app-page-content .notice{background:#f
 .t2i-persistent-player.is-expanded .t2i-video-playback.is-visible{order:-2!important}
 .t2i-persistent-player.is-expanded:has(.t2i-video-playback.is-visible) .t2i-player-art-button{display:none}
 @media(min-width:1101px){html body .app-shell.t2i-light-streaming .app-bottom-nav{display:none!important}.t2i-persistent-player.is-mini{bottom:18px}}
+
+/* Personal, account-synced playback history; intentionally readable on the light app theme. */
+.t2i-recent-shelf{margin-top:clamp(22px,3.7vw,42px)}
+.t2i-recent-row{display:flex;gap:15px;overflow-x:auto;scroll-snap-type:x proximity;padding:5px 3px 15px;scrollbar-width:thin;scrollbar-color:#cb8da9 transparent}
+.t2i-recent-card{display:block;flex:0 0 clamp(174px,22vw,238px);min-width:0;border-radius:19px;background:#fff;border:1px solid #f0dbe6;text-decoration:none;color:#291b28!important;box-shadow:0 7px 25px rgba(48,24,43,.055);overflow:hidden;scroll-snap-align:start;transition:transform .2s ease,box-shadow .2s ease}
+.t2i-recent-card:hover,.t2i-recent-card:focus-visible{transform:translateY(-3px);box-shadow:0 10px 28px rgba(48,24,43,.14)}
+.t2i-recent-art{position:relative;aspect-ratio:16/10;background:#f7e5ef center /cover no-repeat;display:grid;place-items:center}
+.t2i-recent-fallback{max-width:83%;height:auto;object-fit:contain}
+.t2i-recent-play-icon{position:absolute;right:12px;bottom:17px;background:#fff;color:#a91a5c;border-radius:999px;width:39px;height:39px;display:grid;place-items:center;box-shadow:0 4px 15px #270b2450}
+.t2i-recent-progress{position:absolute;bottom:0;inset-inline:0;height:5px;background:#c3a9bb;overflow:hidden}
+.t2i-recent-progress>span{display:block;height:100%;background:#b51a61;min-width:0}
+.t2i-recent-copy{padding:12px 13px 16px;display:grid;gap:7px}
+.t2i-recent-copy strong{font-size:14px;line-height:1.35;font-weight:700;color:#281923!important;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.t2i-recent-copy>span{font-size:12px;font-weight:650;color:#8b275d!important}
+@media (max-width:560px){.t2i-recent-row{margin-inline:-12px;padding-inline:12px}.t2i-recent-card{flex-basis:188px}}

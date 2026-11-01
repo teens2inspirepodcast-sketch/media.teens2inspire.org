@@ -2,6 +2,21 @@ import type { AppLanguage } from './app-language';
 
 /** First-party interface strings. Editorial and member-uploaded media are not machine-translated. */
 export const interfaceStrings: Record<string, [hebrew: string, yiddish: string]> = {
+  'Browse collections':['עיון באוספים','בלעטערן זאַמלונגען'],
+  'Explore collections':['גלו אוספים','אַנטדעקן זאַמלונגען'],
+  'Our collections':['האוספים שלנו','אונדזערע זאַמלונגען'],
+  'Each collection opens its own complete library.':['לכל אוסף ספרייה משלו.','יעדע זאַמלונג האָט איר אייגענע ביבליאָטעק.'],
+  'Choose a collection to discover everything in that section.':['בחרו אוסף כדי לגלות את כל התוכן שבו.','קלײַבט אַ זאַמלונג צו זען איר גאַנצן אינהאַלט.'],
+  'Explore this collection':['גלו את האוסף','אַנטדעקן די זאַמלונג'],
+  'See more':['ראו עוד','זען מער'],
+  'Back to home':['חזרה לדף הבית','צוריק צום אָנהייב'],
+  'Catch up on our newest releases.':['גלו את התכנים החדשים שלנו.','אַנטדעקט אונדזערע נײַסטע אינהאַלטן.'],
+  'Your listening & viewing history':['היסטוריית הצפייה וההאזנה שלכם','אײַער קוקן און הערן געשיכטע'],
+  'Return to the exact place you left off.':['חזרו בדיוק לנקודה שבה עצרתם.','גייט צוריק פּונקט וווּ איר האָט אויפֿגעהערט.'],
+  'Previous':['הקודם','פֿריִערדיק'],
+  'No published items here yet.':['עדיין אין כאן תוכן שפורסם.','עס איז דאָ נאָך נישט פֿאַרעפֿנטלעכט קיין אינהאַלט.'],
+  'New media will appear here when it becomes available.':['תוכן חדש יופיע כאן כשיהיה זמין.','נײַער אינהאַלט וועט דאָ דערשײַנען ווען ער וועט זיין גרייט.'],
+
   'Family profile management requires an active Family membership.':['ניהול פרופילים משפחתיים דורש מינוי משפחתי פעיל.','צו פֿאַרוואַלטן משפּחה־פּראָפֿילן דאַרף מען אַן אַקטיווע מיטגלידשאַפֿט.'],
   'You can create up to two additional profiles (three profiles total including the account holder).':['אפשר ליצור עד שני פרופילים נוספים (שלושה בסך הכול).','איר קענט שאַפֿן נאָך צוויי פּראָפֿילן (דרײַ צוזאַמען).'],
   'The profile could not be saved.':['לא ניתן לשמור את הפרופיל.','מען האָט נישט געקענט היטן דעם פּראָפֿיל.'],

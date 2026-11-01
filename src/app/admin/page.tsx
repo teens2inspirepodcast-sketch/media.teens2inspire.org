@@ -11,7 +11,7 @@ const actions = [
   { title: "Sections", description: "Create homepage shelves and choose where content appears.", href: "/admin/sections", icon: PanelsTopLeft, accent: "plum", label: "Homepage layout" },
   { title: "Partnerships", description: "Control the looping partner carousel on the public homepage.", href: "/admin/partnerships", icon: Handshake, accent: "rose", label: "Public website" },
   { title: "Website editor", description: "Edit the homepage, mission, founder bio, brand logo, images and podcast copy.", href: "/admin/site-settings", icon: SlidersHorizontal, accent: "plum", label: "Marketing CMS" },
-  { title: "Website pop-up", description: "Upload a promotional image or video and publish a homepage announcement on Teens2Inspire.org.", href: "https://teens2inspire.org/admin/popup", icon: Megaphone, accent: "rose", label: "Marketing control" },
+  { title: "Website pop-up", description: "Upload a promotional image or video and publish a homepage announcement on Teens2Inspire.org.", href: "/admin/popup", icon: Megaphone, accent: "rose", label: "Marketing control" },
   { title: "Podcast platforms", description: "Manage all click-through listening services shown on the podcast page.", href: "/admin/podcast-platforms", icon: Radio, accent: "gold", label: "Podcast distribution" },
 ];
 export default async function Admin() {
@@ -27,7 +27,7 @@ export default async function Admin() {
   ]);
   return <div className="studio-dashboard">
     <div className="studio-welcome"><div><span className="studio-eyebrow"><Sparkles size={14}/> YOUR CREATIVE WORKSPACE</span><h1>Your dashboard</h1><p>Welcome back{user.email ? `, ${user.email}` : ""}. What would you like to work on today?</p></div><Link href="/admin/add" className="studio-primary-button"><Plus size={18}/> Add content</Link></div>
-    <Link href="https://teens2inspire.org/admin/popup" className="studio-promo-spotlight"><span className="studio-promo-sigil"><Megaphone size={26}/></span><span className="studio-promo-text"><small>YOUR NEXT ANNOUNCEMENT</small><strong>Take over the homepage.</strong><span>Control a launch trailer, photo announcement, or special promotion—complete with an editable message and publishing switch.</span></span><span className="studio-promo-action">Open pop-up studio <ArrowUpRight size={17}/></span></Link>
+    <Link href="/admin/popup" className="studio-promo-spotlight"><span className="studio-promo-sigil"><Megaphone size={26}/></span><span className="studio-promo-text"><small>YOUR NEXT ANNOUNCEMENT</small><strong>Take over the homepage.</strong><span>Control a launch trailer, photo announcement, or special promotion—complete with an editable message and publishing switch.</span></span><span className="studio-promo-action">Open pop-up studio <ArrowUpRight size={17}/></span></Link>
     <div className="studio-stats">
       {[["Content items", content.count, LibraryBig], ["Members", members.count, Users], ["Events", events.count, CalendarDays], ["Sections", sections.count, PanelsTopLeft]].map(([label, value, Icon]: any) => <div className="studio-stat" key={label}><span className="studio-stat-icon"><Icon size={18}/></span><span className="studio-stat-label">{label}</span><strong>{value ?? "—"}</strong></div>)}
     </div>
