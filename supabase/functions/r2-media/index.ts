@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.49.0";
-import { S3Client, PutObjectCommand, GetObjectCommand } from "npm:@aws-sdk/client-s3@3.883.0";
+import { S3Client, PutObjectCommand, GetObjectCommand, CreateMultipartUploadCommand, UploadPartCommand, CompleteMultipartUploadCommand, AbortMultipartUploadCommand } from "npm:@aws-sdk/client-s3@3.883.0";
 import { getSignedUrl } from "npm:@aws-sdk/s3-request-presigner@3.883.0";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
@@ -10,6 +10,9 @@ const ACCOUNT_ID = Deno.env.get("R2_ACCOUNT_ID") ?? "";
 const ACCESS_KEY_ID = Deno.env.get("R2_ACCESS_KEY_ID") ?? "";
 const SECRET_ACCESS_KEY = Deno.env.get("R2_SECRET_ACCESS_KEY") ?? "";
 const PRIVATE_BUCKET = Deno.env.get("R2_PRIVATE_BUCKET_NAME") ?? "teens2inspire-media";
+const MAX_MEDIA_BYTES = 2_000_000_000; // 2,000 decimal MB
+const MAX_ARTWORK_BYTES = 20 * 1024 * 1024;
+const PART_SIZE = 20 * 1024 * 1024;
 const ADMIN_ID = "8e8ba797-0f01-4956-b747-8122b28a777a";
 const ALLOWED_ORIGINS = new Set(["https://media.teens2inspire.org", "https://teens2inspire.org", "https://www.teens2inspire.org", "http://localhost:3000"]);
 const ALLOWED_TYPES = new Set([
@@ -61,7 +64,7 @@ Deno.serve(async (req: Request) => {
     .eq("id", authData.user.id).maybeSingle();
   if (profileError) return respond({ error: "Unable to verify your account access." }, 500, origin);
   const isAdmin = authData.user.id === ADMIN_ID && String(profile?.role ?? "").toLowerCase() === "administrator";
-  let body: { action?: string; contentId?: string; filename?: string; contentType?: string; size?: number; artwork?: boolean; key?: string };
+  let body: { action?: string; contentId?: string; filename?: string; contentType?: string; size?: number; artwork?: boolean; key?: string; uploadId?: string; partNumber?: number; parts?: Array<{partNumber: number; etag: string}> };
   try { body = await req.json(); } catch { return respond({ error: "Invalid JSON request." }, 400, origin); }
   let r2: S3Client;
   try { r2 = getR2(); } catch { return respond({ error: "R2 server secrets are missing or incomplete." }, 503, origin); }
@@ -71,7 +74,7 @@ Deno.serve(async (req: Request) => {
     const contentType = typeof body.contentType === "string" ? body.contentType.toLowerCase().split(";")[0].trim() : "";
     if (!ALLOWED_TYPES.has(contentType)) return respond({ error: "Unsupported file type. Allowed: common audio/video formats, PDF, images, Office documents, plain text, and CSV." }, 400, origin);
     const size = Number(body.size);
-    if (!Number.isSafeInteger(size) || size < 1 || size > 500 * 1024 * 1024) return respond({ error: "Choose a file smaller than 500 MB." }, 400, origin);
+    if (!Number.isSafeInteger(size) || size < 1 || size > (body.artwork === true ? MAX_ARTWORK_BYTES : MAX_MEDIA_BYTES)) return respond({ error: "Media files must be 2,000 MB or smaller (artwork: 20 MB)." }, 400, origin);
     const filename = typeof body.filename === "string" ? body.filename : "media-file";
     const extension = safeFilename(filename.split(".").pop() || "media-file").slice(0, 12).toLowerCase();
     const isArtwork = body.artwork === true;
@@ -87,6 +90,59 @@ Deno.serve(async (req: Request) => {
     }
   }
 
+
+  // Multipart operations are admin-only; the upload ID and key are validated on every call.
+  if (["multipart-init", "multipart-part", "multipart-complete", "multipart-abort"].includes(body.action || "")) {
+    if (!isAdmin) return respond({ error: "Administrator access required." }, 403, origin);
+    if (body.action === "multipart-init") {
+      const contentType = typeof body.contentType === "string" ? body.contentType.toLowerCase().split(";")[0].trim() : "";
+      const size = Number(body.size);
+      if (!ALLOWED_TYPES.has(contentType) || !Number.isSafeInteger(size) || size < 1 || size > MAX_MEDIA_BYTES)
+        return respond({ error: "Choose a supported media file up to 2,000 MB." }, 400, origin);
+      if (body.artwork === true) return respond({ error: "Artwork uses the standard image uploader." }, 400, origin);
+      const filename = typeof body.filename === "string" ? body.filename : "media-file";
+      const extension = safeFilename(filename.split(".").pop() || "bin").slice(0, 12).toLowerCase();
+      const prefix = contentType.startsWith("video/") ? "videos" : contentType.startsWith("audio/") ? "podcasts" : "downloads";
+      const key = `${prefix}/${new Date().toISOString().slice(0, 10)}/${crypto.randomUUID()}.${extension}`;
+      try {
+        const created = await r2.send(new CreateMultipartUploadCommand({ Bucket: PRIVATE_BUCKET, Key: key, ContentType: contentType }));
+        if (!created.UploadId) throw new Error("Missing R2 upload ID");
+        return respond({ key, uploadId: created.UploadId, partSize: PART_SIZE }, 200, origin);
+      } catch (error) {
+        console.error("R2 multipart initialization failed", error instanceof Error ? error.name : "unknown");
+        return respond({ error: "Could not initialize the R2 multipart upload." }, 502, origin);
+      }
+    }
+    if (!validContentKey(body.key) || body.key.startsWith("artwork/") || typeof body.uploadId !== "string" || !/^[A-Za-z0-9._~+\/=-]{1,512}$/.test(body.uploadId))
+      return respond({ error: "Invalid multipart upload session." }, 400, origin);
+    const key = body.key;
+    const uploadId = body.uploadId;
+    try {
+      if (body.action === "multipart-part") {
+        const number = Number(body.partNumber);
+        if (!Number.isInteger(number) || number < 1 || number > Math.ceil(MAX_MEDIA_BYTES / PART_SIZE))
+          return respond({ error: "Invalid part number." }, 400, origin);
+        const uploadUrl = await getSignedUrl(r2, new UploadPartCommand({ Bucket: PRIVATE_BUCKET, Key: key, UploadId: uploadId, PartNumber: number }), { expiresIn: 900 });
+        return respond({ uploadUrl }, 200, origin);
+      }
+      if (body.action === "multipart-complete") {
+        const parts = body.parts;
+        if (!Array.isArray(parts) || !parts.length || parts.length > Math.ceil(MAX_MEDIA_BYTES / PART_SIZE) ||
+          parts.some((part, i) => part.partNumber !== i + 1 || typeof part.etag !== "string" || !/^\"?[a-fA-F0-9]{32}(?:-[0-9]+)?\"?$/.test(part.etag)))
+          return respond({ error: "Invalid multipart parts list." }, 400, origin);
+        await r2.send(new CompleteMultipartUploadCommand({ Bucket: PRIVATE_BUCKET, Key: key, UploadId: uploadId,
+          MultipartUpload: { Parts: parts.map(part => ({ PartNumber: part.partNumber, ETag: part.etag })) } }));
+        return respond({ key, complete: true }, 200, origin);
+      }
+      if (body.action === "multipart-abort") {
+        await r2.send(new AbortMultipartUploadCommand({ Bucket: PRIVATE_BUCKET, Key: key, UploadId: uploadId }));
+        return respond({ aborted: true }, 200, origin);
+      }
+    } catch (error) {
+      console.error("R2 multipart action failed", body.action, error instanceof Error ? error.name : "unknown");
+      return respond({ error: `R2 could not ${body.action === "multipart-complete" ? "finish" : "prepare"} the multipart upload.` }, 502, origin);
+    }
+  }
 
   if (body.action === "artwork-url") {
     if (typeof body.key !== "string" || !/^artwork\/[A-Za-z0-9._/-]+$/.test(body.key) || /(^|\/)\.\.?($|\/)/.test(body.key)) return respond({ error: "Invalid artwork key." }, 400, origin);
