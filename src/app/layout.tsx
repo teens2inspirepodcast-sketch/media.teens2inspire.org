@@ -7,6 +7,8 @@ import "./live-fixes-2026-10-30.css";
 import "./rose-contrast-2026-10-30.css";
 import "./popup-admin-studio.css";
 import "./collection-pages.css";
+import "./contrast-accessibility-2026-11-17.css";
+import "./popup-editor-unblock.css";
 import { PWARegister } from "@/components/pwa-register";
 export const metadata: Metadata = {
   title: { default: "Teens2Inspire — Your media space", template: "%s | Teens2Inspire" },

@@ -1,0 +1,32 @@
+/* Accessible contrast across the media app. Loaded LAST to override legacy dark-theme rules.
+   Explicit light and dark surfaces, not a blanket white-text rule. */
+html body .admin-studio {color:#fff5fa!important}
+html body .admin-studio :is(.studio-main,.studio-welcome,.studio-section-heading,.studio-dashboard){color:#fff5fa!important}
+html body .admin-studio :is(.studio-stat,.studio-action-card,.studio-shortcut,.studio-form-section,.studio-type-card,.site-setting-card,.studio-editor-page,.studio-form-card){color:#fff5fa!important}
+html body .admin-studio :is(.studio-stat,.studio-action-card,.studio-shortcut,.studio-form-section,.studio-type-card,.site-setting-card,.studio-editor-page,.studio-form-card) :is(h1,h2,h3,h4,strong,label,legend,p,small,span){color:inherit}
+html body .admin-studio :is(.studio-stat,.studio-action-card,.studio-shortcut,.studio-form-section,.studio-type-card,.site-setting-card,.studio-editor-page,.studio-form-card) :is(p,small){opacity:.94}
+/* Form fields must be legible even when their parent is dark. */
+html body .admin-studio :is(input:not([type=checkbox]):not([type=radio]):not([type=file]),textarea,select){background:#fffafd!important;color:#261824!important;border:1px solid #b88aa3!important;caret-color:#261824!important}
+html body .admin-studio :is(input,textarea)::placeholder{color:#685364!important;opacity:1}
+html body .admin-studio :is(input,textarea,select):focus-visible{outline:3px solid #f6a6cd!important;outline-offset:2px}
+html body .admin-studio :is(option,optgroup){background:#fff!important;color:#251721!important}
+/* Intentionally light panels override inherited white copy. */
+html body .admin-studio :is(.studio-upload-field,.studio-inline-edit[open]>form){background:#fffafc!important;color:#291923!important}
+html body .admin-studio :is(.studio-upload-field,.studio-inline-edit[open]>form) :is(h1,h2,h3,h4,p,span,strong,label,legend,small){color:#291923!important;opacity:1!important}
+html body .admin-studio :is(.studio-upload-field,.studio-inline-edit[open]>form) :is(input,textarea,select){background:#fff!important;color:#291923!important}
+html body .admin-studio .studio-primary-button{background:#9f2f62!important;color:#fff!important}
+html body .admin-studio .studio-primary-button :is(span,strong,svg){color:#fff!important}
+html body .admin-studio :is(.notice,[role=alert]){background:#fff4f8!important;color:#63213f!important;border-color:#e6b0c9!important}
+html body .admin-studio :is(.notice,[role=alert]) :is(p,span,strong,small){color:#63213f!important}
+/* The customer-facing streaming app is light, except for deliberate dark/rose hero and navigation regions. */
+html body .app-shell.t2i-light-streaming :is(.app-main-wrap,.app-page-content,.app-home,.content-detail,.t2i-stream-home){color:#261a25!important}
+html body .app-shell.t2i-light-streaming :is(.app-page-content,.t2i-stream-home) :is(h1,h2,h3,h4,p,small,label,legend){color:#30202c!important}
+html body .app-shell.t2i-light-streaming :is(.app-page-content,.t2i-stream-home) :is(input,textarea,select){background:#fff!important;color:#261824!important;border-color:#cfadc0!important}
+html body .app-shell.t2i-light-streaming :is(.app-page-content,.t2i-stream-home) :is(input,textarea)::placeholder{color:#715f6b!important}
+html body .app-shell.t2i-light-streaming :is(.app-page-content,.t2i-stream-home) :is(.app-primary-button,.app-secondary-button,.t2i-stream-play-cta) {color:#92234e!important}
+html body .app-shell.t2i-light-streaming .t2i-stream-hero :is(h1,h2,h3,p,small,span){color:#fff8fc!important}
+html body .app-shell.t2i-light-streaming .app-topbar :is(a,button,span,small){color:#fff!important}
+html body .app-shell.t2i-light-streaming .app-bottom-nav :is(a,span,small){color:#61475b!important}
+html body .app-shell.t2i-light-streaming .app-bottom-nav a.is-active :is(span,small){color:#aa245e!important}
+/* Ensure status text remains legible and cannot disappear into white panels. */
+html body .app-shell.t2i-light-streaming .app-page-content :is(.notice,.empty-state,.settings-card,.profile-card,.library-card) :is(h1,h2,h3,p,span,strong,small){color:#382333!important}

@@ -102,7 +102,8 @@ export function AdminUploadForm({ action, className, children }: { action: Actio
   }
 
   async function uploadMedia(file: File, label: string): Promise<string> {
-    if (!file.size || file.size > MAX_MEDIA_BYTES) throw new Error("Media must be larger than 0 bytes and no larger than 2,000 MB.");
+    if (file.size === 0) throw new Error("This file is empty (0 bytes). Select a file that contains media.");
+    if (file.size > MAX_MEDIA_BYTES) throw new Error(`This file is ${(file.size / 1_000_000).toFixed(1)} MB. The current secure R2 multipart upload supports files up to 2,000 MB. Compress or split this file before uploading.`);
     const contentType = mimeOf(file);
     if (file.size > 80 * 1024 * 1024) {
       markStage("authorization");
@@ -112,6 +113,7 @@ export function AdminUploadForm({ action, className, children }: { action: Actio
         throw new Error("R2 did not return a valid multipart session.");
       const { key, uploadId, partSize } = session;
       const total = Math.ceil(file.size / partSize);
+      if (total < 1 || total > 10000) throw new Error("The multipart upload service returned an invalid part size.");
       const parts: Array<{ partNumber: number; etag: string }> = [];
       for (let i = 0; i < total; i += 1) {
         const partNumber = i + 1;
@@ -166,7 +168,8 @@ export function AdminUploadForm({ action, className, children }: { action: Actio
   async function uploadArtwork(file: File): Promise<string> {
     const contentType = mimeOf(file);
     if (!ARTWORK_MIMES.has(contentType)) throw new Error("Cover images must be JPG, PNG, WebP, GIF or AVIF. Convert HEIC to JPG before uploading.");
-    if (!file.size || file.size > MAX_ART_BYTES) throw new Error("Cover images must be under 10 MB.");
+    if (file.size === 0) throw new Error("The selected image is empty.");
+    if (file.size > MAX_ART_BYTES) throw new Error("Cover artwork exceeds the 10 MB Supabase storage limit. Choose a smaller image.");
     const extension = ({ "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif", "image/avif": "avif" } as Record<string, string>)[contentType];
     const supabase = createClient();
     for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -182,7 +185,8 @@ export function AdminUploadForm({ action, className, children }: { action: Actio
 
   async function uploadCaptions(file: File): Promise<string> {
     if (!/\.vtt$/i.test(file.name)) throw new Error("Captions must be a .vtt file.");
-    if (!file.size || file.size > 5 * 1024 * 1024) throw new Error("Captions must be 5 MB or smaller.");
+    if (file.size === 0) throw new Error("The selected caption file is empty.");
+    if (file.size > 5 * 1024 * 1024) throw new Error("Caption files must be 5 MB or smaller because they use a separate Supabase storage bucket.");
     const beginning = await file.slice(0, 128).text();
     if (!/^\uFEFF?WEBVTT(?:[ \t\r\n]|$)/.test(beginning)) throw new Error("Captions must begin with WEBVTT.");
     const supabase = createClient();

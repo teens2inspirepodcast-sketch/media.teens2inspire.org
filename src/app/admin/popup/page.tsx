@@ -11,10 +11,10 @@ export default async function ManagePopup({searchParams}: {searchParams:Search})
   const popup = await readSitePopup();
   const params = await searchParams;
   const initialMediaUrl = await getPopupMediaUrl(popup?.media_path);
-  return <main className="popup-admin-shell"><div className="popup-admin-header"><Link href="/admin" className="popup-back"><ArrowLeft size={17}/> Admin dashboard</Link><Link href="/" className="popup-visit">View website <ExternalLink size={15}/></Link></div>
+  return <main className="popup-admin-shell"><div className="popup-admin-header"><Link href="/admin" className="popup-back"><ArrowLeft size={17}/> Admin dashboard</Link><Link href="https://teens2inspire.org" className="popup-visit">View website <ExternalLink size={15}/></Link></div>
     <div className="popup-admin-heading"><div className="popup-admin-eyebrow"><Megaphone size={15}/> WEBSITE EXPERIENCE / CONTENT CONTROL</div><h1>Promotional <em>pop-up.</em></h1><p>Create a launch announcement, feature a new film, or promote something important—without changing your website code.</p></div>
     {params.notice && <p className="admin-notice" role="status">{params.notice}</p>}
-    {!popup && <p className="admin-alert" role="alert">The pop-up database table is not available yet. Apply the included Supabase migration <code>20261028010000_site_popup_cms.sql</code> before saving or uploading.</p>}
+    {!popup && <p className="admin-alert" role="alert">The pop-up settings could not be loaded. Check your administrator session and reload this page. If the problem continues, check the Supabase site_popup table access policies.</p>}
     <SitePopupEditor initial={popup || defaultPopup} initialMediaUrl={initialMediaUrl}/>
   </main>;
 }
