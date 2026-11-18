@@ -10,7 +10,7 @@ const ACCOUNT_ID = Deno.env.get("R2_ACCOUNT_ID") ?? "";
 const ACCESS_KEY_ID = Deno.env.get("R2_ACCESS_KEY_ID") ?? "";
 const SECRET_ACCESS_KEY = Deno.env.get("R2_SECRET_ACCESS_KEY") ?? "";
 const PRIVATE_BUCKET = Deno.env.get("R2_PRIVATE_BUCKET_NAME") ?? "teens2inspire-media";
-const MAX_MEDIA_BYTES = 2_000_000_000; // 2,000 decimal MB
+const MAX_MEDIA_BYTES = 10_000_000_000; // 10,000 decimal MB
 const MAX_ARTWORK_BYTES = 20 * 1024 * 1024;
 const PART_SIZE = 20 * 1024 * 1024;
 const ADMIN_ID = "8e8ba797-0f01-4956-b747-8122b28a777a";
@@ -74,7 +74,7 @@ Deno.serve(async (req: Request) => {
     const contentType = typeof body.contentType === "string" ? body.contentType.toLowerCase().split(";")[0].trim() : "";
     if (!ALLOWED_TYPES.has(contentType)) return respond({ error: "Unsupported file type. Allowed: common audio/video formats, PDF, images, Office documents, plain text, and CSV." }, 400, origin);
     const size = Number(body.size);
-    if (!Number.isSafeInteger(size) || size < 1 || size > (body.artwork === true ? MAX_ARTWORK_BYTES : MAX_MEDIA_BYTES)) return respond({ error: "Media files must be 2,000 MB or smaller (artwork: 20 MB)." }, 400, origin);
+    if (!Number.isSafeInteger(size) || size < 1 || size > (body.artwork === true ? MAX_ARTWORK_BYTES : MAX_MEDIA_BYTES)) return respond({ error: "Media files must be 10,000 MB or smaller (artwork: 20 MB)." }, 400, origin);
     const filename = typeof body.filename === "string" ? body.filename : "media-file";
     const extension = safeFilename(filename.split(".").pop() || "media-file").slice(0, 12).toLowerCase();
     const isArtwork = body.artwork === true;
@@ -98,7 +98,7 @@ Deno.serve(async (req: Request) => {
       const contentType = typeof body.contentType === "string" ? body.contentType.toLowerCase().split(";")[0].trim() : "";
       const size = Number(body.size);
       if (!ALLOWED_TYPES.has(contentType) || !Number.isSafeInteger(size) || size < 1 || size > MAX_MEDIA_BYTES)
-        return respond({ error: "Choose a supported media file up to 2,000 MB." }, 400, origin);
+        return respond({ error: "Choose a supported media file up to 10,000 MB." }, 400, origin);
       if (body.artwork === true) return respond({ error: "Artwork uses the standard image uploader." }, 400, origin);
       const filename = typeof body.filename === "string" ? body.filename : "media-file";
       const extension = safeFilename(filename.split(".").pop() || "bin").slice(0, 12).toLowerCase();

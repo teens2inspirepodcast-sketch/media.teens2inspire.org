@@ -3,7 +3,8 @@ import { getContext } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-const MAX_UPLOAD_BYTES = 2_000_000_000;
+const MAX_UPLOAD_BYTES = 10_000_000_000;
+const MAX_MULTIPART_PARTS = Math.ceil(MAX_UPLOAD_BYTES / (20 * 1024 * 1024));
 const ALLOWED_TYPES = new Set([
   "video/mp4", "video/webm", "video/quicktime", "video/x-matroska",
   "audio/mpeg", "audio/mp4", "audio/aac", "audio/wav", "audio/x-wav", "audio/ogg", "audio/webm", "audio/flac",
@@ -26,16 +27,16 @@ export async function POST(request: Request) {
     if (typeof body.key !== "string" || !/^(videos|podcasts|downloads)\/[A-Za-z0-9._/-]+$/.test(body.key) ||
         typeof body.uploadId !== "string" || body.uploadId.length > 512 || !body.uploadId.length)
       return NextResponse.json({ error: "Invalid multipart session." }, { status: 400 });
-    if (multipartAction === "multipart-part" && (!Number.isInteger(body.partNumber) || Number(body.partNumber) < 1 || Number(body.partNumber) > 96))
+    if (multipartAction === "multipart-part" && (!Number.isInteger(body.partNumber) || Number(body.partNumber) < 1 || Number(body.partNumber) > MAX_MULTIPART_PARTS))
       return NextResponse.json({ error: "Invalid part number." }, { status: 400 });
-    if (multipartAction === "multipart-complete" && (!Array.isArray(body.parts) || body.parts.length > 96))
+    if (multipartAction === "multipart-complete" && (!Array.isArray(body.parts) || body.parts.length > MAX_MULTIPART_PARTS))
       return NextResponse.json({ error: "Invalid parts list." }, { status: 400 });
   }
   const filename = typeof body.filename === "string" ? body.filename.trim().slice(0, 180) : "";
   const contentType = typeof body.contentType === "string" ? body.contentType.toLowerCase().trim() : "";
   const size = Number(body.size);
   if ((!multipartAction || multipartAction === "multipart-init") && (!filename || /[\u0000-\u001f\u007f]/.test(filename) || !ALLOWED_TYPES.has(contentType))) return NextResponse.json({ error: "Choose a supported audio, video, PDF, image, or document file." }, { status: 400 });
-  if ((!multipartAction || multipartAction === "multipart-init") && (!Number.isSafeInteger(size) || size < 1 || size > (body.artwork === true ? 20 * 1024 * 1024 : MAX_UPLOAD_BYTES))) return NextResponse.json({ error: body.artwork === true ? "Cover images must be smaller than 20 MB." : "Media files must be 2,000 MB or smaller." }, { status: 400 });
+  if ((!multipartAction || multipartAction === "multipart-init") && (!Number.isSafeInteger(size) || size < 1 || size > (body.artwork === true ? 20 * 1024 * 1024 : MAX_UPLOAD_BYTES))) return NextResponse.json({ error: body.artwork === true ? "Cover images must be smaller than 20 MB." : "Media files must be 10,000 MB or smaller." }, { status: 400 });
   if ((!multipartAction || multipartAction === "multipart-init") && body.artwork === true && !contentType.startsWith("image/")) return NextResponse.json({ error: "Choose an image file for cover artwork." }, { status: 400 });
   const { data: { session } } = await supabase.auth.getSession();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

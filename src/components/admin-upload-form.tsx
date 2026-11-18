@@ -17,7 +17,7 @@ const MIMES: Record<string, string> = {
 };
 const ALLOWED_MIMES = new Set([...Object.values(MIMES), "audio/x-wav", "audio/webm"]);
 const ARTWORK_MIMES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"]);
-const MAX_MEDIA_BYTES = 2_000_000_000;
+const MAX_MEDIA_BYTES = 10_000_000_000;
 const MAX_ART_BYTES = 10 * 1024 * 1024;
 
 function mimeOf(file: File): string {
@@ -103,7 +103,7 @@ export function AdminUploadForm({ action, className, children }: { action: Actio
 
   async function uploadMedia(file: File, label: string): Promise<string> {
     if (file.size === 0) throw new Error("This file is empty (0 bytes). Select a file that contains media.");
-    if (file.size > MAX_MEDIA_BYTES) throw new Error(`This file is ${(file.size / 1_000_000).toFixed(1)} MB. The current secure R2 multipart upload supports files up to 2,000 MB. Compress or split this file before uploading.`);
+    if (file.size > MAX_MEDIA_BYTES) throw new Error(`This file is ${(file.size / 1_000_000).toFixed(1)} MB. The current secure R2 multipart upload supports files up to 10,000 MB. Compress or split this file before uploading.`);
     const contentType = mimeOf(file);
     if (file.size > 80 * 1024 * 1024) {
       markStage("authorization");
